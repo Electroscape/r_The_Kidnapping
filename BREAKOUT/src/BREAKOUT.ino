@@ -7,53 +7,27 @@
 /*==========================================================================================================*/
 
 // I2C Port Expander
-#include "PCF8574.h"
+#include "header_s.h"
+#include <PCF8574.h>
 #include <Wire.h>
 //Watchdog timer
 #include <avr/wdt.h>
 
-String title = "Kidanapping breakout";
-String versionDate = "22.01.2020";
-String version = "version 0.1wip";
-
-// #define DEBUGMODE           1
-#define RESET_DURATION      12
-#define RFID_TICKS_REQUIRED 3
-
 #include <FastLED.h>
 
-#define RELAY_I2C_ADD     	0x3F         // Relay Expander
-#define OLED_I2C_ADD        0x3C         // Predefined by hardware
-#define LCD_I2C_ADD         0x27         // Predefined by hardware
 
 // == PN532 imports and setup
 
 #include <Adafruit_PN532.h>
 
-// If using the breakout with SPI, define the pins for SPI communication.
-#define PN532_SCK               13
-#define PN532_MOSI              11
-#define PN532_MISO              12
-
-#define RFID_1_SS_PIN           8     /* Per Konvention ist dies RFID-Port 1                                */
-#define RFID_2_SS_PIN           7     /* Per Konvention ist dies RFID-Port 2                                */
-#define RFID_3_SS_PIN           4     /* Per Konvention ist dies RFID-Port 3                                */
-#define RFID_4_SS_PIN           2     /* Per Konvention ist dies RFID-Port 4                                */
-
-const byte RFID_SSPins[]  = {RFID_1_SS_PIN};
 
 // very manual but ... its C its gonna be bitching when it doesnt know during compilte time
 // uncomment as needed
 const Adafruit_PN532 RFID_0(PN532_SCK, PN532_MISO, PN532_MOSI, RFID_SSPins[0]);
 
-#define RFID_AMOUNT         1
-#define RFID_SOLUTION_SIZE  4
 const Adafruit_PN532 RFID_READERS[1] = {RFID_0}; //
 
-const uint8_t keya[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
-const char RFID_solutions[1][RFID_SOLUTION_SIZE]  = {"AH"};
 
-#define RFID_DATABLOCK      1
 
 #define REL_AMOUNT      1
 // RELAY
@@ -85,21 +59,6 @@ const enum REL_PIN relayPinArray[]  = {REL_1_PIN, REL_2_PIN, REL_3_PIN, REL_4_PI
 const byte relayInitArray[] = {REL_1_INIT, REL_2_INIT, REL_3_INIT, REL_4_INIT, REL_5_INIT, REL_6_INIT, REL_7_INIT, REL_8_INIT};
 
 
-// the black ones with 30/meter actually have segments of 3 leds per IC
-#define NR_OF_LEDS             31  /* Anzahl der Pixel auf einem Strang (Test 1 Pixel)                   */
-// BE CAREFUL WHEN SETTING ALL LEDS to a colour use the socket count for this
-#define STRIPE_CNT             1
-#define LED_STRIP_TYPE         WS2811
-#define COLOR_ORDER            BRG // BRG
-
-#define RFID_1_LED_PIN          9     /* Per Konvention ist dies RFID-Port 1                                */
-#define RFID_2_LED_PIN          6     /* Per Konvention ist dies RFID-Port 2                                */
-#define RFID_3_LED_PIN          5     /* Per Konvention ist dies RFID-Port 3                                */
-#define RFID_4_LED_PIN          3     /* Per Konvention ist dies RFID-Port 4                                */
-// only a max of 3 PWMS possible hence 3 stripes max, any further LEDs need to be addressed trhough the 3rd stipe
-// here we go: 'LED_PINS' is not usable in a constant expression,
-// cannot use arrays bec thats too newschool.
-// MODIFIY IN LED_INIT ASWELL
 CRGB LED_STRIPE_1[NR_OF_LEDS];
 //CRGB LED_STRIPE_2[NR_OF_LEDS];
 

@@ -10,9 +10,8 @@
 #include "header_s.h"
 #include <PCF8574.h>
 #include <stb_namespace.h>
-using namespace stb_namespace;
 #include <Wire.h>
-//Watchdog timer
+// Watchdog timer
 #include <avr/wdt.h>
 
 #include <FastLED.h>
@@ -21,7 +20,6 @@ using namespace stb_namespace;
 // == PN532 imports and setup
 
 #include <Adafruit_PN532.h>
-
 
 // very manual but ... its C its gonna be bitching when it doesnt know during compilte time
 // uncomment as needed
@@ -44,7 +42,8 @@ Expander_PCF8574 relay;
 
 void setup() {
 
-    communication_init();
+    STB::begin();
+
     Serial.println("WDT endabled");
     //wdt_enable(WDTO_8S);
     wdt_reset();
@@ -55,9 +54,8 @@ void setup() {
 
     wdt_reset();
 
-    printWithHeader("!header_begin", "SYS");
-    stb_namespace::relay_init(relay, *relayPinArray, *relayInitArray);
-
+    STB::relay_init(relay, *relayPinArray, *relayInitArray);
+    
     wdt_reset();
 
     Serial.println();
@@ -73,7 +71,7 @@ void setup() {
     wdt_reset();
 
     Serial.println();
-    print_setup_end();
+    STB::print_setup_end();
 }
 
 void loop() {
@@ -366,37 +364,6 @@ void dbg_println(String print_dbg) {
 #ifdef DEBUGMODE
     Serial.println(print_dbg);
 #endif
-}
-
-void communication_init() {
-    Wire.begin();
-    Serial.begin(115200);
-    delay(20);
-    print_serial_header();
-}
-
-void print_serial_header() {
-    print_logo_infos(title);
-
-    Serial.println("!header_begin");
-    Serial.println(title);
-    Serial.println(versionDate);
-    Serial.println(version);
-}
-
-void print_logo_infos(String progTitle) {
-    Serial.println(F("+-----------------------------------+"));
-    Serial.println(F("|    TeamEscape HH&S ENGINEERING    |"));
-    Serial.println(F("+-----------------------------------+"));
-    Serial.println();
-    Serial.println(progTitle);
-    Serial.println();
-    delay(20);
-}
-
-void print_setup_end() {
-    Serial.println("!setup_end");
-    Serial.println(); Serial.println("===================START====================="); Serial.println();
 }
 
 bool i2c_scanner() {

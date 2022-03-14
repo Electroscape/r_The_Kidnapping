@@ -14,10 +14,6 @@ String version = "version 1.1 HH";
 const unsigned long heartbeatFrequency = 5000;
 
 
-
-#define MAX485_READ LOW
-#define MAX485_WRITE HIGH
-
 // #define DEBUGMODE           1
 #define RESET_DURATION      12
 #define RFID_TICKS_REQUIRED 3
@@ -34,7 +30,8 @@ const char RFID_solutions[1][RFID_SOLUTION_SIZE]  = {"AH"};
 //#define OLED_DISABLE 1
 
 // Standards der Adressierung (Konvention)
-#define RELAY_I2C_ADD 0x3F   // Relay Expander																							*/
+// this is optional now due to default value in STB lib
+// #define RELAY_I2C_ADD 0x3F   // Relay Expander																							*/
 #define OLED_I2C_ADD 0x3C    // Ist durch Hardware des OLEDs vorgegeben
 
 
@@ -64,7 +61,7 @@ const byte RFID_SSPins[]  = {RFID_1_SS_PIN};
 #define RFID_1_LED_PIN          9     /* Per Konvention ist dies RFID-Port 1                                */
 #define RFID_2_LED_PIN          6     /* Per Konvention ist dies RFID-Port 2                                */
 #define RFID_3_LED_PIN          5     /* Per Konvention ist dies RFID-Port 3                                */
-#define RFID_4_LED_PIN          3     /* Per Konvention ist dies RFID-Port 4   
+#define RFID_4_LED_PIN          3     /* Per Konvention ist dies RFID-Port 4   */
 
 #define REL_AMOUNT 1
 
@@ -90,5 +87,5 @@ enum REL_INIT {
     REL_7_INIT = 1                     // DESCRIPTION OF THE RELAY WIRING
 };
 
-const enum REL_PIN relayPinArray[REL_AMOUNT] = {REL_DOOR_PIN};
-const enum REL_INIT relayInitArray[REL_AMOUNT] = {REL_DOOR_INIT};
+const int relayPinArray[REL_AMOUNT] = {REL_DOOR_PIN};
+const int relayInitArray[REL_AMOUNT] = {REL_DOOR_INIT};

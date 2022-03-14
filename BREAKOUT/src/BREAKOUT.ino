@@ -9,6 +9,8 @@
 // I2C Port Expander
 #include "header_s.h"
 #include <PCF8574.h>
+#include <stb_namespace.h>
+using namespace stb_namespace;
 #include <Wire.h>
 //Watchdog timer
 #include <avr/wdt.h>
@@ -26,37 +28,6 @@
 const Adafruit_PN532 RFID_0(PN532_SCK, PN532_MISO, PN532_MOSI, RFID_SSPins[0]);
 
 const Adafruit_PN532 RFID_READERS[1] = {RFID_0}; //
-
-
-
-#define REL_AMOUNT      1
-// RELAY
-// PIN
-enum REL_PIN {
-    REL_1_PIN ,                              // 0 Door Opener
-    REL_2_PIN ,                              // 1 Buzzer
-    REL_3_PIN ,                              // 2
-    REL_4_PIN ,                              // 3
-    REL_5_PIN ,                              // 4   Schwarzlicht
-    REL_6_PIN ,                              // 5   ROOM_LI
-    REL_7_PIN ,                              // 6
-    REL_8_PIN                                // 7
-};
-
-enum REL_INIT {
-    REL_1_INIT   =                1,        // COM-12V_IN, NO-12V_OUT, NC-/  set to 1 for magnet, 0 for mechanical
-    REL_2_INIT   =                1,        // COM-12V_IN, NO-12V_OUT_DOOR, NC-12V_OUT_ALARM
-    REL_3_INIT   =                1,        // NC-12V_OUT_ALARM
-    REL_4_INIT   =                1,        // DESCRIPTION OF THE RELAY WIRING
-    REL_5_INIT   =                1,        // DESCRIPTION OF THE RELAY WIRING
-    REL_6_INIT   =                1,        // DESCRIPTION OF THE RELAY WIRING
-    REL_7_INIT   =                1,        // DESCRIPTION OF THE RELAY WIRING
-    REL_8_INIT   =                1        // COM AC_volt, NO 12_PS+, NC-/
-};
-
-// == constants
-const enum REL_PIN relayPinArray[]  = {REL_1_PIN, REL_2_PIN, REL_3_PIN, REL_4_PIN, REL_5_PIN, REL_6_PIN, REL_7_PIN, REL_8_PIN};
-const byte relayInitArray[] = {REL_1_INIT, REL_2_INIT, REL_3_INIT, REL_4_INIT, REL_5_INIT, REL_6_INIT, REL_7_INIT, REL_8_INIT};
 
 
 CRGB LED_STRIPE_1[NR_OF_LEDS];
@@ -84,9 +55,8 @@ void setup() {
 
     wdt_reset();
 
-    Serial.println();
-    Serial.println("Relay: ... ");
-    if (relay_Init()) {Serial.println("Relay: OK!");} else {Serial.println("Relay: FAILED!");}
+    printWithHeader("!header_begin", "SYS");
+    stb_namespace::relay_init(relay, *relayPinArray, *relayInitArray);
 
     wdt_reset();
 
@@ -166,7 +136,7 @@ void wait_for_reset() {
     }
     Serial.println("Game going live, killing lights and locking the door");
     game_live = true;
-    relay.digitalWrite(REL_1_PIN, !REL_1_INIT);
+    relay.digitalWrite(REL_DOOR_PIN, !REL_DOOR_INIT);
     LEDS.setBrightness(50); FastLED.show();
     led_set_all_clrs(CRGB::DarkRed, NR_OF_LEDS);
 }
@@ -177,7 +147,7 @@ void end_game() {
     led_set_all_clrs(CRGB::Green, NR_OF_LEDS);
     wdt_reset();
     game_live = false;
-    relay.digitalWrite(REL_1_PIN, REL_1_INIT);
+    relay.digitalWrite(REL_DOOR_PIN, REL_DOOR_INIT);
 };
 
 bool LED_init() {
@@ -427,34 +397,6 @@ void print_logo_infos(String progTitle) {
 void print_setup_end() {
     Serial.println("!setup_end");
     Serial.println(); Serial.println("===================START====================="); Serial.println();
-}
-
-bool relay_Init() {
-
-    Serial.println("initializing relay");
-    relay.begin(RELAY_I2C_ADD);
-    delay(20);
-
-    for (int i=0; i<REL_AMOUNT; i++) {
-        relay.pinMode(relayPinArray[i], OUTPUT);
-        relay.digitalWrite(relayPinArray[i], HIGH);
-        delay(20);
-    }
-
-    delay(20);
-
-    for (int i=0; i<REL_AMOUNT; i++) {
-        relay.digitalWrite(relayPinArray[i], relayInitArray[i]);
-        Serial.print("     ");
-        Serial.print("Relay ["); Serial.print(relayPinArray[i]); Serial.print("] set to "); Serial.println(relayInitArray[i]);
-        delay(20);
-    }
-
-    Serial.println();
-    Serial.println("successfully initialized relay");
-    delay(20);
-
-    return true;
 }
 
 bool i2c_scanner() {

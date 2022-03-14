@@ -8,7 +8,7 @@
 
 String title = "ENT_HH_BREAKOUT";
 String versionDate = "13.03.2022";
-String version = "version 1.1 ST";
+String version = "version 1.1 HH";
 // String brainName = String("BrCOLOR");
 // String relayCode = String("HID");
 const unsigned long heartbeatFrequency = 5000;
@@ -66,39 +66,29 @@ const byte RFID_SSPins[]  = {RFID_1_SS_PIN};
 #define RFID_3_LED_PIN          5     /* Per Konvention ist dies RFID-Port 3                                */
 #define RFID_4_LED_PIN          3     /* Per Konvention ist dies RFID-Port 4   
 
+#define REL_AMOUNT 1
 
-/* 
-will be used once relay init is standartised
-
-// RELAY
 enum REL_PIN {
-    REL_0_PIN,          // 0 First room light
-    REL_1_PIN,          // 1 Light 2nd room
-    REL_2_PIN,          // 2 UV Light
-    REL_3_PIN,          // 3 Alarm
-    REL_4_PIN,          // 4 Empty
-    REL_5_PIN,          // 5 Fireplace valve
-    REL_SAFE_PIC_PIN,  // 6 valve holding the painting
-    REL_7_PIN           // 7 Exit door lock
+    REL_DOOR_PIN,      // door lock
+    REL_1_PIN,          
+    REL_2_PIN,         
+    REL_3_PIN,        
+    REL_4_PIN,          
+    REL_5_PIN,         
+    REL_6_PIN,  
+    REL_7_PIN          
 };
 
 enum REL_INIT {
-    REL_0_INIT = 1,                    // DESCRIPTION OF THE RELAY WIRING
+    REL_DOOR_INIT = 1,                    // DESCRIPTION OF THE RELAY WIRING
     REL_1_INIT = 1,                    // DESCRIPTION OF THE RELAY WIRING
     REL_2_INIT = 1,                    // DESCRIPTION OF THE RELAY WIRING
     REL_3_INIT = 1,                    // DESCRIPTION OF THE RELAY WIRING
     REL_4_INIT = 1,                    // DESCRIPTION OF THE RELAY WIRING
     REL_5_INIT = 1,                    // DESCRIPTION OF THE RELAY WIRING
-    REL_SAFE_PIC_INIT = SAFE_HIDDEN,  // NC = Empty | COM = 24V  | NO = Valve
+    REL_6_INIT = 1,                    // DESCRIPTION OF THE RELAY WIRING
     REL_7_INIT = 1                     // DESCRIPTION OF THE RELAY WIRING
 };
 
-
-
-// == constants
-#define REL_AMOUNT 1
-const enum REL_PIN relayPinArray[] = {
-    REL_SAFE_PIC_PIN};
-const byte relayInitArray[] = {
-    REL_SAFE_PIC_INIT};
-*/
+const enum REL_PIN relayPinArray[REL_AMOUNT] = {REL_DOOR_PIN};
+const enum REL_INIT relayInitArray[REL_AMOUNT] = {REL_DOOR_INIT};

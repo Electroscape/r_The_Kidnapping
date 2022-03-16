@@ -50,7 +50,7 @@ void setup() {
 
     Serial.println();
     Serial.println("I2C: ... ");
-    if (i2c_scanner()) {Serial.println("I2C: OK!");} else {Serial.println("I2C: FAILED!");}
+    if (STB::i2c_scanner()) {Serial.println("I2C: OK!");} else {Serial.println("I2C: FAILED!");}
 
     wdt_reset();
 
@@ -222,7 +222,7 @@ bool RFID_Init() {
                 Serial.println("Didn't find PN53x board");
                 if (retries > 5) {
                     Serial.println("PN532 startup timed out, restarting");
-                    software_Reset();
+                    STB::software_reset();
                 }
             } else {
                 Serial.print("Found chip PN5"); Serial.println((versiondata>>24) & 0xFF, HEX);
@@ -364,47 +364,4 @@ void dbg_println(String print_dbg) {
 #ifdef DEBUGMODE
     Serial.println(print_dbg);
 #endif
-}
-
-bool i2c_scanner() {
-    Serial.println (F("I2C scanner:"));
-    Serial.println (F("Scanning..."));
-    byte wire_device_count = 0;
-
-    for (byte i = 8; i < 120; i++) {
-        Wire.beginTransmission (i);
-        if (Wire.endTransmission () == 0) {
-            Serial.print   (F("Found address: "));
-            Serial.print   (i, DEC);
-            Serial.print   (F(" (0x"));
-            Serial.print   (i, HEX);
-            Serial.print (F(")"));
-            if (i == 39) Serial.print(F(" -> LCD"));
-            if (i == 56) Serial.print(F(" -> LCD-I2C-Board"));
-            if (i == 57) Serial.print(F(" -> Input-I2C-board"));
-            if (i == 60) Serial.print(F(" -> Display"));
-            if (i == 63) Serial.print(F(" -> Relay"));
-            if (i == 22) Serial.print(F(" -> Servo-I2C-Board"));
-            Serial.println();
-            wire_device_count++;
-            delay (3);
-        }
-    }
-    Serial.print   (F("Found "));
-    Serial.print   (wire_device_count, DEC);
-    Serial.println (F(" device(s)."));
-    Serial.println("successfully scanned I2C");
-    Serial.println();
-
-    return true;
-}
-
-void software_Reset() {
-    Serial.println(F("Restarting in"));
-    delay(50);
-    for (byte i = 3; i>0; i--) {
-        Serial.println(i);
-        delay(100);
-    }
-    asm volatile ("  jmp 0");
 }

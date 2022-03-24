@@ -9,7 +9,7 @@
 // I2C Port Expander
 #include "header_s.h"
 #include <PCF8574.h>
-#include <stb_namespace.h>
+#include <stb_common.h>
 #include <Wire.h>
 // Watchdog timer
 #include <avr/wdt.h>
@@ -50,11 +50,11 @@ void setup() {
 
     Serial.println();
     Serial.println("I2C: ... ");
-    if (STB::i2c_scanner()) {Serial.println("I2C: OK!");} else {Serial.println("I2C: FAILED!");}
+    if (STB::i2cScanner()) {Serial.println("I2C: OK!");} else {Serial.println("I2C: FAILED!");}
 
     wdt_reset();
 
-    STB::relay_init(relay, *relayPinArray, *relayInitArray);
+    STB::relayInit(relay, *relayPinArray, *relayInitArray);
     
     wdt_reset();
 
@@ -71,7 +71,7 @@ void setup() {
     wdt_reset();
 
     Serial.println();
-    STB::print_setup_end();
+    STB::printSetupEnd();
 }
 
 void loop() {
@@ -222,7 +222,7 @@ bool RFID_Init() {
                 Serial.println("Didn't find PN53x board");
                 if (retries > 5) {
                     Serial.println("PN532 startup timed out, restarting");
-                    STB::software_reset();
+                    STB::softwareReset();
                 }
             } else {
                 Serial.print("Found chip PN5"); Serial.println((versiondata>>24) & 0xFF, HEX);

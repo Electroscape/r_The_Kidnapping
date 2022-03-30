@@ -205,7 +205,6 @@ void led_set_clrs(int stripe_nr, CRGB clr, int led_cnt) {
 
 bool RFID_Gate_locked() {
 
-    bool readableCard;
     uint8_t data[16];
 
     int cards_present[RFID_AMOUNT];
@@ -216,9 +215,7 @@ bool RFID_Gate_locked() {
 
         Serial.print("Checking presence for reader: ");Serial.println(reader_nr);
 
-        readableCard = STB_RFID::cardRead(RFID_READERS[reader_nr], data, RFID_DATABLOCK);
-        if (readableCard) {
-
+        if ( STB_RFID::cardRead(RFID_READERS[reader_nr], data, RFID_DATABLOCK) ) {
             Serial.println((char *) data);
             if (strcmp(RFID_solutions[0], (char *) data)) {
                 Serial.println("Correct card placed!");

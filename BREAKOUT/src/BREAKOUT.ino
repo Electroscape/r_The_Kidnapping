@@ -205,11 +205,8 @@ void led_set_clrs(int stripe_nr, CRGB clr, int led_cnt) {
 
 bool RFID_Gate_locked() {
 
-    uint8_t success;
-    uint8_t uid[] = {0, 0, 0, 0, 0, 0, 0 };  // Buffer to store the returned UID
-    uint8_t uidLength;
+    bool readableCard;
     uint8_t data[16];
-    bool gate_locked = false;
 
     int cards_present[RFID_AMOUNT];
     memset(cards_present, 0, sizeof(cards_present));
@@ -219,26 +216,14 @@ bool RFID_Gate_locked() {
 
         Serial.print("Checking presence for reader: ");Serial.println(reader_nr);
 
-        success = STB_RFID::read_PN532(RFID_READERS[reader_nr], RFID_DATABLOCK);
-        if (success) {
-            for (int i=0; i<3; i++) {
-                Serial.println(RFID_solutions[0][i]);
-            }
+        readableCard = STB_RFID::cardRead(RFID_READERS[reader_nr], data, RFID_DATABLOCK);
+        if (readableCard) {
 
-            /*
-            Serial.println("Card present on reader!");
-            //Serial.println(data);
-            // data_correct(reader_nr, data);
-            for (int i=0; i<RFID_SOLUTION_SIZE; i++) {
-                Serial.println(RFID_solutions[0][i]);
-                Serial.println(data[i]);
-                if (RFID_solutions[0][i] != data[i]) {
-                    Serial.println("wrong card");
-                } else  {
-                    Serial.println("correct bit");
-                }
+            Serial.println((char *) data);
+            if (strcmp(RFID_solutions[0], (char *) data)) {
+                Serial.println("Correct card placed!");
+                return false;
             }
-            */
         } else  {
             delay(50);
         }
@@ -246,7 +231,7 @@ bool RFID_Gate_locked() {
     }
 
     Serial.print("\n");
-    return gate_locked;
+    return true;
 }
 
 bool read_PN532(int reader_nr, uint8_t *data, uint8_t *uid, uint8_t uidLength) {

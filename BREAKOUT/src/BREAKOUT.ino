@@ -55,7 +55,7 @@ void setup() {
 
     wdt_reset();
 
-    STB::relayInit(relay, *relayPinArray, *relayInitArray);
+    STB::relayInit(relay, relayPinArray, relayInitArray, REL_AMOUNT);
     
     wdt_reset();
 
@@ -222,9 +222,11 @@ bool RFID_Gate_locked() {
             Serial.println((char *) data);
             if (strcmp(RFID_solutions[0], (char *) data)) {
                 Serial.println("Correct card placed!");
+                relay.digitalWrite(REL_DOOR_PIN, REL_DOOR_INIT);
                 return false;
             }
         } else  {
+            relay.digitalWrite(REL_DOOR_PIN, !REL_DOOR_INIT);
             delay(50);
         }
         

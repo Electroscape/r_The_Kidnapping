@@ -23,7 +23,8 @@
 
 // very manual but ... its C its gonna be bitching when it doesnt know during compilte time
 // uncomment as needed
-Adafruit_PN532 RFID_0(PN532_SCK, PN532_MISO, PN532_MOSI, RFID_SSPins[0]);
+// for software SPI use (PN532_SCK, PN532_MISO, PN532_MOSI, RFID_SSPins[0])
+Adafruit_PN532 RFID_0(RFID_SSPins[0]);
 
 Adafruit_PN532 RFID_READERS[1] = {RFID_0}; //
 
@@ -268,43 +269,8 @@ bool read_PN532(int reader_nr, uint8_t *data, uint8_t *uid, uint8_t uidLength) {
 }
 
 bool data_correct(int current_reader, uint8_t *data) {
-    uint8_t result = -1;
-
-    for (int solution=0; solution<RFID_AMOUNT; solution++) {
-        Serial.println();
-        for (int i=0; i<RFID_SOLUTION_SIZE; i++) {
-            
-            Serial.print(data[i]);
-            if (RFID_solutions[solution][i] != data[i]) {
-                // We still check for the other solutions to show the color
-                // but we display it being the wrong solution of the riddle
-                if (solution == current_reader) {
-                    Serial.print("Wrong card placed on reader: "); Serial.println(current_reader);
-                }
-                continue;
-            } else {
-                if (i >= RFID_SOLUTION_SIZE - 1) {
-                    // its a valid card but not placed on the right socket
-                    Serial.print("equal to result of reader");
-                    delay(5);
-                    // dbg_println(solution);
-                    result = solution;
-                }
-            }
-        }
-
-    }
-
-    // handling of the colours of the individual cards
-    if (result < 0) {
-        Serial.print("undefined card placed on reader: "); Serial.println(current_reader);
-    }
-
-    if (result == current_reader) {
-        Serial.print("Correct card placed on reader: "); Serial.println(current_reader);
+    if (strcmp(RFID_solutions[current_reader], (char *) data)) {
         return true;
-    } else {
-        return false;
     }
 }
 

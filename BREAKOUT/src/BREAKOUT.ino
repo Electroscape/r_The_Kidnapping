@@ -234,31 +234,6 @@ bool RFID_Gate_locked() {
     return true;
 }
 
-bool read_PN532(int reader_nr, uint8_t *data, uint8_t *uid, uint8_t uidLength) {
-
-    uint8_t success;
-    wdt_reset();
-    // authentication may be shifted to another function if we need to expand
-    success = RFID_READERS[reader_nr].mifareclassic_AuthenticateBlock(uid, uidLength, RFID_DATABLOCK, 0, keya);
-    dbg_println("Trying to authenticate block 4 with default KEYA value");
-    if (!success) {
-        dbg_println("Authentication failed, card may already be authenticated");
-    }
-
-    success = RFID_READERS[reader_nr].mifareclassic_ReadDataBlock(RFID_DATABLOCK, data);
-    if (!success) {
-        Serial.println("Reading failed, discarding card");
-        return false;
-    }
-    return true;
-}
-
-bool data_correct(int current_reader, uint8_t *data) {
-    if (strcmp(RFID_solutions[current_reader], (char *) data)) {
-        return true;
-    }
-}
-
 void dbg_println(String print_dbg) {
 #ifdef DEBUGMODE
     Serial.println(print_dbg);

@@ -6,11 +6,10 @@
 */
 #pragma once
 
-String title = "ENT_HH_BREAKOUT";
-String versionDate = "13.03.2022";
-String version = "version 1.1 HH";
+String title = "ENT_S_BREAKOUT";
+String versionDate = "31.03.2022";
+String version = "version 1.1.1 HH";
 // String brainName = String("BrCOLOR");
-// String relayCode = String("HID");
 const unsigned long heartbeatFrequency = 5000;
 
 
@@ -50,18 +49,16 @@ const char RFID_solutions[1][RFID_SOLUTION_SIZE]  = {"AH"};
 const byte RFID_SSPins[]  = {RFID_1_SS_PIN};
 
 // --- LED settings --- 
-
-// the black ones with 30/meter actually have segments of 3 leds per IC
 #define NR_OF_LEDS             31  /* Anzahl der Pixel auf einem Strang (Test 1 Pixel)                   */
-// BE CAREFUL WHEN SETTING ALL LEDS to a colour use the socket count for this
 #define STRIPE_CNT             1
-#define LED_STRIP_TYPE         WS2811
-#define COLOR_ORDER            BRG // BRG
 
 #define RFID_1_LED_PIN          9     /* Per Konvention ist dies RFID-Port 1                                */
 #define RFID_2_LED_PIN          6     /* Per Konvention ist dies RFID-Port 2                                */
 #define RFID_3_LED_PIN          5     /* Per Konvention ist dies RFID-Port 3                                */
 #define RFID_4_LED_PIN          3     /* Per Konvention ist dies RFID-Port 4   */
+
+int ledCnts[STRIPE_CNT] = {31};
+int ledPins[STRIPE_CNT] = {RFID_1_LED_PIN};
 
 #define REL_AMOUNT 1
 
@@ -87,5 +84,5 @@ enum REL_INIT {
     REL_7_INIT = 1                     // DESCRIPTION OF THE RELAY WIRING
 };
 
-const int relayPinArray[REL_AMOUNT] = {REL_DOOR_PIN};
-const int relayInitArray[REL_AMOUNT] = {REL_DOOR_INIT};
+int relayPinArray[REL_AMOUNT] = {REL_DOOR_PIN};
+int relayInitArray[REL_AMOUNT] = {REL_DOOR_INIT};

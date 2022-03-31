@@ -30,7 +30,6 @@ const long int green = LED_Strips[0].Color(0,255,0);
 
 // for software SPI use (PN532_SCK, PN532_MISO, PN532_MOSI, RFID_SSPins[0])
 Adafruit_PN532 RFID_0(RFID_SSPins[0]);
-
 Adafruit_PN532 RFID_READERS[1] = {RFID_0};
 
 static bool game_live = false;
@@ -78,7 +77,7 @@ void loop() {
 
     if (game_live) {
         rfid_ticks = 0;
-        while (!RFIDGatelocked()) {
+        while (!rfidGateLocked()) {
             rfid_ticks++;
             if (rfid_ticks > RFID_TICKS_REQUIRED) {
                 end_game();
@@ -103,7 +102,7 @@ void wait_for_reset() {
 
     while (reset_timer < RESET_DURATION) {
         wdt_reset();
-        if (!RFIDGatelocked()) {
+        if (!rfidGateLocked()) {
             Serial.println("card present, resettimer set to 0");
             reset_timer = 0;
         } else {
@@ -128,7 +127,7 @@ void end_game() {
 };
 
 
-bool RFIDGatelocked() {
+bool rfidGateLocked() {
 
     uint8_t data[16];
 

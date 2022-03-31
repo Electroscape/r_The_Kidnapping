@@ -30,7 +30,6 @@ Adafruit_PN532 RFID_READERS[1] = {RFID_0}; //
 
 
 CRGB LED_STRIPE_1[NR_OF_LEDS];
-//CRGB LED_STRIPE_2[NR_OF_LEDS];
 
 static CRGB LED_STRIPES[STRIPE_CNT] = {LED_STRIPE_1};
 
@@ -67,7 +66,7 @@ void setup() {
 
     Serial.println();
     Serial.println("RFID: ... ");
-    if (STB_RFID::RFID_Init(RFID_0)) {Serial.println("RFID: OK!");} else {Serial.println("RFID: FAILED!");}
+    if (STB_RFID::RFIDInit(RFID_0)) {Serial.println("RFID: OK!");} else {Serial.println("RFID: FAILED!");}
 
     wdt_reset();
 
@@ -97,7 +96,7 @@ void loop() {
 
     if (game_live) {
         rfid_ticks = 0;
-        while (!RFID_Gate_locked()) {
+        while (!RFIDGatelocked()) {
             rfid_ticks++;
             if (rfid_ticks > RFID_TICKS_REQUIRED) {
                 end_game();
@@ -122,7 +121,7 @@ void wait_for_reset() {
 
     while (reset_timer < RESET_DURATION) {
         wdt_reset();
-        if (!RFID_Gate_locked()) {
+        if (!RFIDGatelocked()) {
             Serial.println("card present, resettimer set to 0");
             reset_timer = 0;
         } else {
@@ -203,21 +202,21 @@ void led_set_clrs(int stripe_nr, CRGB clr, int led_cnt) {
 }
 
 
-bool RFID_Gate_locked() {
+bool RFIDGatelocked() {
 
-    bool readableCard;
     uint8_t data[16];
 
+    /*
     int cards_present[RFID_AMOUNT];
     memset(cards_present, 0, sizeof(cards_present));
     int cards_present_cnt = 0;
+    */
 
     for (int reader_nr=0; reader_nr<RFID_AMOUNT; reader_nr++) {
 
         Serial.print("Checking presence for reader: ");Serial.println(reader_nr);
 
-        readableCard = STB_RFID::cardRead(RFID_READERS[reader_nr], data, RFID_DATABLOCK);
-        if (readableCard) {
+        if (STB_RFID::cardRead(RFID_READERS[reader_nr], data, RFID_DATABLOCK)) {
 
             Serial.println((char *) data);
             if (strcmp(RFID_solutions[0], (char *) data)) {

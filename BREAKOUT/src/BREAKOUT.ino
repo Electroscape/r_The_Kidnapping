@@ -42,7 +42,7 @@ void setup() {
     STB::begin();
 
     Serial.println("WDT endabled");
-    //wdt_enable(WDTO_8S);
+    wdt_enable(WDTO_8S);
     wdt_reset();
 
     Serial.println();
@@ -55,10 +55,6 @@ void setup() {
     
     wdt_reset();
 
-    Serial.println();
-    Serial.println("LED: ... ");
-    if (STB_LED::ledInit(LED_Strips, ledCnts, ledPins)) {Serial.println("LED: OK!");} else {Serial.println("LED: FAILED!");}
-    STB_LED::setAllStripsToClr(LED_Strips, darked);
 
     wdt_reset();
 
@@ -67,6 +63,13 @@ void setup() {
     if (STB_RFID::RFIDInit(RFID_0)) {Serial.println("RFID: OK!");} else {Serial.println("RFID: FAILED!");}
 
     wdt_reset();
+
+    //  Caution! there is a conflict with the PN532 library
+    // having the led_init before the reader will cause it to fail
+    Serial.println();
+    Serial.println("LED: ... ");
+    if (STB_LED::ledInit(LED_Strips, ledCnts, ledPins, NEO_BRG)) {Serial.println("LED: OK!");} else {Serial.println("LED: FAILED!");}
+    STB_LED::setAllStripsToClr(LED_Strips, darked);
 
     Serial.println();
     STB::printSetupEnd();

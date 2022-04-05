@@ -36,7 +36,7 @@ bool gameLive = true;
 int rfidTicks = 0;      // ticks of the correct RFID placed
 int resetTimer = 0;     // ticks to trigger the game going live again
 
-Expander_PCF8574 relay;
+PCF8574 relay;
 
 void setup() {
 

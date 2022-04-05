@@ -120,6 +120,8 @@ void wait_for_reset() {
 }
 
 void endGame() {
+    oled.clear();
+    oled.println("Game ended\n green lights\n open door");
     Serial.println("Game ended, have some light and an open door");
     gameLive = false;
     relay.digitalWrite(REL_DOOR_PIN, REL_DOOR_INIT);
@@ -129,6 +131,8 @@ void endGame() {
 void initGame() {
     resetTimer = 0;
     Serial.println("Game going live, killing lights and locking the door");
+    oled.clear();
+    oled.println("Game live\n killing lights\n locking");
     gameLive = true;
     relay.digitalWrite(REL_DOOR_PIN, !REL_DOOR_INIT);
     STB_LED::setAllStripsToClr(LED_Strips, darked);

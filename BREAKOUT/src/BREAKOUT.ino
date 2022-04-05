@@ -22,6 +22,10 @@
 
 #include <Adafruit_NeoPixel.h>
 #include <stb_led.h>
+#include <stb_oled.h>
+#include "SSD1306AsciiWire.h"
+
+SSD1306AsciiWire oled = SSD1306AsciiWire();
 
 Adafruit_NeoPixel LED_Strips[STRIPE_CNT];
 const long int darked = LED_Strips[0].Color(120,0,0);
@@ -53,6 +57,8 @@ void setup() {
     wdt_reset();
 
     STB::relayInit(relay, relayPinArray, relayInitArray, REL_AMOUNT);
+
+    STB_OLED::oledInit(oled, SH1106_128x64);
     
     wdt_reset();
 

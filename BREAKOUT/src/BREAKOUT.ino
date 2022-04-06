@@ -66,7 +66,7 @@ void setup() {
 
     Serial.println();
     Serial.println("RFID: ... ");
-    if (STB_RFID::RFIDInit(RFID_0)) {Serial.println("RFID: OK!");} else {Serial.println("RFID: FAILED!");}
+    if (STB_LED::ledInit(LED_Strips, ledCnts, ledPins, NEO_BRG)) {Serial.println("LED: OK!");} else {Serial.println("LED: FAILED!");}
     wdt_reset();
 
     Serial.println();

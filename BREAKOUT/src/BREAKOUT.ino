@@ -3,12 +3,14 @@
  * @author Martin Pek (martin.pek@web.de)
  * @brief 
  * @version 0.1
- * @date 2022-04-01
- * 
+ * @date 6.04.2022
  * 
  */
 
-#include "header_s.h"
+String versionDate = "6.04.2022";
+String version = "1.4.2";
+
+#include "header_st.h"
 // I2C Port Expander
 #include <PCF8574.h>
 #include <stb_common.h>

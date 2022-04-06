@@ -6,9 +6,7 @@
 */
 #pragma once
 
-String title = "ENT_S_BREAKOUT";
-String versionDate = "31.03.2022";
-String version = "version 1.1.1 HH";
+String title = "ENT_ST_BREAKOUT";
 // String brainName = String("BrCOLOR");
 const unsigned long heartbeatFrequency = 5000;
 

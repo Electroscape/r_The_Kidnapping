@@ -82,7 +82,7 @@ void loop() {
     if (gameLive) {
         runGame();
     } else {
-        wait_for_reset();
+        waitForReset();
     }
     wdt_reset();
 }
@@ -99,7 +99,7 @@ void runGame() {
     }
 }
 
-void wait_for_reset() {
+void waitForReset() {
 
     Serial.println("room has been solved, waiting for card being removed to arm the room");
 

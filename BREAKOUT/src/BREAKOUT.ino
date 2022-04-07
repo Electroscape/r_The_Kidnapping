@@ -12,20 +12,13 @@ String version = "1.4.2";
 
 #include "header_st.h"
 // I2C Port Expander
-#include <PCF8574.h>
+
 #include <stb_common.h>
-#include <Wire.h>
-// Watchdog timer
 #include <avr/wdt.h>
 
-// == PN532 imports and setup
 #include <stb_rfid.h>
-#include <Adafruit_PN532.h>
-
-#include <Adafruit_NeoPixel.h>
 #include <stb_led.h>
 #include <stb_oled.h>
-#include "SSD1306AsciiWire.h"
 
 SSD1306AsciiWire oled = SSD1306AsciiWire();
 

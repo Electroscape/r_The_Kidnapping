@@ -20,7 +20,11 @@ String version = "1.4.2";
 #include <stb_led.h>
 #include <stb_oled.h>
 
-SSD1306AsciiWire oled = SSD1306AsciiWire();
+// #define ledDisable 0
+// #define rfidDisable 1
+// #define oledDisable 1
+
+SSD1306AsciiWire oled;
 
 Adafruit_NeoPixel LED_Strips[STRIPE_CNT];
 const long int darked = LED_Strips[0].Color(120,0,0);
@@ -53,18 +57,32 @@ void setup() {
 
     STB::relayInit(relay, relayPinArray, relayInitArray, REL_AMOUNT);
 
-    STB_OLED::oledInit(oled, SH1106_128x64);
     
     wdt_reset();
 
     Serial.println();
     Serial.println("RFID: ... ");
+
+#ifndef rfidDisable
     if (STB_RFID::RFIDInit(RFID_0)) {Serial.println("RFID: OK!");} else {Serial.println("RFID: FAILED!");}
     wdt_reset();
+#endif
 
+#ifndef oledDisable
+    // STB_OLED::oledInit(&oled, SH1106_128x64);
+    oled.begin(&SH1106_128x64, OLED_I2C_ADD);
+    oled.set400kHz();
+    oled.setScroll(true);
+    oled.setFont(Verdana12_bold);
+    oled.clear();
+    oled.println("  System startup...");  
+#endif  
+
+#ifndef ledDisable
     Serial.println();
     Serial.println("LED: ... ");
     if (STB_LED::ledInit(LED_Strips, ledCnts, ledPins, NEO_BRG)) {Serial.println("LED: OK!");} else {Serial.println("LED: FAILED!");}
+#endif
 
     Serial.println();
     STB::printSetupEnd();
@@ -73,12 +91,14 @@ void setup() {
 }
 
 void loop() {
-    Serial.println("loop");
+    // Serial.println("loop");
+#ifndef rfidDisable
     if (gameLive) {
         runGame();
     } else {
         waitForReset();
     }
+#endif
     wdt_reset();
 }
 
@@ -88,10 +108,11 @@ void runGame() {
             endGame();
         }
         rfidTicks++;
-        delay(50);
+        
     } else {
         rfidTicks = 0;
     }
+    delay(50);
 }
 
 void waitForReset() {
@@ -115,22 +136,30 @@ void waitForReset() {
 }
 
 void endGame() {
+#ifndef oledDisable
     oled.clear();
     oled.println("Game ended\n green lights\n open door");
+#endif
     Serial.println("Game ended, have some light and an open door");
     gameLive = false;
     relay.digitalWrite(REL_DOOR_PIN, REL_DOOR_INIT);
+#ifndef ledDisable
     STB_LED::setAllStripsToClr(LED_Strips, green);
+#endif
 };
 
 void initGame() {
     resetTimer = 0;
     Serial.println("Game going live, killing lights and locking the door");
+#ifndef oledDisable
     oled.clear();
     oled.println("Game live\n killing lights\n locking");
+#endif
     gameLive = true;
     relay.digitalWrite(REL_DOOR_PIN, !REL_DOOR_INIT);
+#ifndef ledDisable
     STB_LED::setAllStripsToClr(LED_Strips, darked);
+#endif
 }
 
 

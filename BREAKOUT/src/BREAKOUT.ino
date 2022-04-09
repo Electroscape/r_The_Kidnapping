@@ -49,9 +49,7 @@ void setup() {
     wdt_enable(WDTO_8S);
     wdt_reset();
 
-    Serial.println();
-    Serial.println("I2C: ... ");
-    if (STB::i2cScanner()) {Serial.println("I2C: OK!");} else {Serial.println("I2C: FAILED!");}
+    STB::i2cScanner();
 
     wdt_reset();
 
@@ -64,7 +62,7 @@ void setup() {
     Serial.println("RFID: ... ");
 
 #ifndef rfidDisable
-    if (STB_RFID::RFIDInit(RFID_0)) {Serial.println("RFID: OK!");} else {Serial.println("RFID: FAILED!");}
+    STB_RFID::RFIDInit(RFID_0);
     wdt_reset();
 #endif
 
@@ -79,9 +77,7 @@ void setup() {
 #endif  
 
 #ifndef ledDisable
-    Serial.println();
-    Serial.println("LED: ... ");
-    if (STB_LED::ledInit(LED_Strips, ledCnts, ledPins, NEO_BRG)) {Serial.println("LED: OK!");} else {Serial.println("LED: FAILED!");}
+    STB_LED::ledInit(LED_Strips, ledCnts, ledPins, NEO_BRG);
 #endif
 
     Serial.println();

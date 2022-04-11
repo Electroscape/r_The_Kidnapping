@@ -1,4 +1,4 @@
-/**
+ /**
  * @file BREAKOUT.ino
  * @author Martin Pek (martin.pek@web.de)
  * @brief 
@@ -28,8 +28,10 @@ const long int green = LED_Strips[0].Color(0,255,0);
 
 
 // for software SPI use (PN532_SCK, PN532_MISO, PN532_MOSI, RFID_SSPins[0])
-Adafruit_PN532 RFID_0(RFID_SSPins[0]);
-Adafruit_PN532 RFID_READERS[1] = {RFID_0};
+//Adafruit_PN532 RFID_0(RFID_SSPins[0]);
+//Adafruit_PN532 RFID_READERS[1] = {RFID_0};
+PN532_I2C pn532i2c(Wire);
+PN532 nfc(pn532i2c);	
 
 bool gameLive = true;
 int rfidTicks = 0;      // ticks of the correct RFID placed
@@ -45,26 +47,19 @@ void setup() {
     wdt_enable(WDTO_8S);
     wdt_reset();
 
-    Serial.println();
-    Serial.println("I2C: ... ");
-    if (STB::i2cScanner()) {Serial.println("I2C: OK!");} else {Serial.println("I2C: FAILED!");}
-
+    if (STB::i2cScanner()) {Serial.println("I2C: ✓");} else {Serial.println("I2C: X");}
     wdt_reset();
 
-    STB::relayInit(relay, relayPinArray, relayInitArray, REL_AMOUNT);
+    if (STB::relayInit(relay, relayPinArray, relayInitArray, REL_AMOUNT)) {Serial.println("RELAY: ✓");} else {Serial.println("RELAY: X");}
 
     STB_OLED::oledInit(oled, SH1106_128x64);
-    
     wdt_reset();
 
-    Serial.println();
-    Serial.println("RFID: ... ");
-    if (STB_RFID::RFIDInit(RFID_0)) {Serial.println("RFID: OK!");} else {Serial.println("RFID: FAILED!");}
+    //if (STB_RFID::RFIDInit(RFID_0)) {Serial.println("RFID: ✓");} else {Serial.println("RFID: X");}
+    if (STB_RFID::RFIDInitI2c(nfc)) {Serial.println("RFID: ✓");} else {Serial.println("RFID: X");}
     wdt_reset();
 
-    Serial.println();
-    Serial.println("LED: ... ");
-    if (STB_LED::ledInit(LED_Strips, ledCnts, ledPins, NEO_BRG)) {Serial.println("LED: OK!");} else {Serial.println("LED: FAILED!");}
+    //if (STB_LED::ledInit(LED_Strips, ledCnts, ledPins, NEO_BRG)) {Serial.println("LED: ✓");} else {Serial.println("LED: X");}
 
     Serial.println();
     STB::printSetupEnd();
@@ -73,7 +68,7 @@ void setup() {
 }
 
 void loop() {
-    Serial.println("loop");
+    // Serial.println("loop");
     if (gameLive) {
         runGame();
     } else {
@@ -115,31 +110,31 @@ void waitForReset() {
 }
 
 void endGame() {
-    oled.clear();
-    oled.println("Game ended\n green lights\n open door");
+    // oled.clear();
+    // oled.println("Game ended\n green lights\n open door");
     Serial.println("Game ended, have some light and an open door");
     gameLive = false;
     relay.digitalWrite(REL_DOOR_PIN, REL_DOOR_INIT);
-    STB_LED::setAllStripsToClr(LED_Strips, green);
+    //STB_LED::setAllStripsToClr(LED_Strips, green);
 };
 
 void initGame() {
     resetTimer = 0;
     Serial.println("Game going live, killing lights and locking the door");
-    oled.clear();
-    oled.println("Game live\n killing lights\n locking");
+    // oled.clear();
+    // oled.println("Game live\n killing lights\n locking");
     gameLive = true;
     relay.digitalWrite(REL_DOOR_PIN, !REL_DOOR_INIT);
-    STB_LED::setAllStripsToClr(LED_Strips, darked);
+    //STB_LED::setAllStripsToClr(LED_Strips, darked);
 }
 
 
 bool rfidCorrect() {
 
     uint8_t data[16];
-    Serial.println("Checking presence for reader");
+    // Serial.println("Checking presence for reader");
 
-    if (STB_RFID::cardRead(RFID_READERS[0], data, RFID_DATABLOCK)) {
+    if (STB_RFID::cardReadI2c(nfc, data, RFID_DATABLOCK)) {
 
         Serial.println((char *) data);
         if (strcmp(RFID_solutions[0], (char *) data)) {

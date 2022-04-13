@@ -20,9 +20,10 @@ String version = "1.4.2";
 #include <stb_led.h>
 #include <stb_oled.h>
 
-// #define ledDisable 0
-// #define rfidDisable 1
+// #define ledDisable 1
+#define rfidDisable 1
 // #define oledDisable 1
+// #define relayDisable 1
 
 SSD1306AsciiWire oled;
 
@@ -53,28 +54,23 @@ void setup() {
 
     wdt_reset();
 
-    STB::relayInit(relay, relayPinArray, relayInitArray, REL_AMOUNT);
-
-    
+#ifndef oledDisable
+    STB_OLED::oledInit(&oled, SH1106_128x64);
     wdt_reset();
+#endif  
 
-    Serial.println();
-    Serial.println("RFID: ... ");
+
+
+#ifndef relayDisable
+    STB::relayInit(relay, relayPinArray, relayInitArray, REL_AMOUNT);
+    wdt_reset();
+#endif
+
 
 #ifndef rfidDisable
     STB_RFID::RFIDInit(RFID_0);
     wdt_reset();
 #endif
-
-#ifndef oledDisable
-    // STB_OLED::oledInit(&oled, SH1106_128x64);
-    oled.begin(&SH1106_128x64, OLED_I2C_ADD);
-    oled.set400kHz();
-    oled.setScroll(true);
-    oled.setFont(Verdana12_bold);
-    oled.clear();
-    oled.println("  System startup...");  
-#endif  
 
 #ifndef ledDisable
     STB_LED::ledInit(LED_Strips, ledCnts, ledPins, NEO_BRG);

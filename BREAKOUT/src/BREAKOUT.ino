@@ -25,6 +25,8 @@ String version = "1.4.2";
 // #define oledDisable 1
 // #define relayDisable 1
 
+STB STB_Oled;
+
 SSD1306AsciiWire oled;
 
 Adafruit_NeoPixel LED_Strips[STRIPE_CNT];
@@ -44,7 +46,8 @@ PCF8574 relay;
 
 void setup() {
 
-    STB::begin();
+    STB_Oled.dbgln("test");
+    // STB::begin();
 
     Serial.println("WDT endabled");
     wdt_enable(WDTO_8S);

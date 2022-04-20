@@ -25,9 +25,8 @@ String version = "1.4.2";
 // #define oledDisable 1
 // #define relayDisable 1
 
-STB STB_Oled;
-
 SSD1306AsciiWire oled;
+STB STB;
 
 Adafruit_NeoPixel LED_Strips[STRIPE_CNT];
 const long int darked = LED_Strips[0].Color(120,0,0);
@@ -46,26 +45,27 @@ PCF8574 relay;
 
 void setup() {
 
-    STB_Oled.dbgln("test");
-    // STB::begin();
+    STB.begin();
+    STB.defaultOled.println("  someTest");
+    delay(2000);
 
-    Serial.println("WDT endabled");
-    wdt_enable(WDTO_8S);
-    wdt_reset();
-
-    STB::i2cScanner();
-
-    wdt_reset();
-
+    // todo replace oled with STB.defaultoled
 #ifndef oledDisable
     STB_OLED::oledInit(&oled, SH1106_128x64);
     wdt_reset();
 #endif  
 
+    Serial.println("WDT endabled");
+    wdt_enable(WDTO_8S);
+    wdt_reset();
 
+    STB.i2cScanner();
+
+    wdt_reset();
 
 #ifndef relayDisable
-    STB::relayInit(relay, relayPinArray, relayInitArray, REL_AMOUNT);
+    STB.relayInit(relay, relayPinArray, relayInitArray, REL_AMOUNT);
+    // STB::relayInit(relay, relayPinArray, relayInitArray, REL_AMOUNT);
     wdt_reset();
 #endif
 
@@ -80,7 +80,7 @@ void setup() {
 #endif
 
     Serial.println();
-    STB::printSetupEnd();
+    STB.printSetupEnd();
 
     initGame();
 }

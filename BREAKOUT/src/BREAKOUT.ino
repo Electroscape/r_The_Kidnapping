@@ -3,12 +3,12 @@
  * @author Martin Pek (martin.pek@web.de)
  * @brief 
  * @version 0.1
- * @date 6.04.2022
+ * @date 22.04.2022
  * 
  */
 
 String versionDate = "6.04.2022";
-String version = "1.4.2";
+String version = "1.5.0";
 
 #include "header_st.h"
 // I2C Port Expander

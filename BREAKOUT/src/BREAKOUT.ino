@@ -22,7 +22,7 @@ String version = "1.4.2";
 
 // #define ledDisable 1
 #define rfidDisable 1
-// #define oledDisable 1
+#define oledDisable 1
 // #define relayDisable 1
 
 SSD1306AsciiWire oled;
@@ -46,21 +46,19 @@ PCF8574 relay;
 void setup() {
 
     STB.begin();
-    STB.defaultOled.println("  someTest");
-    delay(2000);
 
     // todo replace oled with STB.defaultoled
 #ifndef oledDisable
-    STB_OLED::oledInit(&oled, SH1106_128x64);
+    // STB_OLED::oledInit(&oled, SH1106_128x64);
     wdt_reset();
 #endif  
 
-    Serial.println("WDT endabled");
+    STB.dbgln("WDT endabled");
     wdt_enable(WDTO_8S);
     wdt_reset();
 
     STB.i2cScanner();
-
+    // delay(3000);
     wdt_reset();
 
 #ifndef relayDisable
@@ -68,6 +66,7 @@ void setup() {
     // STB::relayInit(relay, relayPinArray, relayInitArray, REL_AMOUNT);
     wdt_reset();
 #endif
+    // delay(3000);
 
 
 #ifndef rfidDisable
@@ -78,6 +77,7 @@ void setup() {
 #ifndef ledDisable
     STB_LED::ledInit(LED_Strips, ledCnts, ledPins, NEO_BRG);
 #endif
+    wdt_reset();
 
     Serial.println();
     STB.printSetupEnd();

@@ -74,9 +74,6 @@ void setup() {
     wdt_reset();
 #endif
 
-#ifndef ledDisable
-    STB_LED::ledInit(LED_Strips, ledCnts, ledPins, NEO_BRG);
-#endif
     wdt_reset();
 
     Serial.println();
@@ -112,7 +109,7 @@ void runGame() {
 
 void waitForReset() {
 
-    Serial.println("room has been solved, waiting for card being removed to arm the room");
+    STB.dbgln("room has been solved, waiting for card being removed to arm the room");
 
     if (rfidCorrect()) {
         Serial.println("card still present");
@@ -131,11 +128,8 @@ void waitForReset() {
 }
 
 void endGame() {
-#ifndef oledDisable
-    oled.clear();
-    oled.println("Game ended\n green lights\n open door");
-#endif
-    Serial.println("Game ended, have some light and an open door");
+
+    STB.dbgln("Game ended \n green lights & open door");
     gameLive = false;
     relay.digitalWrite(REL_DOOR_PIN, REL_DOOR_INIT);
 #ifndef ledDisable
@@ -145,11 +139,7 @@ void endGame() {
 
 void initGame() {
     resetTimer = 0;
-    Serial.println("Game going live, killing lights and locking the door");
-#ifndef oledDisable
-    oled.clear();
-    oled.println("Game live\n killing lights\n locking");
-#endif
+    STB.dbgln("Game live\n killing lights\n locking");
     gameLive = true;
     relay.digitalWrite(REL_DOOR_PIN, !REL_DOOR_INIT);
 #ifndef ledDisable

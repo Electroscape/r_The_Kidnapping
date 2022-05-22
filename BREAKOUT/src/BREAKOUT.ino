@@ -21,8 +21,8 @@ String version = "1.5.0";
 #include <stb_oled.h>
 
 // #define ledDisable 1
-#define rfidDisable 1
-#define oledDisable 1
+// #define rfidDisable 1
+// #define oledDisable 1
 // #define relayDisable 1
 
 SSD1306AsciiWire oled;
@@ -46,10 +46,11 @@ PCF8574 relay;
 void setup() {
 
     STB.begin();
+    STB.rs485SetSlaveAddr(0);
 
     // todo replace oled with STB.defaultoled
 #ifndef oledDisable
-    // STB_OLED::oledInit(&oled, SH1106_128x64);
+    STB_OLED::oledInit(&oled, SH1106_128x64);
     wdt_reset();
 #endif  
 
@@ -58,16 +59,7 @@ void setup() {
     wdt_reset();
 
     STB.i2cScanner();
-    // delay(3000);
     wdt_reset();
-
-#ifndef relayDisable
-    STB.relayInit(relay, relayPinArray, relayInitArray, REL_AMOUNT);
-    // STB::relayInit(relay, relayPinArray, relayInitArray, REL_AMOUNT);
-    wdt_reset();
-#endif
-    // delay(3000);
-
 
 #ifndef rfidDisable
     STB_RFID::RFIDInit(RFID_0);
@@ -131,7 +123,7 @@ void endGame() {
 
     STB.dbgln("Game ended \n green lights & open door");
     gameLive = false;
-    relay.digitalWrite(REL_DOOR_PIN, REL_DOOR_INIT);
+    STB.rs485SendRelayCmd(REL_DOOR_PIN, REL_DOOR_INIT);
 #ifndef ledDisable
     STB_LED::setAllStripsToClr(LED_Strips, green);
 #endif
@@ -141,7 +133,7 @@ void initGame() {
     resetTimer = 0;
     STB.dbgln("Game live\n killing lights\n locking");
     gameLive = true;
-    relay.digitalWrite(REL_DOOR_PIN, !REL_DOOR_INIT);
+    STB.rs485SendRelayCmd(REL_DOOR_PIN, !REL_DOOR_INIT);
 #ifndef ledDisable
     STB_LED::setAllStripsToClr(LED_Strips, darked);
 #endif

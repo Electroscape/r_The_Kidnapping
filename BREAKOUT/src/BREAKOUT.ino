@@ -22,10 +22,8 @@ String version = "1.5.0";
 
 // #define ledDisable 1
 // #define rfidDisable 1
-// #define oledDisable 1
 // #define relayDisable 1
 
-SSD1306AsciiWire oled;
 STB STB;
 
 Adafruit_NeoPixel LED_Strips[STRIPE_CNT];
@@ -48,12 +46,6 @@ void setup() {
     STB.begin();
     STB.rs485SetSlaveAddr(0);
 
-    // todo replace oled with STB.defaultoled
-#ifndef oledDisable
-    STB_OLED::oledInit(&oled, SH1106_128x64);
-    wdt_reset();
-#endif  
-
     STB.dbgln("WDT endabled");
     wdt_enable(WDTO_8S);
     wdt_reset();
@@ -66,6 +58,10 @@ void setup() {
     wdt_reset();
 #endif
 
+#ifndef ledDisable
+    STB_LED::ledInit(LED_Strips, ledCnts, ledPins, NEO_BRG);
+#endif
+
     wdt_reset();
 
     Serial.println();
@@ -75,7 +71,6 @@ void setup() {
 }
 
 void loop() {
-    // Serial.println("loop");
 #ifndef rfidDisable
     if (gameLive) {
         runGame();
@@ -96,7 +91,7 @@ void runGame() {
     } else {
         rfidTicks = 0;
     }
-    delay(50);
+    delay(200);
 }
 
 void waitForReset() {

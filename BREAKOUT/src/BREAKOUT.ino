@@ -78,6 +78,7 @@ void loop() {
         waitForReset();
     }
 #endif
+    STB.rs485SendBuffer();
     wdt_reset();
 }
 

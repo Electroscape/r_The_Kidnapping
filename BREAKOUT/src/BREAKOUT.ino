@@ -82,10 +82,17 @@ void rfidRead() {
     }
 
     lastRfidCheck = millis();
+    char message[32] = "!RFID";
 
-    Serial.println("Checking presence for reader");
-    if (STB_RFID::cardRead(RFID_READERS[0], data, RFID_DATABLOCK)) {
-        
+    for (int readerNo = 0; readerNo < RFID_AMOUNT; readerNo++) {
+        if (STB_RFID::cardRead(RFID_READERS[0], data, RFID_DATABLOCK)) {
+            strcat(message, "_");
+            strcat(message, data);
+        }
     }
+    STB.defaultOled.clear();
+    STB.defaultOled.println(message);
+    STB.rs485AddToBuffer(message);
+
 }
 

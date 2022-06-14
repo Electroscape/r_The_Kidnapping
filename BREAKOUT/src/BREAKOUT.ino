@@ -34,6 +34,8 @@ const long int green = LED_Strips[0].Color(0,255,0);
 // for software SPI use (PN532_SCK, PN532_MISO, PN532_MOSI, RFID_SSPins[0])
 Adafruit_PN532 RFID_0(RFID_SSPins[0]);
 Adafruit_PN532 RFID_READERS[1] = {RFID_0};
+uint8_t data[16];
+unsigned long lastRfidCheck = millis();
 
 bool gameLive = true;
 int rfidTicks = 0;      // ticks of the correct RFID placed
@@ -64,92 +66,26 @@ void setup() {
 
     wdt_reset();
 
-    Serial.println();
     STB.printSetupEnd();
-
-    initGame();
 }
 
 void loop() {
-#ifndef rfidDisable
-    if (gameLive) {
-        runGame();
-    } else {
-        waitForReset();
-    }
-#endif
-    STB.rs485SendBuffer();
+    rfidRead();
+    STB.rs485SlaveRespond();
     wdt_reset();
 }
 
-void runGame() {
-    if (rfidCorrect()) {
-        if (rfidTicks > RFID_TICKS_REQUIRED) {
-            endGame();
-        }
-        rfidTicks++;
-        
-    } else {
-        rfidTicks = 0;
-    }
-    delay(200);
-}
 
-void waitForReset() {
-
-    STB.dbgln("room has been solved, waiting for card being removed to arm the room");
-
-    if (rfidCorrect()) {
-        Serial.println("card still present");
-        resetTimer = 0;
-    } else {
-        Serial.println("card removed, increasing timer");
-        resetTimer += 5;
+void rfidRead() {
+    if (millis() - lastRfidCheck < rfidCheckInterval) {
+        return;
     }
 
-    if (resetTimer > RESET_DURATION) {
-        initGame();
-    } else {
-        delay(5000);
-    }
+    lastRfidCheck = millis();
 
-}
-
-void endGame() {
-
-    STB.dbgln("Game ended \n green lights & open door");
-    gameLive = false;
-    STB.rs485SendRelayCmd(REL_DOOR_PIN, REL_DOOR_INIT);
-#ifndef ledDisable
-    STB_LED::setAllStripsToClr(LED_Strips, green);
-#endif
-};
-
-void initGame() {
-    resetTimer = 0;
-    STB.dbgln("Game live\n killing lights\n locking");
-    gameLive = true;
-    STB.rs485SendRelayCmd(REL_DOOR_PIN, !REL_DOOR_INIT);
-#ifndef ledDisable
-    STB_LED::setAllStripsToClr(LED_Strips, darked);
-#endif
-}
-
-
-bool rfidCorrect() {
-
-    uint8_t data[16];
     Serial.println("Checking presence for reader");
-
     if (STB_RFID::cardRead(RFID_READERS[0], data, RFID_DATABLOCK)) {
-
-        Serial.println((char *) data);
-        if (strcmp(RFID_solutions[0], (char *) data)) {
-            Serial.println("Correct card placed!");
-            return true;
-        }
-    }
         
-    return false;
+    }
 }
 

@@ -6,22 +6,13 @@
 */
 #pragma once
 
-// #define DEBUGMODE           1
 const unsigned long rfidCheckInterval = 250;
 
 #define RFID_AMOUNT         1
-#define RFID_SOLUTION_SIZE  4
 
 const uint8_t keya[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 
 #define RFID_DATABLOCK      1
-
-// by default enabled
-//#define OLED_DISABLE 1
-
-// Standards der Adressierung (Konvention)
-// this is optional now due to default value in STB lib
-// #define RELAY_I2C_ADD 0x3F   // Relay Expander																							*/
 #define OLED_I2C_ADD 0x3C    // Ist durch Hardware des OLEDs vorgegeben
 
 

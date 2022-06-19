@@ -72,6 +72,8 @@ void rfidRead() {
     if (millis() - lastRfidCheck < rfidCheckInterval) {
         return;
     }
+    Serial.println("RFID start");
+    Serial.flush();
 
     lastRfidCheck = millis();
     char message[32] = "!RFID";
@@ -82,9 +84,15 @@ void rfidRead() {
             strcat(message, (char*) data);
         }
     }
+
+    Serial.println("RFID message adding");
+    Serial.flush();
+
     STB.defaultOled.clear();
     STB.defaultOled.println(message);
     STB.rs485AddToBuffer(message);
 
+    Serial.println("RFID end");
+    Serial.flush();
 }
 

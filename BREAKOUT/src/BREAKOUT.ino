@@ -79,7 +79,7 @@ void rfidRead() {
     for (int readerNo = 0; readerNo < RFID_AMOUNT; readerNo++) {
         if (STB_RFID::cardRead(RFID_READERS[0], data, RFID_DATABLOCK)) {
             strcat(message, "_");
-            strcat(message, data);
+            strcat(message, (char*) data);
         }
     }
     STB.defaultOled.clear();

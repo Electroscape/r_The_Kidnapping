@@ -24,6 +24,7 @@ void startGame() {
 }
 
 void endGame() {
+    Serial.println("ENDGAME!!");
     // Led stuff
     STB.motherRelay.digitalWrite(REL_0_PIN, !REL_0_INIT);
 }
@@ -50,13 +51,21 @@ void setup() {
 //====================================*/
 void loop() {
     STB.rs485PerformPoll();
-    while (STB.rs485RcvdNextLn() && lineCnt < 5) {
-        STB.dbgln(String(lineCnt));
-        STB.dbgln("nextline: ");
-        STB.dbgln(String(STB.rcvdLn));
-        lineCnt++;
-        wdt_reset();
-        delay(2000);
+    while (STB.rs485RcvdNextLn() && lineCnt++ < 5) {
+        
+        Serial.println("motherloop");
+        char* ptr = strtok(STB.rcvdPtr, "_");
+        ptr = strtok(NULL, "_");
+        if (ptr != NULL) {
+            Serial.println(ptr);
+            delay(1000);
+            if (strncmp(rfidSolutions[0], ptr, 2) == 0) {
+                endGame();
+            } else if (strncmp(rfidSolutions[0], ptr, 3) == 0) {
+                // do a reset here
+            }
+        }
     }
+    lineCnt = 0;
     wdt_reset();
 }

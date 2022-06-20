@@ -16,6 +16,17 @@ STB STB;
 
 // PCF8574 relay;
 PCF8574 reset;
+int lineCnt = 0;
+
+void startGame() {
+    // Led stuff
+    STB.motherRelay.digitalWrite(REL_0_PIN, REL_0_INIT);
+}
+
+void endGame() {
+    // Led stuff
+    STB.motherRelay.digitalWrite(REL_0_PIN, !REL_0_INIT);
+}
 
 void setup() {
     STB.begin();
@@ -39,5 +50,13 @@ void setup() {
 //====================================*/
 void loop() {
     STB.rs485PerformPoll();
+    while (STB.rs485RcvdNextLn() && lineCnt < 5) {
+        STB.dbgln(String(lineCnt));
+        STB.dbgln("nextline: ");
+        STB.dbgln(String(STB.rcvdLn));
+        lineCnt++;
+        wdt_reset();
+        delay(2000);
+    }
     wdt_reset();
 }

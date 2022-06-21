@@ -21,12 +21,16 @@ int lineCnt = 0;
 void startGame() {
     // Led stuff
     STB.motherRelay.digitalWrite(REL_0_PIN, REL_0_INIT);
+    // const long int darked = LED_Strips[0].Color(120,0,0);
+    STB.rs485AddToBuffer("!LED_120_0_0");
 }
 
 void endGame() {
     Serial.println("ENDGAME!!");
     // Led stuff
     STB.motherRelay.digitalWrite(REL_0_PIN, !REL_0_INIT);
+    // // const long int green = LED_Strips[0].Color(0,255,0);
+    STB.rs485AddToBuffer("!LED_0_255_0");
 }
 
 void setup() {

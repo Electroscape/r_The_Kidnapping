@@ -28,6 +28,8 @@ STB STB;
 
 Adafruit_NeoPixel LED_Strips[STRIPE_CNT];
 
+const long int green = LED_Strips[0].Color(0,255,0);
+
 
 // for software SPI use (PN532_SCK, PN532_MISO, PN532_MOSI, RFID_SSPins[0])
 Adafruit_PN532 RFID_0(RFID_SSPins[0]);
@@ -72,14 +74,17 @@ void rfidRead() {
     if (millis() - lastRfidCheck < rfidCheckInterval) {
         return;
     }
-    Serial.println("RFID start");
-    Serial.flush();
 
     lastRfidCheck = millis();
     char message[32] = "!RFID";
 
+    Serial.println("RFID start");
+    Serial.flush();
+
     for (int readerNo = 0; readerNo < RFID_AMOUNT; readerNo++) {
         if (STB_RFID::cardRead(RFID_READERS[0], data, RFID_DATABLOCK)) {
+            Serial.println("RFID read succees");
+            Serial.flush();
             strcat(message, "_");
             strcat(message, (char*) data);
         }

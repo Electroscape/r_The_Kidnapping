@@ -31,7 +31,10 @@ String relayCode = String("UVL");
 int ledCnts[STRIPE_CNT] = {9};
 int ledPins[STRIPE_CNT] = {RFID_1_LED_PIN, RFID_2_LED_PIN, RFID_3_LED_PIN};
 
+enum cardType {unlock, reset};
 char rfidSolutions[2][5] = {"AH\0", "RES\0"};
+
+unsigned long  presentationTime[2] = {500 ,3000};
 
 // RFIDs
 #define RFID_AMOUNT 8

@@ -15,8 +15,10 @@
 STB STB;
 
 // PCF8574 relay;
-PCF8574 reset;
+PCF8574 resetPCF;
 int lineCnt = 0;
+unsigned long presentationTimestamp = millis();
+int currentCardType = -1;
 
 void startGame() {
     // Led stuff
@@ -27,9 +29,9 @@ void startGame() {
 
 void endGame() {
     Serial.println("ENDGAME!!");
-    reset.digitalWrite(0,0);
+    resetPCF.digitalWrite(0,0);
     delay(200);
-    reset.digitalWrite(0,1);
+    resetPCF.digitalWrite(0,1);
     STB.motherRelay.digitalWrite(REL_0_PIN, !REL_0_INIT);
     // // const long int green = LED_Strips[0].Color(0,255,0);
     STB.rs485AddToBuffer("!LED_0_255_0");
@@ -42,10 +44,10 @@ void setup() {
     wdt_enable(WDTO_8S);
 
     STB.i2cScanner();
-    reset.begin(0x3D);
+    resetPCF.begin(0x3D);
     for (int i = 0; i < 8; i++) {
-        reset.pinMode(i, OUTPUT);
-        reset.digitalWrite(i,1);
+        resetPCF.pinMode(i, OUTPUT);
+        resetPCF.digitalWrite(i,1);
     }
     
     wdt_reset();
@@ -61,18 +63,45 @@ void setup() {
 void loop() {
     STB.rs485PerformPoll();
     while (STB.rs485RcvdNextLn() && lineCnt++ < 5) {
+
         char* ptr = strtok(STB.rcvdPtr, "_");
+        if (strcmp("!RFID", ptr) != 0) {
+            continue; // skip all the other checks since its not RFID cmd
+        }
         ptr = strtok(NULL, "_");
         if (ptr != NULL) {
-            Serial.println(ptr);
-            delay(1000);
-            if (strncmp(rfidSolutions[0], ptr, 2) == 0) {
-                endGame();
-            } else if (strncmp(rfidSolutions[1], ptr, 3) == 0) {
-                startGame();
+            Serial.print("card is: "); Serial.println(ptr);
+            // cannot use a dynamic variable with strcmp since it needs const char* with for loop here ... 
+            if (strncmp(rfidSolutions[unlock], ptr, 2) == 0) {
+                if (currentCardType != unlock) {
+                    Serial.println("setting presentation");
+                    presentationTimestamp = millis();
+                    currentCardType = unlock;
+                }
+            } else if (strncmp(rfidSolutions[reset], ptr, 3) == 0) {
+                if (currentCardType != reset) {
+                    Serial.println("setting presentation");
+                    presentationTimestamp = millis();
+                    currentCardType = reset;
+                }
+            } else {
+                currentCardType = -1;
+            }
+
+        } else {
+            currentCardType = -1; // i dont like doing this twice ...
+        }
+
+        if (currentCardType >= 0 && millis() - presentationTimestamp > presentationTime[currentCardType]) {
+            Serial.println("cardtype action");
+            switch (currentCardType) {
+                case cardType::unlock: endGame(); break;
+                case cardType::reset: startGame(); break;
             }
         }
+
     }
+
     lineCnt = 0;
     wdt_reset();
 }

@@ -27,7 +27,9 @@ void startGame() {
 
 void endGame() {
     Serial.println("ENDGAME!!");
-    // Led stuff
+    reset.digitalWrite(0,0);
+    delay(200);
+    reset.digitalWrite(0,1);
     STB.motherRelay.digitalWrite(REL_0_PIN, !REL_0_INIT);
     // // const long int green = LED_Strips[0].Color(0,255,0);
     STB.rs485AddToBuffer("!LED_0_255_0");
@@ -43,11 +45,14 @@ void setup() {
     reset.begin(0x3D);
     for (int i = 0; i < 8; i++) {
         reset.pinMode(i, OUTPUT);
+        reset.digitalWrite(i,1);
     }
     
     wdt_reset();
     STB.printSetupEnd();
     STB.dbgln("MOther");
+
+    startGame();
 }
 
 /*======================================
@@ -56,8 +61,6 @@ void setup() {
 void loop() {
     STB.rs485PerformPoll();
     while (STB.rs485RcvdNextLn() && lineCnt++ < 5) {
-        
-        Serial.println("motherloop");
         char* ptr = strtok(STB.rcvdPtr, "_");
         ptr = strtok(NULL, "_");
         if (ptr != NULL) {
@@ -65,8 +68,8 @@ void loop() {
             delay(1000);
             if (strncmp(rfidSolutions[0], ptr, 2) == 0) {
                 endGame();
-            } else if (strncmp(rfidSolutions[0], ptr, 3) == 0) {
-                // do a reset here
+            } else if (strncmp(rfidSolutions[1], ptr, 3) == 0) {
+                startGame();
             }
         }
     }

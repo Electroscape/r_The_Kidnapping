@@ -69,7 +69,8 @@ void loop() {
         }
         ptr = strtok(NULL, "_");
         if (ptr != NULL) {
-            Serial.print("card is: "); Serial.println(ptr);
+            STB.dbgln("card detected: "); 
+            STB.dbgln(ptr);
             // cannot use a dynamic variable with strcmp since it needs const char* with for loop here ... 
             if (strncmp(rfidSolutions[unlock], ptr, 2) == 0) {
                 if (currentCardType != unlock) {

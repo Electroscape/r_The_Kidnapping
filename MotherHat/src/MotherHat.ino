@@ -39,6 +39,7 @@ void endGame() {
 void setup() {
     STB.begin();
     STB.rs485SetToMaster();
+    STB.rs485SetSlaveCount(1);
     Serial.println("WDT endabled");
     wdt_enable(WDTO_8S);
 

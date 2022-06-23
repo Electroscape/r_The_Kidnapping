@@ -27,6 +27,8 @@ String version = "1.5.0";
 STB STB;
 
 Adafruit_NeoPixel LED_Strips[STRIPE_CNT];
+int lineCnt = 0;
+char ledKeyword[] = "!LED";
 
 const long int green = LED_Strips[0].Color(0,255,0);
 
@@ -64,8 +66,45 @@ void setup() {
 }
 
 void loop() {
+
+    // if (Serial.available()) { Serial.write(Serial.read()); }
+    
+    lineCnt = 0;
     rfidRead();
     STB.rs485SlaveRespond();
+
+    while (STB.rcvdPtr != NULL) {
+        
+        if (strncmp((char *) ledKeyword, STB.rcvdPtr, 4) == 0) {
+            
+            char *cmdPtr = strtok(STB.rcvdPtr, "_");
+            cmdPtr = strtok(NULL, "_");
+
+            int i = 0;
+            int values[3] = {0,0,0};
+
+            while (cmdPtr != NULL && i < 3) {
+                STB.dbgln(cmdPtr);
+                sscanf(cmdPtr,"%d", &values[i]);
+                STB.dbgln(String(values[i]));
+                cmdPtr = strtok(NULL, "_");
+                i++;
+            }
+
+          
+            if (i == 3) {
+                STB.dbgln("I == 2");
+                // double check this since the led stripes for testing may not be identical
+                long int setClr = LED_Strips[0].Color(values[0],values[2],values[1]);
+                STB_LED::setAllStripsToClr(LED_Strips, setClr);
+            }
+            
+        }
+       
+        STB.rs485RcvdNextLn();
+    }
+
+
     wdt_reset();
 }
 

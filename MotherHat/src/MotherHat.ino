@@ -21,20 +21,19 @@ unsigned long presentationTimestamp = millis();
 int currentCardType = -1;
 
 void startGame() {
-    // Led stuff
+    Serial.println("STARTGAME!!");
     STB.motherRelay.digitalWrite(REL_0_PIN, REL_0_INIT);
     // const long int darked = LED_Strips[0].Color(120,0,0);
-    STB.rs485AddToBuffer("!LED_120_0_0");
+    STB.rs485AddToBuffer("!Poll0\n!LED_120_0_0");
+    STB.rs485SendBuffer();
 }
 
 void endGame() {
     Serial.println("ENDGAME!!");
-    resetPCF.digitalWrite(0,0);
-    delay(200);
-    resetPCF.digitalWrite(0,1);
     STB.motherRelay.digitalWrite(REL_0_PIN, !REL_0_INIT);
     // // const long int green = LED_Strips[0].Color(0,255,0);
-    STB.rs485AddToBuffer("!LED_0_255_0");
+    STB.rs485AddToBuffer("!Poll0\n!LED_0_255_0");
+    STB.rs485SendBuffer();
 }
 
 void setup() {
@@ -74,13 +73,11 @@ void loop() {
             // cannot use a dynamic variable with strcmp since it needs const char* with for loop here ... 
             if (strncmp(rfidSolutions[unlock], ptr, 2) == 0) {
                 if (currentCardType != unlock) {
-                    Serial.println("setting presentation");
                     presentationTimestamp = millis();
                     currentCardType = unlock;
                 }
             } else if (strncmp(rfidSolutions[reset], ptr, 3) == 0) {
                 if (currentCardType != reset) {
-                    Serial.println("setting presentation");
                     presentationTimestamp = millis();
                     currentCardType = reset;
                 }
@@ -93,7 +90,6 @@ void loop() {
         }
 
         if (currentCardType >= 0 && millis() - presentationTimestamp > presentationTime[currentCardType]) {
-            Serial.println("cardtype action");
             switch (currentCardType) {
                 case cardType::unlock: endGame(); break;
                 case cardType::reset: startGame(); break;

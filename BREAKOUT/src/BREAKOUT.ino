@@ -37,8 +37,11 @@ char ledKeyword[] = "!LED";
 
 // for software SPI use (PN532_SCK, PN532_MISO, PN532_MOSI, RFID_SSPins[0])
 #ifndef rfidDisable
-    Adafruit_PN532 RFID_0(RFID_SSPins[0]);
-    Adafruit_PN532 RFID_READERS[1] = {RFID_0};
+    PN532_I2C pn532i2c(Wire);
+    PN532 nfc(pn532i2c);	
+
+    // Adafruit_PN532 RFID_0(RFID_SSPins[0]);
+    PN532 RFID_READERS[1] = {nfc};
     uint8_t data[16];
     unsigned long lastRfidCheck = millis();
 #endif
@@ -57,7 +60,8 @@ void setup() {
     wdt_reset();
 
 #ifndef rfidDisable
-    STB_RFID::RFIDInit(RFID_0);
+    if (STB_RFID::RFIDInitI2c(nfc)) {Serial.println("RFID: ✓");} else {Serial.println("RFID: X");}
+    // STB_RFID::RFIDInit(RFID_0);
     wdt_reset();
 #endif
 
@@ -130,7 +134,7 @@ void rfidRead() {
     Serial.flush();
 
     for (int readerNo = 0; readerNo < RFID_AMOUNT; readerNo++) {
-        if (STB_RFID::cardRead(RFID_READERS[0], data, RFID_DATABLOCK)) {
+        if (STB_RFID::cardReadI2c(RFID_READERS[0], data, RFID_DATABLOCK)) {
             Serial.println("RFID read succees");
             Serial.flush();
             strcat(message, "_");

@@ -34,10 +34,13 @@ const long int green = LED_Strips[0].Color(0,255,0);
 
 
 // for software SPI use (PN532_SCK, PN532_MISO, PN532_MOSI, RFID_SSPins[0])
-Adafruit_PN532 RFID_0(RFID_SSPins[0]);
-Adafruit_PN532 RFID_READERS[1] = {RFID_0};
-uint8_t data[16];
-unsigned long lastRfidCheck = millis();
+#ifndef rfidDisable
+    Adafruit_PN532 RFID_0(RFID_SSPins[0]);
+    Adafruit_PN532 RFID_READERS[1] = {RFID_0};
+    uint8_t data[16];
+    unsigned long lastRfidCheck = millis();
+#endif
+
 
 void setup() {
 
@@ -65,12 +68,16 @@ void setup() {
     STB.printSetupEnd();
 }
 
+
 void loop() {
 
     // if (Serial.available()) { Serial.write(Serial.read()); }
-    
     lineCnt = 0;
-    rfidRead();
+
+    #ifndef rfidDisable
+        rfidRead();
+    #endif
+
     STB.rs485SlaveRespond();
 
     while (STB.rcvdPtr != NULL) {
@@ -104,11 +111,10 @@ void loop() {
         STB.rs485RcvdNextLn();
     }
 
-
     wdt_reset();
 }
 
-
+#ifndef rfidDisable
 void rfidRead() {
     if (millis() - lastRfidCheck < rfidCheckInterval) {
         return;
@@ -139,4 +145,4 @@ void rfidRead() {
     Serial.println("RFID end");
     Serial.flush();
 }
-
+#endif

@@ -149,3 +149,14 @@ void rfidRead() {
     Serial.flush();
 }
 #endif
+
+void interruptCheck() {
+    unsigned long startTime = millis();
+    delay(10);
+    Serial.print("interruptcheck attempt ...");
+    Serial.flush();
+    while (millis() - startTime < 9 ) {}
+    Serial.println("success");
+    Serial.flush();
+    delay(10);
+}

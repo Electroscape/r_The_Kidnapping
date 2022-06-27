@@ -26,11 +26,13 @@ String version = "1.5.0";
 
 STB STB;
 
+#ifndef ledDisable
+#define FASTLED_INTERRUPT_RETRY_COUNT 1
 Adafruit_NeoPixel LED_Strips[STRIPE_CNT];
-int lineCnt = 0;
+const long int green = LED_Strips[0].Color(0,255,0);
+#endif
 char ledKeyword[] = "!LED";
 
-const long int green = LED_Strips[0].Color(0,255,0);
 
 
 // for software SPI use (PN532_SCK, PN532_MISO, PN532_MOSI, RFID_SSPins[0])
@@ -72,7 +74,6 @@ void setup() {
 void loop() {
 
     // if (Serial.available()) { Serial.write(Serial.read()); }
-    lineCnt = 0;
 
     #ifndef rfidDisable
         rfidRead();
@@ -101,9 +102,11 @@ void loop() {
           
             if (i == 3) {
                 STB.dbgln("I == 2");
+                #ifndef ledDisable
                 // double check this since the led stripes for testing may not be identical
                 long int setClr = LED_Strips[0].Color(values[0],values[2],values[1]);
                 STB_LED::setAllStripsToClr(LED_Strips, setClr);
+                #endif
             }
             
         }

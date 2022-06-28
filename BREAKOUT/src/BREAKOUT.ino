@@ -62,7 +62,7 @@ void setup() {
 #endif
 
 #ifndef ledDisable
-    STB_LED::ledInit(LED_Strips, ledCnts, ledPins, NEO_BRG);
+    STB_LED::ledInit(LED_Strips, 1, ledCnts, ledPins, NEO_BRG);
 #endif
 
     wdt_reset();
@@ -105,7 +105,7 @@ void loop() {
                 #ifndef ledDisable
                 // double check this since the led stripes for testing may not be identical
                 long int setClr = LED_Strips[0].Color(values[0],values[2],values[1]);
-                STB_LED::setAllStripsToClr(LED_Strips, setClr);
+                STB_LED::setAllStripsToClr(LED_Strips, 1, setClr);
                 #endif
             }
             

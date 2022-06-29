@@ -92,20 +92,21 @@ void loop() {
             int values[3] = {0,0,0};
 
             while (cmdPtr != NULL && i < 3) {
-                STB.dbgln(cmdPtr);
+                // STB.dbgln(cmdPtr);
                 sscanf(cmdPtr,"%d", &values[i]);
-                STB.dbgln(String(values[i]));
+                //STB.dbgln(String(values[i]));
                 cmdPtr = strtok(NULL, "_");
                 i++;
             }
 
           
             if (i == 3) {
-                STB.dbgln("I == 2");
+                // STB.dbgln("I == 2");
                 #ifndef ledDisable
                 // double check this since the led stripes for testing may not be identical
                 long int setClr = LED_Strips[0].Color(values[0],values[2],values[1]);
                 STB_LED::setAllStripsToClr(LED_Strips, 1, setClr);
+                STB.rs485SendAck();
                 #endif
             }
             

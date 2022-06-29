@@ -39,5 +39,6 @@ const byte RFID_SSPins[]  = {RFID_1_SS_PIN};
 #define RFID_3_LED_PIN          5     /* Per Konvention ist dies RFID-Port 3                                */
 #define RFID_4_LED_PIN          3     /* Per Konvention ist dies RFID-Port 4   */
 
-int ledCnts[STRIPE_CNT] = {64};
+// 140cm of 60 leds/m = 84 Leds to be safe bump it to 100
+int ledCnts[STRIPE_CNT] = {100};
 int ledPins[STRIPE_CNT] = {RFID_1_LED_PIN};

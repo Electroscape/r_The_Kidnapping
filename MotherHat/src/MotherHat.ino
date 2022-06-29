@@ -24,16 +24,24 @@ void startGame() {
     Serial.println("STARTGAME!!");
     STB.motherRelay.digitalWrite(REL_0_PIN, REL_0_INIT);
     // const long int darked = LED_Strips[0].Color(120,0,0);
-    STB.rs485AddToBuffer("!Poll0\n!LED_120_0_0");
-    STB.rs485SendBuffer();
+    
+    // TODO: make this safer
+    while (true) {
+        STB.rs485AddToBuffer("!Poll0\n!LED_120_0_0");
+        if (STB.rs485SendBuffer(true)) { break;}
+    }
+
 }
 
 void endGame() {
     Serial.println("ENDGAME!!");
     STB.motherRelay.digitalWrite(REL_0_PIN, !REL_0_INIT);
     // // const long int green = LED_Strips[0].Color(0,255,0);
-    STB.rs485AddToBuffer("!Poll0\n!LED_0_255_0");
-    STB.rs485SendBuffer();
+
+    while (true) {
+        STB.rs485AddToBuffer("!Poll0\n!LED_0_255_0");
+        if (STB.rs485SendBuffer(true)) { break;}
+    }
 }
 
 void setup() {

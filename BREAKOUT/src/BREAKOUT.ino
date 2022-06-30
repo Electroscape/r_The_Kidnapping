@@ -2,9 +2,9 @@
  * @file BREAKOUT.ino
  * @author Martin Pek (martin.pek@web.de)
  * @brief 
- * @version 0.1
- * @date 22.04.2022
- * 
+ * @version 1.6.2
+ * @date 30.06.2022
+ * build with lib_arduino v0.6.2
  */
 
 String versionDate = "6.04.2022";

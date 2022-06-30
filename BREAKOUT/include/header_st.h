@@ -6,29 +6,13 @@
 */
 #pragma once
 
-String title = "ENT_ST_BREAKOUT";
-// String brainName = String("BrCOLOR");
-const unsigned long heartbeatFrequency = 5000;
-
-
-// #define DEBUGMODE           1
-#define RESET_DURATION      12
-#define RFID_TICKS_REQUIRED 3
+const unsigned long rfidCheckInterval = 250;
 
 #define RFID_AMOUNT         1
-#define RFID_SOLUTION_SIZE  4
 
 const uint8_t keya[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
-const char RFID_solutions[1][RFID_SOLUTION_SIZE]  = {"AH"};
 
 #define RFID_DATABLOCK      1
-
-// by default enabled
-//#define OLED_DISABLE 1
-
-// Standards der Adressierung (Konvention)
-// this is optional now due to default value in STB lib
-// #define RELAY_I2C_ADD 0x3F   // Relay Expander																							*/
 #define OLED_I2C_ADD 0x3C    // Ist durch Hardware des OLEDs vorgegeben
 
 
@@ -55,32 +39,6 @@ const byte RFID_SSPins[]  = {RFID_1_SS_PIN};
 #define RFID_3_LED_PIN          5     /* Per Konvention ist dies RFID-Port 3                                */
 #define RFID_4_LED_PIN          3     /* Per Konvention ist dies RFID-Port 4   */
 
-int ledCnts[STRIPE_CNT] = {31};
+// 140cm of 60 leds/m = 84 Leds to be safe bump it to 100
+int ledCnts[STRIPE_CNT] = {100};
 int ledPins[STRIPE_CNT] = {RFID_1_LED_PIN};
-
-#define REL_AMOUNT 1
-
-enum REL_PIN {
-    REL_DOOR_PIN,      // door lock
-    REL_1_PIN,          
-    REL_2_PIN,         
-    REL_3_PIN,        
-    REL_4_PIN,          
-    REL_5_PIN,         
-    REL_6_PIN,  
-    REL_7_PIN          
-};
-
-enum REL_INIT {
-    REL_DOOR_INIT = 1,                    // DESCRIPTION OF THE RELAY WIRING
-    REL_1_INIT = 1,                    // DESCRIPTION OF THE RELAY WIRING
-    REL_2_INIT = 1,                    // DESCRIPTION OF THE RELAY WIRING
-    REL_3_INIT = 1,                    // DESCRIPTION OF THE RELAY WIRING
-    REL_4_INIT = 1,                    // DESCRIPTION OF THE RELAY WIRING
-    REL_5_INIT = 1,                    // DESCRIPTION OF THE RELAY WIRING
-    REL_6_INIT = 1,                    // DESCRIPTION OF THE RELAY WIRING
-    REL_7_INIT = 1                     // DESCRIPTION OF THE RELAY WIRING
-};
-
-int relayPinArray[REL_AMOUNT] = {REL_DOOR_PIN};
-int relayInitArray[REL_AMOUNT] = {REL_DOOR_INIT};

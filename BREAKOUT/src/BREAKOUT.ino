@@ -26,20 +26,23 @@ String version = "1.5.0";
 
 STB STB;
 
+#ifndef ledDisable
+#define FASTLED_INTERRUPT_RETRY_COUNT 1
 Adafruit_NeoPixel LED_Strips[STRIPE_CNT];
-const long int darked = LED_Strips[0].Color(120,0,0);
 const long int green = LED_Strips[0].Color(0,255,0);
+#endif
+char ledKeyword[] = "!LED";
+
 
 
 // for software SPI use (PN532_SCK, PN532_MISO, PN532_MOSI, RFID_SSPins[0])
-Adafruit_PN532 RFID_0(RFID_SSPins[0]);
-Adafruit_PN532 RFID_READERS[1] = {RFID_0};
+#ifndef rfidDisable
+    Adafruit_PN532 RFID_0(RFID_SSPins[0]);
+    Adafruit_PN532 RFID_READERS[1] = {RFID_0};
+    uint8_t data[16];
+    unsigned long lastRfidCheck = millis();
+#endif
 
-bool gameLive = true;
-int rfidTicks = 0;      // ticks of the correct RFID placed
-int resetTimer = 0;     // ticks to trigger the game going live again
-
-PCF8574 relay;
 
 void setup() {
 
@@ -59,97 +62,102 @@ void setup() {
 #endif
 
 #ifndef ledDisable
-    STB_LED::ledInit(LED_Strips, ledCnts, ledPins, NEO_BRG);
+    STB_LED::ledInit(LED_Strips, 1, ledCnts, ledPins, NEO_BRG);
 #endif
 
     wdt_reset();
 
-    Serial.println();
     STB.printSetupEnd();
-
-    initGame();
 }
+
 
 void loop() {
-#ifndef rfidDisable
-    if (gameLive) {
-        runGame();
-    } else {
-        waitForReset();
+
+    // if (Serial.available()) { Serial.write(Serial.read()); }
+
+    #ifndef rfidDisable
+        rfidRead();
+    #endif
+
+    STB.rs485SlaveRespond();
+
+    while (STB.rcvdPtr != NULL) {
+        
+        if (strncmp((char *) ledKeyword, STB.rcvdPtr, 4) == 0) {
+            
+            char *cmdPtr = strtok(STB.rcvdPtr, "_");
+            cmdPtr = strtok(NULL, "_");
+
+            int i = 0;
+            int values[3] = {0,0,0};
+
+            while (cmdPtr != NULL && i < 3) {
+                // STB.dbgln(cmdPtr);
+                sscanf(cmdPtr,"%d", &values[i]);
+                //STB.dbgln(String(values[i]));
+                cmdPtr = strtok(NULL, "_");
+                i++;
+            }
+
+          
+            if (i == 3) {
+                // STB.dbgln("I == 2");
+                #ifndef ledDisable
+                // double check this since the led stripes for testing may not be identical
+                long int setClr = LED_Strips[0].Color(values[0],values[2],values[1]);
+                STB_LED::setAllStripsToClr(LED_Strips, 1, setClr);
+                STB.rs485SendAck();
+                #endif
+            }
+            
+        }
+       
+        STB.rs485RcvdNextLn();
     }
-#endif
-    STB.rs485SendBuffer();
+
     wdt_reset();
 }
 
-void runGame() {
-    if (rfidCorrect()) {
-        if (rfidTicks > RFID_TICKS_REQUIRED) {
-            endGame();
-        }
-        rfidTicks++;
-        
-    } else {
-        rfidTicks = 0;
-    }
-    delay(200);
-}
-
-void waitForReset() {
-
-    STB.dbgln("room has been solved, waiting for card being removed to arm the room");
-
-    if (rfidCorrect()) {
-        Serial.println("card still present");
-        resetTimer = 0;
-    } else {
-        Serial.println("card removed, increasing timer");
-        resetTimer += 5;
+#ifndef rfidDisable
+void rfidRead() {
+    if (millis() - lastRfidCheck < rfidCheckInterval) {
+        return;
     }
 
-    if (resetTimer > RESET_DURATION) {
-        initGame();
-    } else {
-        delay(5000);
-    }
+    lastRfidCheck = millis();
+    char message[32] = "!RFID";
 
-}
+    Serial.println("RFID start");
+    Serial.flush();
 
-void endGame() {
-
-    STB.dbgln("Game ended \n green lights & open door");
-    gameLive = false;
-    STB.rs485SendRelayCmd(REL_DOOR_PIN, REL_DOOR_INIT);
-#ifndef ledDisable
-    STB_LED::setAllStripsToClr(LED_Strips, green);
-#endif
-};
-
-void initGame() {
-    resetTimer = 0;
-    STB.dbgln("Game live\n killing lights\n locking");
-    gameLive = true;
-    STB.rs485SendRelayCmd(REL_DOOR_PIN, !REL_DOOR_INIT);
-#ifndef ledDisable
-    STB_LED::setAllStripsToClr(LED_Strips, darked);
-#endif
-}
-
-
-bool rfidCorrect() {
-
-    uint8_t data[16];
-    Serial.println("Checking presence for reader");
-
-    if (STB_RFID::cardRead(RFID_READERS[0], data, RFID_DATABLOCK)) {
-
-        Serial.println((char *) data);
-        if (strcmp(RFID_solutions[0], (char *) data)) {
-            Serial.println("Correct card placed!");
-            return true;
+    for (int readerNo = 0; readerNo < RFID_AMOUNT; readerNo++) {
+        if (STB_RFID::cardRead(RFID_READERS[0], data, RFID_DATABLOCK)) {
+            Serial.println("RFID read succees");
+            Serial.flush();
+            strcat(message, "_");
+            strcat(message, (char*) data);
         }
     }
-        
-    return false;
-}
 
+    Serial.println("RFID message adding");
+    Serial.flush();
+
+    STB.defaultOled.clear();
+    STB.defaultOled.println(message);
+    STB.rs485AddToBuffer(message);
+
+    Serial.println("RFID end");
+    Serial.flush();
+}
+#endif
+
+void interruptCheck() {
+    unsigned long startTime = millis();
+    delay(10);
+    Serial.print("interruptcheck attempt ...");
+    Serial.flush();
+    while (millis() - startTime < 9 ) {}
+    Serial.println("success");
+    Serial.flush();
+    delay(10);
+}

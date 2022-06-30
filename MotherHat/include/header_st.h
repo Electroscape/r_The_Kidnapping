@@ -31,20 +31,25 @@ String relayCode = String("UVL");
 int ledCnts[STRIPE_CNT] = {9};
 int ledPins[STRIPE_CNT] = {RFID_1_LED_PIN, RFID_2_LED_PIN, RFID_3_LED_PIN};
 
+enum cardType {unlock, reset};
+char rfidSolutions[2][5] = {"AH\0", "RES\0"};
+
+unsigned long  presentationTime[2] = {500 ,3000};
+
 // RFIDs
 #define RFID_AMOUNT 8
 
 // == constants
 // RELAY
 enum REL_PIN {
-    REL_0_PIN,        // 0 First room light
-    REL_1_PIN,  // 1 Light 2nd room
-    REL_2_PIN,  // 2 UV Light
-    REL_3_PIN,        // 3 Alarm
-    REL_4_PIN,        // 4 Empty
-    REL_5_PIN,        // 5 Fireplace valve
-    REL_6_PIN,        // 6 valve holding the painting
-    REL_7_PIN         // 7 Exit door lock
+    REL_0_PIN,        // 0 Exit door
+    REL_1_PIN,  
+    REL_2_PIN,  
+    REL_3_PIN,        
+    REL_4_PIN,        
+    REL_5_PIN,        
+    REL_6_PIN,       
+    REL_7_PIN        
 };
 enum REL_INIT {                 // DESCRIPTION OF THE RELAY WIRING
     REL_0_INIT = 1,                

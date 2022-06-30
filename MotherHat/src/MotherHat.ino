@@ -1,8 +1,8 @@
 /**
 *   2CP - TeamEscape - Engineering
 *   Author Martin Pek
-* @date 30.06.2022
-* build with lib_arduino v0.6.2
+*   @date 30.06.2022
+*   build with lib_arduino v0.6.2
 */
 
 /**************************************************************************/
@@ -16,12 +16,19 @@
 STB STB;
 
 // PCF8574 relay;
-PCF8574 resetPCF;
+// PCF8574 resetPCF;
+
 int lineCnt = 0;
 unsigned long presentationTimestamp = millis();
 int currentCardType = -1;
+bool solvedState = true;
+
 
 void startGame() {
+
+    // game already ready, no need to spam LED cmds 
+    if (!solvedState) {return;}
+
     Serial.println("STARTGAME!!");
     STB.motherRelay.digitalWrite(REL_0_PIN, REL_0_INIT);
     // const long int darked = LED_Strips[0].Color(120,0,0);
@@ -30,11 +37,19 @@ void startGame() {
     while (true) {
         STB.rs485AddToBuffer("!Poll0\n!LED_120_0_0");
         if (STB.rs485SendBuffer(true)) { break;}
+        wdt_reset();
     }
+
+    solvedState = false;
 
 }
 
+
 void endGame() {
+
+    // game already solved, no need to spam LED cmds 
+    if (solvedState) {return;}
+
     Serial.println("ENDGAME!!");
     STB.motherRelay.digitalWrite(REL_0_PIN, !REL_0_INIT);
     // // const long int green = LED_Strips[0].Color(0,255,0);
@@ -42,22 +57,30 @@ void endGame() {
     while (true) {
         STB.rs485AddToBuffer("!Poll0\n!LED_0_255_0");
         if (STB.rs485SendBuffer(true)) { break;}
+        wdt_reset();
     }
+
+    solvedState = true;
 }
+
 
 void setup() {
     STB.begin();
     STB.rs485SetToMaster();
     STB.rs485SetSlaveCount(1);
+
     Serial.println("WDT endabled");
     wdt_enable(WDTO_8S);
 
     STB.i2cScanner();
+
+    /*
     resetPCF.begin(0x3D);
     for (int i = 0; i < 8; i++) {
         resetPCF.pinMode(i, OUTPUT);
         resetPCF.digitalWrite(i,1);
     }
+    */
     
     wdt_reset();
     STB.printSetupEnd();
@@ -66,11 +89,11 @@ void setup() {
     startGame();
 }
 
-/*======================================
-//===LOOP==============================
-//====================================*/
+
 void loop() {
+    
     STB.rs485PerformPoll();
+
     while (STB.rs485RcvdNextLn() && lineCnt++ < 5) {
 
         char* ptr = strtok(STB.rcvdPtr, "_");

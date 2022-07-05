@@ -33,7 +33,6 @@ String version = "1.5.0";
 #include <avr/wdt.h>
 
 #include <stb_rfid.h>
-#include <stb_led.h>
 #include <stb_oled.h>
 
 // #define ledDisable 1
@@ -43,9 +42,10 @@ String version = "1.5.0";
 STB STB;
 
 #ifndef ledDisable
-#define FASTLED_INTERRUPT_RETRY_COUNT 1
-Adafruit_NeoPixel LED_Strips[STRIPE_CNT];
-const long int green = LED_Strips[0].Color(0,255,0);
+    #include <stb_led.h>
+    #define FASTLED_INTERRUPT_RETRY_COUNT 1
+    Adafruit_NeoPixel LED_Strips[STRIPE_CNT];
+    const long int green = LED_Strips[0].Color(0,255,0);
 #endif
 char ledKeyword[] = "!LED";
 

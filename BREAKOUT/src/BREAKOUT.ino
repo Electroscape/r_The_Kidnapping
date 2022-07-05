@@ -11,7 +11,6 @@
 test Todo:
 removed oled
 remove wdt
-use interruptcheck
 switch SPI port
 
 test completed:
@@ -19,6 +18,7 @@ delays
 setup order
 basic code RFID
 removed Leds
+use interruptcheck, its not tied to a systemclk problem 
 
 works with a blank example 
 */

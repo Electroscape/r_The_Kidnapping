@@ -7,6 +7,22 @@
  * build with lib_arduino v0.6.2
  */
 
+/*
+test Todo:
+removed oled
+remove wdt
+use interruptcheck
+switch SPI port
+
+test completed:
+delays
+setup order
+basic code RFID
+removed Leds
+
+works with a blank example 
+*/
+
 String versionDate = "6.04.2022";
 String version = "1.5.0";
 

@@ -53,7 +53,7 @@ char ledKeyword[] = "!LED";
 
 // for software SPI use (PN532_SCK, PN532_MISO, PN532_MOSI, RFID_SSPins[0])
 #ifndef rfidDisable
-    Adafruit_PN532 RFID_0(RFID_SSPins[0]);
+    Adafruit_PN532 RFID_0(PN532_SCK, PN532_MISO, PN532_MOSI, RFID_1_SS_PIN);
     Adafruit_PN532 RFID_READERS[1] = {RFID_0};
     uint8_t data[16];
     unsigned long lastRfidCheck = millis();

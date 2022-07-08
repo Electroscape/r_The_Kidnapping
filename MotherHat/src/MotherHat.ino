@@ -11,6 +11,7 @@
 
 #include <stb_common.h>
 #include <avr/wdt.h>
+#include <stb_mother_ledCmds.h>
 
 
 STB STB;
@@ -31,14 +32,7 @@ void startGame() {
 
     Serial.println("STARTGAME!!");
     STB.motherRelay.digitalWrite(REL_0_PIN, REL_0_INIT);
-    // const long int darked = LED_Strips[0].Color(120,0,0);
-    
-    // TODO: make this safer
-    while (true) {
-        STB.rs485AddToBuffer("!Poll0\n!LED_120_0_0");
-        if (STB.rs485SendBuffer(true)) { break;}
-        wdt_reset();
-    }
+    LED_CMDS::setToClr(STB, 1, LED_CMDS::clrRed, 50);
 
     solvedState = false;
 
@@ -52,13 +46,7 @@ void endGame() {
 
     Serial.println("ENDGAME!!");
     STB.motherRelay.digitalWrite(REL_0_PIN, !REL_0_INIT);
-    // // const long int green = LED_Strips[0].Color(0,255,0);
-
-    while (true) {
-        STB.rs485AddToBuffer("!Poll0\n!LED_0_255_0");
-        if (STB.rs485SendBuffer(true)) { break;}
-        wdt_reset();
-    }
+    LED_CMDS::setToClr(STB, 1, LED_CMDS::clrGreen, 50);
 
     solvedState = true;
 }

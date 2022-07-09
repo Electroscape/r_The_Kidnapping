@@ -7,21 +7,6 @@
  * build with lib_arduino v0.6.2
  */
 
-/*
-test Todo:
-removed oled
-remove wdt
-switch SPI port
-
-test completed:
-delays
-setup order
-basic code RFID
-removed Leds
-use interruptcheck, its not tied to a systemclk problem 
-
-works with a blank example 
-*/
 
 String versionDate = "6.04.2022";
 String version = "1.5.0";

@@ -54,13 +54,15 @@ void endGame() {
 
 void setup() {
     STB.begin();
+
+    STB.i2cScanner();
+
     STB.rs485SetToMaster();
     STB.rs485SetSlaveCount(1);
 
     Serial.println("WDT endabled");
     wdt_enable(WDTO_8S);
 
-    STB.i2cScanner();
 
     /*
     resetPCF.begin(0x3D);
@@ -72,7 +74,6 @@ void setup() {
     
     wdt_reset();
     STB.printSetupEnd();
-    STB.dbgln("MOther");
 
     startGame();
 }

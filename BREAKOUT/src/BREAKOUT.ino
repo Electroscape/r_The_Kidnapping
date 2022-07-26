@@ -19,12 +19,14 @@ String version = "1.5.0";
 
 #include <stb_rfid.h>
 #include <stb_oled.h>
+#include <stb_brain.h>
 
 // #define ledDisable 1
 // #define rfidDisable 1
 // #define relayDisable 1
 
 STB STB;
+STB_BRAIN BRAIN;
 
 #ifndef ledDisable
     #include <stb_led.h>
@@ -57,13 +59,19 @@ void setup() {
     STB.i2cScanner();
     wdt_reset();
 
+    BRAIN.receiveFlags(STB);
+
 #ifndef rfidDisable
-    STB_RFID::RFIDInit(RFID_0);
-    wdt_reset();
+    if (BRAIN.flags[rfidFlag]) {
+        STB_RFID::RFIDInit(RFID_0);
+        wdt_reset();
+    }
 #endif
 
 #ifndef ledDisable
-    STB_LED::ledInit(LED_Strips, 1, ledCnts, ledPins, NEO_BRG);
+    if (BRAIN.flags[ledFlag]) {
+        STB_LED::ledInit(LED_Strips, 1, ledCnts, ledPins, NEO_BRG);
+    }
 #endif
 
     wdt_reset();
@@ -77,7 +85,9 @@ void loop() {
     // if (Serial.available()) { Serial.write(Serial.read()); }
 
     #ifndef rfidDisable
+    if (BRAIN.flags[rfidFlag]) {
         rfidRead();
+    }
     #endif
 
     STB.rs485SlaveRespond();
@@ -105,8 +115,10 @@ void loop() {
                 // STB.dbgln("I == 2");
                 #ifndef ledDisable
                 // double check this since the led stripes for testing may not be identical
-                long int setClr = LED_Strips[0].Color(values[0],values[2],values[1]);
-                STB_LED::setAllStripsToClr(LED_Strips, 1, setClr);
+                if (BRAIN.flags[ledFlag]) {
+                    long int setClr = LED_Strips[0].Color(values[0],values[2],values[1]);
+                    STB_LED::setAllStripsToClr(LED_Strips, 1, setClr);
+                }
                 STB.rs485SendAck();
                 #endif
             }

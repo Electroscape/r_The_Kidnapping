@@ -12,9 +12,11 @@
 #include <stb_common.h>
 #include <avr/wdt.h>
 #include <stb_mother_ledCmds.h>
+#include <stb_mother.h>
 
 
 STB STB;
+STB_MOTHER Mother;
 
 // PCF8574 relay;
 // PCF8574 resetPCF;
@@ -62,19 +64,15 @@ void setup() {
 
     Serial.println("WDT endabled");
     wdt_enable(WDTO_8S);
-
-
-    /*
-    resetPCF.begin(0x3D);
-    for (int i = 0; i < 8; i++) {
-        resetPCF.pinMode(i, OUTPUT);
-        resetPCF.digitalWrite(i,1);
-    }
-    */
     
     wdt_reset();
     STB.printSetupEnd();
 
+    Mother.setFlag(STB, 0, cmdFlags::rfidFlag, true);
+    Mother.setFlag(STB, 0, cmdFlags::ledFlag, true);
+    Mother.setFlag(STB, 0, cmdFlags::oledFlag, true);
+    Mother.flagsCompleted(STB, 0);
+    
     startGame();
 }
 

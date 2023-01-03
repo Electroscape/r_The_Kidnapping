@@ -1,0 +1,18 @@
+{
+    "PATH": {
+        "sounds": "sounds/"
+    },
+    "PIN":{
+
+        "hh":{
+            "PHONE_switch_pin": 12    
+        },
+
+        "st":{
+            "PHONE_switch_pin": 12  
+        }
+
+    }
+
+
+}

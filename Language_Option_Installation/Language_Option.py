@@ -5,7 +5,7 @@ import socket
 import tkinter as tk
 from tkinter import *
 
-host = '192.168.87.127'
+host = '192.168.178.186'
 port = 5560
 window = tk.Tk()
 window.geometry("1024x400")

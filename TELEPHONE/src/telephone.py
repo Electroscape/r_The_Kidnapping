@@ -7,7 +7,9 @@ from pygame.locals import *
 import RPi.GPIO as GPIO
 from time import sleep
 from server import *
+import subprocess
 from threading import Thread
+
 
 
 '''
@@ -71,12 +73,12 @@ Initialize pygame
 =========================================================================================================
 '''
 # Initialize pygame
+
 pygame.init()
 pygame.display.init()
 pygame.mixer.set_num_channels(8)
 size = width, height = 300, 200
-flags = FULLSCREEN
-screen = pygame.display.set_mode(size, flags, 32)
+screen = pygame.display.set_mode(size, 32)
 
 '''
 =========================================================================================================
@@ -97,6 +99,13 @@ Initialize size of code digits, language and entered number
 maxNumberOfDigits = 12
 language = "deu/"
 Number = ""
+
+def restartRaspberryPi():
+    command = "/usr/bin/sudo /sbin/shutdown -r now"
+    process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
+    output = process.communicate()[0]
+
+
 '''
 =========================================================================================================
 Initialize a thread class
@@ -172,7 +181,6 @@ def checkNumber(Number):
 def checkCorrectDigit(event):
 
      global Number
-
      pygame.mixer.music.pause()
      empty_channel = pygame.mixer.Channel(1)
 
@@ -209,7 +217,7 @@ def checkCorrectDigit(event):
      
      effect.set_volume(1)
      empty_channel.play(effect)
-     pygame.time.delay(250)
+     pygame.time.delay(100)
 
 '''
 =========================================================================================================
@@ -245,6 +253,9 @@ def runSystem():
                if thread.join() == "ENGLISH":
                     language = "eng/"
                     logging.info("The language now is english")
+               if thread.join() == "RESTART":
+                    logging.info("PI is closing now")
+                    restartRaspberryPi()
 
                thread = None
                thread = CustomThread(target=dataTransfer,daemon=True)
@@ -256,7 +267,7 @@ def runSystem():
                pygame.mixer.music.unpause()
 
                # countTimer reached 5s and player didn't press a button.
-               if len(Number) < 12 and countTimer == 50 :
+               if len(Number) < 12 and countTimer == 500 :
                     countTimer = 0
                     keyPressedAtleastOnce = False
                     logging.info("Player didn't press a button for 5s nor completed 10 digits")
@@ -268,8 +279,8 @@ def runSystem():
                     checkNumber(Number)
 
                # keep on returning button state
+               
                event = pygame.event.poll()
-
                # checking if a player didn't press 
                # a button after 5s from pressing any button
                if keyPressedAtleastOnce :  
@@ -277,7 +288,8 @@ def runSystem():
                          keyPressedAtleastOnce = False
                          countTimer = 0
                     else : 
-                         sleep(0.1)
+                         # decreased
+                         sleep(0.01)
                          countTimer = countTimer +1  
                if event.type == KEYDOWN :
                     keyPressedAtleastOnce = True

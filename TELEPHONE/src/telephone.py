@@ -151,6 +151,7 @@ Number checking methods
 '''
 # play correct number sound 
 def checkingNumberSound(path):
+     pauseCurrentSound()
      logging.info(f"Playing voice record {path}")
      playSound(path)
      while pygame.mixer.music.get_busy():
@@ -164,19 +165,18 @@ def checkingNumberSound(path):
 def checkNumber(Number):
      
      if Number == "86753489":
-          pauseCurrentSound()
           checkingNumberSound(config['PATH']['sounds'] + language + "TaxiGerst.wav")
      elif Number == "071101232267":
-          pauseCurrentSound()
           checkingNumberSound(config['PATH']['sounds'] + language + "Albrecht.wav")
      elif Number == "90011123":
-          pauseCurrentSound()
           checkingNumberSound(config['PATH']['sounds'] + language +"Accomplice.wav")
+     else:
+          checkingNumberSound(config['PATH']['sounds'] + "dialedWrongNumber.wav")
+     '''
      elif len(Number) < 12:
           return
-     else:
-          pauseCurrentSound()
-          checkingNumberSound(config['PATH']['sounds'] + "dialedWrongNumber.wav")
+     '''
+
 
 def checkCorrectDigit(event):
 
@@ -187,33 +187,37 @@ def checkCorrectDigit(event):
      if(event.key == 48):
           effect = pygame.mixer.Sound(config['PATH']['sounds'] + "ZERO.wav")
           Number = Number + "0"
-     if(event.key == 49):
+     elif(event.key == 49):
           effect = pygame.mixer.Sound(config['PATH']['sounds'] + "ONE.wav")
           Number = Number + "1"
-     if(event.key == 50):
+     elif(event.key == 50):
           effect = pygame.mixer.Sound(config['PATH']['sounds'] + "TWO.wav")
           Number = Number + "2"
-     if(event.key == 51):
+     elif(event.key == 51):
           effect = pygame.mixer.Sound(config['PATH']['sounds'] + "THREE.wav")
           Number = Number + "3"
-     if(event.key == 52):
+     elif(event.key == 52):
           effect = pygame.mixer.Sound(config['PATH']['sounds'] + "FOUR.wav")
           Number = Number + "4"
-     if(event.key == 53):
+     elif(event.key == 53):
           effect = pygame.mixer.Sound(config['PATH']['sounds'] + "FIVE.wav")
           Number = Number + "5"
-     if(event.key == 54):
+     elif(event.key == 54):
           effect = pygame.mixer.Sound(config['PATH']['sounds'] + "SIX.wav")
           Number = Number + "6"
-     if(event.key == 55):
+     elif(event.key == 55):
           effect = pygame.mixer.Sound(config['PATH']['sounds'] + "SEVEN.wav")
           Number = Number + "7"
-     if(event.key == 56):
+     elif(event.key == 56):
           effect = pygame.mixer.Sound(config['PATH']['sounds'] + "EIGHT.wav")
           Number = Number + "8"
-     if(event.key == 57):
+     elif(event.key == 57):
           effect = pygame.mixer.Sound(config['PATH']['sounds'] + "NINE.wav")
           Number = Number + "9"
+     else:
+          # @todo: maybe remove the checkNumber depending on the wanted use of the #/OK key but return has to stay
+          checkNumber(Number)
+          return
      
      effect.set_volume(1)
      empty_channel.play(effect)

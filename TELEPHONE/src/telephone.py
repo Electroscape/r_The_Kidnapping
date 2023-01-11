@@ -97,6 +97,7 @@ Initialize size of code digits, language and entered number
 =========================================================================================================
 '''
 maxNumberOfDigits = 12
+numberAlbrecht = "071101232267"
 language = "deu/"
 Number = ""
 
@@ -166,8 +167,9 @@ def checkNumber(Number):
      
      if Number == "86753489":
           checkingNumberSound(config['PATH']['sounds'] + language + "TaxiGerst.wav")
-     elif Number == "071101232267":
-          checkingNumberSound(config['PATH']['sounds'] + language + "Albrecht.wav")
+     elif Number in numberAlbrecht:
+          if Number == numberAlbrecht:
+               checkingNumberSound(config['PATH']['sounds'] + language + "Albrecht.wav")
      elif Number == "90011123":
           checkingNumberSound(config['PATH']['sounds'] + language +"Accomplice.wav")
      else:
@@ -216,7 +218,7 @@ def checkCorrectDigit(event):
           Number = Number + "9"
      else:
           # @todo: maybe remove the checkNumber depending on the wanted use of the #/OK key but return has to stay
-          checkNumber(Number)
+          # checkNumber(Number)
           return
      
      effect.set_volume(1)
@@ -279,8 +281,10 @@ def runSystem():
                     checkingNumberSound(config['PATH']['sounds'] + "dialedWrongNumber.wav")
                
                # check correct number
+
                if len(Number) == 12 or len(Number)==8:
                     checkNumber(Number)
+
 
                # keep on returning button state
                

@@ -5,7 +5,7 @@ import socket
 import tkinter as tk
 from tkinter import *
 
-host = '192.168.178.186'
+host = '192.168.87.127'
 port = 5560
 window = tk.Tk()
 window.geometry("1024x400")
@@ -51,10 +51,15 @@ def restartPi():
     sendDataToServer("RESTART")
 
 def sendDataToServer(language):
-    s = setupSocket()
-    s.send(str.encode(language))
-    reply = s.recv(1024)
-    print(reply.decode('utf-8'))
+    try :
+        s = setupSocket()
+        s.send(str.encode(language))
+        reply = s.recv(1024)
+        print(reply.decode('utf-8'))
+    except:
+        Message.delete("1.0","end")
+        Message.insert(END, 'This message will pop out when you restart the Pi \n,so wait till the telephone opens for 1.5 mins')
+
     
         
 

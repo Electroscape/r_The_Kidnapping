@@ -11,7 +11,6 @@ import subprocess
 from threading import Thread
 
 
-
 '''
 =========================================================================================================
 Current Working Directory
@@ -165,6 +164,7 @@ def checkingNumberSound(path):
 
 def checkNumber(Number):
      
+     sleep(0.5)
      if Number == "86753489":
           checkingNumberSound(config['PATH']['sounds'] + language + "TaxiGerst.wav")
      elif Number in numberAlbrecht:
@@ -172,12 +172,12 @@ def checkNumber(Number):
                checkingNumberSound(config['PATH']['sounds'] + language + "Albrecht.wav")
      elif Number == "90011123":
           checkingNumberSound(config['PATH']['sounds'] + language +"Accomplice.wav")
-     else:
-          checkingNumberSound(config['PATH']['sounds'] + "dialedWrongNumber.wav")
-     '''
+     
      elif len(Number) < 12:
           return
-     '''
+     else:
+          checkingNumberSound(config['PATH']['sounds'] + "dialedWrongNumber.wav")
+
 
 
 def checkCorrectDigit(event):
@@ -299,7 +299,7 @@ def runSystem():
                          # decreased
                          sleep(0.01)
                          countTimer = countTimer +1  
-               if event.type == KEYDOWN :
+               if event.type == KEYDOWN  :
                     keyPressedAtleastOnce = True
                     countTimer = 0
                     checkCorrectDigit(event)

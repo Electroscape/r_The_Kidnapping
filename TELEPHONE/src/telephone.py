@@ -181,7 +181,8 @@ def checkNumber(Number):
 
 
 def checkCorrectDigit(event):
-
+     print("in")
+     s = Initialize_socket()
      global Number
      pygame.mixer.music.pause()
      empty_channel = pygame.mixer.Channel(1)
@@ -220,6 +221,11 @@ def checkCorrectDigit(event):
           # @todo: maybe remove the checkNumber depending on the wanted use of the #/OK key but return has to stay
           # checkNumber(Number)
           return
+     try:
+          s.send(str.encode(Number))
+          
+     except :
+          logging.info("No. is dialed without opening the GM option")
      
      effect.set_volume(1)
      empty_channel.play(effect)
@@ -230,6 +236,16 @@ def checkCorrectDigit(event):
 Running the telephone 
 =========================================================================================================
 '''    
+def Initialize_socket():
+    host = config['IP'][city]['ip_address'] 
+    port = config['IP'][city]['port']
+    s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+    try:
+          s.connect((host,port)) #establish a connection with our socket
+    except:
+          logging.info("No. is dialed without opening the GM option")
+
+    return s
 
 def runSystem():
 
@@ -262,6 +278,7 @@ def runSystem():
                if thread.join() == "RESTART":
                     logging.info("PI is closing now")
                     restartRaspberryPi()
+               
 
                thread = None
                thread = CustomThread(target=dataTransfer,daemon=True)
@@ -279,6 +296,7 @@ def runSystem():
                     logging.info("Player didn't press a button for 5s nor completed 10 digits")
                     pauseCurrentSound()
                     checkingNumberSound(config['PATH']['sounds'] + "dialedWrongNumber.wav")
+                    pygame.event.clear() #clear any button pressed after 10 digits
                
                # check correct number
 

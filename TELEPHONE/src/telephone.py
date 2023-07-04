@@ -85,7 +85,7 @@ Run as a start the beep sound
 =========================================================================================================
 '''
 # setting at the beginning the beep sound 
-pygame.mixer.music.load(config['PATH']['sounds'] + "/013_freizeichen_30min.wav")
+pygame.mixer.music.load(config['PATH']['sounds'] + "013_freizeichen_30min.wav")
 pygame.mixer.music.play(-1, 0.0)
 pygame.mixer.music.set_volume(2.0)
 pygame.mixer.music.pause()

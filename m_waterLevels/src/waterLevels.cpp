@@ -40,21 +40,22 @@ void handleInputs() {
         return;
     }
     lastState = result;
+    Serial.println(result);
 
     switch (result) {
         case level_1: 
             // Mother.motherRelay.digitalWrite(labEntry, closed);
-            LED_CMDS::setStripToClr(Mother, ledBrain, LED_CMDS::clrRed, 100, 1, 0);
+            LED_CMDS::setLEDToClr(Mother, ledBrain, LED_CMDS::clrRed, 100, 1, 0);
             // static void setLEDToClr(STB_MOTHER &Mother,int brainNo , const int clr[3], int brightness,int stripNo, int LED_Nr);
         break;
         case level_2:
-            LED_CMDS::setStripToClr(Mother, ledBrain, LED_CMDS::clrGreen, 100, 1, 1);
+            LED_CMDS::setLEDToClr(Mother, ledBrain, LED_CMDS::clrGreen, 100, 1, 1);
         break;
         case level_3:
-            LED_CMDS::setStripToClr(Mother, ledBrain, LED_CMDS::clrGreen, 100, 1, 2);
+            LED_CMDS::setLEDToClr(Mother, ledBrain, LED_CMDS::clrGreen, 100, 1, 2);
         break;
         case level_4:
-            LED_CMDS::setStripToClr(Mother, ledBrain, LED_CMDS::clrGreen, 100, 1, 3);
+            LED_CMDS::setLEDToClr(Mother, ledBrain, LED_CMDS::clrGreen, 100, 1, 3);
         break;
         case level_5:
             LED_CMDS::setAllStripsToClr(Mother, ledBrain, LED_CMDS::clrPurple, 100);

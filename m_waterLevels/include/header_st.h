@@ -27,7 +27,7 @@ int relayInitArray[relayAmount] = {
 };
 
 enum brains {
-    ledBrain = 0
+    ledBrain = 2
 };
 
 
@@ -36,7 +36,8 @@ enum IOPins {
     IO1,
     IO2,
     IO3,
-    IO4
+    IO4,
+    IO5
 };
 
 
@@ -49,7 +50,7 @@ enum IO {
 };
 
 #define outputCnt 0
-#define inputCnt 4
+#define inputCnt 5
 
 static constexpr int clrLight[3] = {255,200,120};
 
@@ -58,7 +59,8 @@ int intputArray[inputCnt] = {
     IO1,
     IO2,
     IO3,
-    IO4
+    IO4,
+    IO5
 };
 
 int outputArray[outputCnt] = {};

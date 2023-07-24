@@ -27,7 +27,7 @@ int relayInitArray[relayAmount] = {
 };
 
 enum brains {
-    ledCeilBrain = 3
+    ledBrain = 0
 };
 
 
@@ -41,16 +41,11 @@ enum IOPins {
 
 
 enum IO {
-    lightOff = 1,
-    lightNormal,
-    lightRed,
-    lightBlue,
-    lightRachelAnnouncement,
-    lightRachelEnd,
-    lightDavidAnnouncement,
-    labDoorLock,
-    labDoorUnlock,
-    deconTrigger,
+    level_1 = 1 << 0,
+    level_2 = 1 << 1,
+    level_3 = 1 << 2,
+    level_4 = 1 << 3,
+    level_5 = 1 << 4,
 };
 
 #define outputCnt 0

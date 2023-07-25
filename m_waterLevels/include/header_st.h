@@ -3,27 +3,25 @@
 #define relayAmount 2
 #define open        0
 #define closed      1
-#define Hamburg     1
 
 enum relays {
-    labEntry,
-    decon
+    pump_1,
+    pump_2
 };
 
 enum relayInits {
-    labEntry_init = closed,
-    labExit_init = closed,
-    decon_init = closed
+    pump_1_init = closed,
+    pump_2_init = closed
 };
 
 int relayPinArray[relayAmount] = {
-    labEntry,
-    decon
+    pump_1,
+    pump_2
 };
 
 int relayInitArray[relayAmount] = {
-    labEntry_init,
-    decon_init
+    pump_1_init,
+    pump_2_init
 };
 
 enum brains {

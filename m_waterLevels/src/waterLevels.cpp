@@ -44,7 +44,7 @@ void handleInputs() {
 
     switch (result) {
         case level_1: 
-            // Mother.motherRelay.digitalWrite(labEntry, closed);
+            // Mother.motherRelay.digitalWrite(pump_1, closed);
             LED_CMDS::setLEDToClr(Mother, ledBrain, LED_CMDS::clrRed, 100, 1, 0);
             // static void setLEDToClr(STB_MOTHER &Mother,int brainNo , const int clr[3], int brightness,int stripNo, int LED_Nr);
         break;

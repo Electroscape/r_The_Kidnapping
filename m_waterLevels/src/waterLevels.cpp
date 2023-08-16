@@ -24,6 +24,7 @@ STB_MOTHER Mother;
 STB_MOTHER_IO MotherIO;
 
 int lastState = -1;
+bool level1_active = false;
 
 
 void enableWdt() {
@@ -42,27 +43,30 @@ void handleInputs() {
     lastState = result;
     Serial.println(result);
 
-    switch (result) {
-        case level_1: 
-            // Mother.motherRelay.digitalWrite(pump_1, closed);
-            LED_CMDS::setLEDToClr(Mother, ledBrain, LED_CMDS::clrRed, 100, 1, 0);
-            // static void setLEDToClr(STB_MOTHER &Mother,int brainNo , const int clr[3], int brightness,int stripNo, int LED_Nr);
-        break;
-        case level_2:
-            LED_CMDS::setLEDToClr(Mother, ledBrain, LED_CMDS::clrGreen, 100, 1, 1);
-        break;
-        case level_3:
-            LED_CMDS::setLEDToClr(Mother, ledBrain, LED_CMDS::clrGreen, 100, 1, 2);
-        break;
-        case level_4:
-            LED_CMDS::setLEDToClr(Mother, ledBrain, LED_CMDS::clrGreen, 100, 1, 3);
-        break;
-        case level_5:
-            LED_CMDS::setAllStripsToClr(Mother, ledBrain, LED_CMDS::clrPurple, 100);
-        break;
-        default: break;
+    if (ledTable & result) {
+        Mother.motherRelay.digitalWrite(lightTable, open);
     }
 
+    if (level_1 & result) {
+        if (!level1_active) {
+            LED_CMDS::setAllStripsToClr(Mother, ledBrain, LED_CMDS::clrBlack, 100);
+            Mother.motherRelay.digitalWrite(pump_1, closed);
+            Mother.motherRelay.digitalWrite(pump_2, closed);
+            level1_active = true;
+            Mother.motherRelay.digitalWrite(lightTable, closed);
+        }
+    } else if (level1_active) {
+        level1_active = false;
+        LED_CMDS::setLEDToClr(Mother, ledBrain, LED_CMDS::clrRed, 100, 1, 0);
+    }
+   
+
+    if (level_2 & result) {
+        LED_CMDS::setLEDToClr(Mother, ledBrain, LED_CMDS::clrGreen, 100, 1, 1);
+    }
+    if (level_3 & result) {
+        LED_CMDS::setAllStripsToClr(Mother, ledBrain, LED_CMDS::clrPurple, 100);
+    }
 }
 
 

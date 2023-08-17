@@ -26,6 +26,7 @@ STB_MOTHER_IO MotherIO;
 int lastState = -1;
 bool level1_active = false;
 bool level3_active = false;
+bool level3_complete = true;
 
 unsigned long pumpCycleSwitch = millis();
 
@@ -114,6 +115,7 @@ void handleInputs() {
             pumpCycleSwitch = millis();
             level1_active = true;
             level3_active = false;
+            level3_complete = false;
             Mother.motherRelay.digitalWrite(lightTable, closed);
         }
     } else if (level1_active) {
@@ -130,13 +132,17 @@ void handleInputs() {
         pumpCycleSwitch = millis();
         LED_CMDS::fade2color(Mother, ledBrain, LED_CMDS::clrRed, 60, LED_CMDS::clrPurple, 80, 3000, 1);
     }
-    if (level_3 & result && !level3_active) {
-        LED_CMDS::fade2color(Mother, ledBrain, LED_CMDS::clrPurple, 80, LED_CMDS::clrWhite, 20, 1500, 1);
-        pumpIntensity = 3;
-        pumpCycleSwitch = millis();
-        level3_active = true;
-    } else if (level3_active) {
-        level3_active = false;
+
+    if (level_3 & result) {
+        if (!level3_active) {
+            LED_CMDS::fade2color(Mother, ledBrain, LED_CMDS::clrPurple, 80, LED_CMDS::clrWhite, 20, 1500, 1);
+            pumpIntensity = 3;
+            pumpCycleSwitch = millis();
+            level3_active = true;
+            delay(300); // to make sure its not a hystersis 
+        }
+    } else if (level3_active and !level3_complete) {
+        level3_complete = true;
         pumpCycleSwitch = millis();
         LED_CMDS::fade2color(Mother, ledBrain, LED_CMDS::clrWhite, 20, LED_CMDS::clrWhite, 5, 5000, 1);
         Mother.motherRelay.digitalWrite(pump_1, closed);

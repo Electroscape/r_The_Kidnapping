@@ -1,31 +1,35 @@
 #pragma once
 
-#define relayAmount 3
+#define relayAmount 4
 #define open        0
 #define closed      1
 
 enum relays {
     pump_1,
     pump_2,
-    lightTable
+    table_light,
+    table_magnet,
 };
 
 enum relayInits {
     pump_1_init = closed,
     pump_2_init = closed,
-    lightTable_init = closed
+    table_light_init = closed,
+    table_magnet_init = closed, // Wiring will be NC
 };
 
 int relayPinArray[relayAmount] = {
     pump_1,
     pump_2,
-    lightTable,
+    table_light,
+    table_magnet,
 };
 
 int relayInitArray[relayAmount] = {
     pump_1_init,
     pump_2_init,
-    lightTable_init,
+    table_light_init,
+    table_magnet_init,
 };
 
 enum brains {

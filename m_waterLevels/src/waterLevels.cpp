@@ -49,7 +49,9 @@ void updatePumps() {
             Mother.motherRelay.digitalWrite(pump_2, closed);
         } else {
             Mother.motherRelay.digitalWrite(pump_1, open);
-            Mother.motherRelay.digitalWrite(pump_2, open);
+            if (pumpIntensity > 0) {
+                Mother.motherRelay.digitalWrite(pump_2, open);
+            }
         }
         switch (pumpIntensity) {
             case 0:
@@ -141,7 +143,7 @@ void handleInputs() {
             pumpIntensity = 3;
             pumpCycleSwitch = millis();
             level3_active = true;
-            delay(300); // to make sure its not a hystersis 
+            delay(400); // to make sure its not a hystersis 
         }
     } else if (level3_active and !level3_complete) {
         level3_complete = true;
@@ -166,6 +168,8 @@ void setup() {
     Mother.rs485SetSlaveCount(0);
     LED_CMDS::setAllStripsToClr(Mother, ledBrain, LED_CMDS::clrBlack, 100);
   
+    wdt_reset();
+    delay(4000);
     wdt_reset();
 }
 

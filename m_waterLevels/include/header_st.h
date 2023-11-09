@@ -8,28 +8,28 @@ enum relays {
     pump_1,
     pump_2,
     table_light,
-    table_magnet,
+    magnets,    // Zwinger and drawer
 };
 
 enum relayInits {
     pump_1_init = closed,
     pump_2_init = closed,
     table_light_init = closed,
-    table_magnet_init = closed, // Wiring will be NC
+    magnets_init = closed, // Wiring will be NC for both
 };
 
 int relayPinArray[relayAmount] = {
     pump_1,
     pump_2,
     table_light,
-    table_magnet,
+    magnets,
 };
 
 int relayInitArray[relayAmount] = {
     pump_1_init,
     pump_2_init,
     table_light_init,
-    table_magnet_init,
+    magnets_init,
 };
 
 enum brains {
@@ -43,21 +43,27 @@ enum IOPins {
     IO2,
     IO3,
     IO4,
+    IO5,
 };
 
 
-enum IO {
+enum inputs {
     level_1 = 1 << 0,
     level_2 = 1 << 1,
     level_3 = 1 << 2,
     ledTable = 1 << 3,
 };
 
-#define outputCnt 0
+
+enum outputs {
+    solved = 1
+};
+
+
+#define outputCnt 1
 #define inputCnt 4
 
 static constexpr int clrLight[3] = {255,200,120};
-
 
 int intputArray[inputCnt] = {
     IO1,
@@ -66,5 +72,7 @@ int intputArray[inputCnt] = {
     IO4,
 };
 
-int outputArray[outputCnt] = {};
+int outputArray[outputCnt] = {
+    IO5
+};
 

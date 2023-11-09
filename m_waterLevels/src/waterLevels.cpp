@@ -108,7 +108,10 @@ void handleInputs() {
 
     if (ledTable & result) {
         Mother.motherRelay.digitalWrite(table_light, open);
-        Mother.motherRelay.digitalWrite(table_magnet, open);
+        Mother.motherRelay.digitalWrite(magnets, open);
+        MotherIO.setOuput(solved);
+        delay(200);
+        MotherIO.outputReset();
     }
 
     if (level_1 & result) {
@@ -120,7 +123,7 @@ void handleInputs() {
             level3_active = false;
             level3_complete = false;
             Mother.motherRelay.digitalWrite(table_light, table_light_init);
-            Mother.motherRelay.digitalWrite(table_magnet, table_magnet_init);
+            Mother.motherRelay.digitalWrite(magnets, magnets_init);
         }
     } else if (level1_active) {
         pumpIntensity = 1;

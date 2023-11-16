@@ -38,7 +38,9 @@ enum inputs {
     fuse_3 = 1 << 2,
     fuse_4 = 1 << 3,
     fuse_5 = 1 << 4,
-    lid_reed = 1 << 5
+    lid_reed = 1 << 5,
+    start_game = 1 << 6,
+    mc_opened = 1 << 7
 };
 
 
@@ -48,8 +50,8 @@ enum outputs {
 };
 
 
-#define outputCnt 2
-#define inputCnt 6
+#define outputCnt 0
+#define inputCnt 8
 
 static constexpr int clrLight[3] = {255,200,120};
 
@@ -60,9 +62,10 @@ int intputArray[inputCnt] = {
     IO4,
     IO5,
     IO6,
+    IO7,
+    IO8,
 };
 
 int outputArray[outputCnt] = {
-    IO5
 };
 

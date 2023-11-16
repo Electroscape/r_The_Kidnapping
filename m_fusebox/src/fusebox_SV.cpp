@@ -39,6 +39,8 @@ void toggleHallwayLight(bool state) {
 void handleInputs() {
 
     int result = MotherIO.getInputs();
+    Serial.println(result);
+    delay(300);
 
     if (lastState == result) {
         return;
@@ -54,12 +56,18 @@ void handleInputs() {
             if (result == (fuse_1 + fuse_2 + fuse_3)) {
                 stage = stages::missionControlUnlock;
             }
-        case stages::missionControlUnlock: {
-            stage = stages::missionControlBoot;
-        }
+        break;
         case missionControlBoot: 
             if (result == (fuse_1 + fuse_2 + fuse_3 + fuse_4)) {
                 stage = stages::completed;
+            }
+        break;
+        default:
+            if (result & start_game) {
+                stage = hallway;
+            }
+            if (result & mc_opened) {
+                stage = stages::missionControlBoot;
             }
         break;
     }
@@ -106,6 +114,7 @@ void stageUpdate() {
     Serial.print("Stage is:");
     Serial.println(stage);
     stageActions();
+    lastStage = stage;
     delay(200);
     MotherIO.outputReset();
 }

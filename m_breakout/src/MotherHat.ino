@@ -59,25 +59,6 @@ void endGame() {
 }
 */
 
-/**
- * @brief Set the Stage Index object
- * @todo safety considerations
-*/
-void setStageIndex() {
-    for (int i=0; i<StageCount; i++) {
-        if (stage <= 1 << i) {
-            stageIndex = i;
-            Serial.print("stageIndex:");
-            Serial.println(stageIndex);
-            delay(1000);
-            return;
-        }
-    }
-    Serial.println(F("STAGEINDEX ERRROR!"));
-    wdt_reset();
-    delay(16000);
-}
-
 
 bool passwordInterpreter(char* password) {
     // Mother.STB_.defaultOled.clear();
@@ -133,20 +114,18 @@ void stageUpdate() {
     if (lastStage == stage) { return; }
     Serial.print("Stage is:");
     Serial.println(stage);
-    setStageIndex();
         
-    // check || stageIndex >= int(sizeof(stages))
     if (stageIndex < 0) {
         Serial.println(F("Stages out of index!"));
-        delay(15000);
-        
+        delay(15000);    
     }
+
     // important to do this before stageActions! otherwise we skip stages
     lastStage = stage;
 
     // for now no need to make it work properly scaling, need to build afnc repertoir anyways
     for (int brainNo=0; brainNo < Mother.getSlaveCnt(); brainNo++) {
-        Mother.setFlags(brainNo, flagMapping[stageIndex]);
+        Mother.setFlags(ledBrain, rfidFlag);
         delay(5);
     }
     MotherIO.outputReset();
@@ -190,7 +169,6 @@ void setup() {
     // technically 3 but for the first segments till unlocked there is no need
     Mother.rs485SetSlaveCount(1);
 
-    setStageIndex();
     inputInit();
 
     wdt_reset();

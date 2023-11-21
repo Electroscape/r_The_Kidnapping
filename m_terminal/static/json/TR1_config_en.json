@@ -1,0 +1,49 @@
+{
+  "title": "Terminal 1",
+  "id": "TR1",
+  "auth_msg": "Needs Authentication First",
+  "btns": [
+    {
+      "title": "Wiki",
+      "details": "open new browser page",
+      "image": "static/imgs/home/search.png",
+      "link": "browser",
+      "auth": false
+    },
+    {
+      "title": "Lab Access Controls",
+      "details": "control the files",
+      "image": "static/imgs/home/medical-lab.png",
+      "link": "lab_control",
+      "auth": false
+    },
+    {
+      "title": "Gas Control",
+      "details": "control the gas flow",
+      "image": "static/imgs/home/valve.png",
+      "link": "gas_control",
+      "auth": "David"
+    },
+    {
+      "title": "Foscam Control",
+      "details": "control CCTV camera",
+      "image": "static/imgs/home/cctv.png",
+      "link": "foscam_control",
+      "auth": false
+    },
+    {
+      "title": "Media File Database",
+      "details": "Surveillance footage",
+      "image": "static/imgs/home/file-sharing.png",
+      "link": "media_control",
+      "auth": false
+    },
+    {
+      "title": "Chat",
+      "details": "Chat with Terminal 2 or Chatbot",
+      "image": "static/imgs/home/chat.png",
+      "link": "chat_control",
+      "auth": false
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+[
+  {
+    "name": "experiment 1",
+    "passcode": "51",
+    "img": "media/gas_puzzle/AN_1.png",
+    "status": "locked",
+    "icon": "fas fa-lock"
+  },
+  {
+    "name": "experiment 2",
+    "passcode": "23",
+    "img": "media/gas_puzzle/AN_2.png",
+    "status": "blocked",
+    "icon": "fa-solid fa-ban",
+    "info": "non-toxic"
+  },
+  {
+    "name": "experiment 3",
+    "passcode": "12",
+    "img": "media/gas_puzzle/AN_3.png",
+    "status": "blocked",
+    "icon": "fa-solid fa-ban",
+    "info": "non-active"
+  },
+  {
+    "name": "experiment 4",
+    "passcode": "34",
+    "img": "media/gas_puzzle/AN_4.png",
+    "status": "blocked",
+    "icon": "fa-solid fa-ban"
+  }
+]

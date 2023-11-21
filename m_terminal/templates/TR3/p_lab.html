@@ -1,0 +1,389 @@
+{% extends 'layout.html' %}
+
+{% block head %}
+    <script type="text/javascript">
+        let stopBootLoop = false;
+        let countdownTimeSeconds = "{{ g_config.version.get('countdown_time_s', 10) }}";
+        let bootingTimeSeconds = "{{ g_config.version.get('boot_time_s', 15) }}";
+    </script>
+    <style>
+        /* countdown */
+        .countdown {
+            font-size: 6.5rem;
+            margin-top: 20px;
+            color: red;
+        }
+
+        #prtscr {
+            overflow-x: hidden;
+        }
+
+        #lang-box {
+            visibility: hidden;
+        }
+
+        #btn-main-back {
+            visibility: hidden;
+        }
+
+        #k-lab {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        input {
+            background: none;
+            color: Red;
+            outline: none;
+            border: none;
+            font-family: monospace;
+        }
+
+        #bootContainer {
+            color: green;
+            overflow-y: scroll;
+            overflow-x: hidden;
+            height: 75vh;
+        }
+
+        @-webkit-keyframes clack {
+            0% {
+                background-image: repeating-linear-gradient(45deg, #000, #000 25%, yellow 25%, yellow 50%);
+            }
+            50% {
+                background-image: repeating-linear-gradient(45deg, #000, #000 25%, yellow 25%, yellow 50%);
+            }
+            51% {
+                background-image: repeating-linear-gradient(45deg, yellow, yellow 25%, #000 25%, #000 50%);
+            }
+            100% {
+                background-image: repeating-linear-gradient(45deg, yellow, yellow 25%, #000 25%, #000 50%);
+            }
+        }
+
+        @keyframes clack {
+            0% {
+                background-image: repeating-linear-gradient(45deg, #000, #000 25%, yellow 25%, yellow 50%);
+            }
+            50% {
+                background-image: repeating-linear-gradient(45deg, #000, #000 25%, yellow 25%, yellow 50%);
+            }
+            51% {
+                background-image: repeating-linear-gradient(45deg, yellow, yellow 25%, #000 25%, #000 50%);
+            }
+            100% {
+                background-image: repeating-linear-gradient(45deg, yellow, yellow 25%, #000 25%, #000 50%);
+            }
+        }
+
+        .caution {
+            margin-block: 50px;
+            height: 4em;
+            -webkit-animation: 2s clack;
+            animation: 0.3s clack;
+            background-size: 24px 24px;
+            -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+            position: relative;
+        }
+
+        .caution__text {
+            content: "CAUTION";
+            font-family: monospace;
+            font-weight: 900;
+            letter-spacing: 0.25em;
+            background: yellow;
+            font-size: 2vw;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            padding: 0.125em 0.25em;
+            text-align: center;
+            transform: translate(-50%, -50%);
+            border: 0.6vw solid #000;
+            box-shadow: -0.15vw -0.15vw 0 0.15vw yellow, 0.15vw 0.15vw 0 0.15vw yellow;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <audio id="laserBoot">
+        <source src="{{ url_for('static', filename='sounds/laser-boot.mp3') }}" type="audio/mpeg">
+    </audio>
+    <audio id="laserActive" loop>
+        <source src="{{ url_for('static', filename='sounds/laser-active.mp3') }}" type="audio/mpeg">
+    </audio>
+    <audio id="errorSnd">
+        <source src="{{ url_for('static', filename='sounds/error.mp3') }}" type="audio/mpeg">
+    </audio>
+    <div id="caution-container" class="d-none">
+        <div class="caution">
+            <div class="caution__text">CAUTION! Laser active</div>
+        </div>
+    </div>
+    <div id="bootContainer" class="not-selectable">
+        <!-- <div id="test"></div> -->
+
+        <button id="bootup" class="d-none">Power-On Airlock2</button>
+
+        <pre id="prtscr"></pre>
+    </div>
+    <div id="k-lab" class="d-none">
+        <!-- countdown text -->
+        <p style="color: whitesmoke">Bitte authentifizieren Sie sich, bevor die Zeit abgelaufen ist!<br>
+            Please authenticate yourself before the time is up!</p>
+        <p class="countdown">00</p>
+    </div>
+{% endblock %}
+
+{% block add_js %}
+    <script src="{{ url_for('static', filename='js/bootOutput.js') }}">
+    </script>
+    <script type="text/javascript">
+        headerLines = [
+            "░█████╗░██╗██████╗░██╗░░░░░░█████╗░░█████╗░██╗░░██╗\n",
+            "██╔══██╗██║██╔══██╗██║░░░░░██╔══██╗██╔══██╗██║░██╔╝\n",
+            "███████║██║██████╔╝██║░░░░░██║░░██║██║░░╚═╝█████═╝░\n",
+            "██╔══██║██║██╔══██╗██║░░░░░██║░░██║██║░░██╗██╔═██╗░\n",
+            "██║░░██║██║██║░░██║███████╗╚█████╔╝╚█████╔╝██║░╚██╗\n",
+            "╚═╝░░╚═╝╚═╝╚═╝░░╚═╝╚══════╝░╚════╝░░╚════╝░╚═╝░░╚═╝\n",
+            "POD83 Computers: NAVI-BIOS (c) 1983 \nLaboratory Corporation International, Inc. \n \n",
+        ];
+        bootLines = [
+            "LAB: v4.105.22.0 \n\n",
+            "Memory Test:\n",
+            "X RAM -------------------- 2198485991424 KB\n",
+            "WAIT . . . . . . . . . .\n",
+            "Memory Test Complete.\n\n",
+            "Total real memory	=	70,351,551,725,568 KB\nAvailable memory	=	70,351,551,725,568 KB\n",
+            "\n==================================================================\n" +
+            "Booting into System Maintenance Mode\n" +
+            "==================================================================\n\n",
+            "PCI Devices Listing ...\n\n",
+            "Bus  Dev  Fun   Vendor  Device  SVID  SSID  Class\n",
+            "0    20   1345  1235    1235    1235  Temp  Cntrlr\n",
+            "\nBooting paravirtualized kernal on bare hardware\n",
+            "setup_precpu: ",
+            "NR_CPUS:8192 ",
+            "NR_CPUS:8192 ",
+            "NR_CPUS:8192\n",
+            "Built X zonelists in Zone order, mobility grouping on, Total pages 16,940,741,088\n",
+            "Checking aperture ...\n"
+        ]
+
+        errorLines = ["ERROR in app: Exception on /lab_control [INIT]",
+            "Cannot load data from the hardware",
+            "Connection is broken",
+            "ERROR 432 - PLEASE CHECK CONNECTIONS"];
+
+        successLine = "Laser is ready to use";
+
+        function sleep(ms) {
+            return new Promise(
+                resolve => setTimeout(resolve, ms)
+            );
+        }
+
+        async function delayedGreeting() {
+            let fixed = "{{ g_config.boot }}";
+
+            await sleep(1000);
+            for (let line of headerLines) {
+                appendLine(line);
+            }
+
+            await sleep(1000);
+            for (const line of bootLines) {
+                if (line.startsWith("X RAM")) {
+                    for (let i = 0; i < 10; i++) {
+                        appendLine(line);
+                        await sleep(Math.floor(Math.random() * 50) + 1);
+                    }
+                    await sleep(1000);
+                } else if (line.startsWith("0    20")) {
+                    for (let i = 0; i < 12; i++) {
+                        appendLine(line);
+                        await sleep(Math.floor(Math.random() * 50) + 1);
+                    }
+                    await sleep(1000);
+                } else {
+                    appendLine(line);
+                    await sleep(Math.floor(Math.random() * 300) + 1);
+                }
+            }
+
+            await sleep(1000);
+            $('#laserBoot')[0].pause();
+            if (fixed === "fixed") {
+                {% if g_config.version.sound_effects %}
+                    $('#laserActive')[0].play();
+                {% endif %}
+                // successful booting loop with the "active laser" timeout
+                setTimeout(() => {
+                    stopBootLoop = true;
+                }, bootingTimeSeconds * 1000);
+
+                $('#prtscr').empty();
+                $('#caution-container').removeClass("d-none");
+                $('#bootContainer').height("60vh");
+                await sleep(100);
+                for (const line of outputs) {
+                    if (stopBootLoop) {
+                        break
+                    } else {
+                        appendLine(line + "\n");
+                        await sleep(Math.floor(Math.random() * 50) + 1);
+                    }
+                }
+
+                await sleep(1000);
+                $('#prtscr').empty();
+
+                $("#bootContainer").css("height", "unset");
+                $("#k-lab").removeClass("d-none");
+                setCountdownTimer(countdownTimeSeconds);
+
+            } else {
+                $('#errorSnd')[0].play();
+                $.post("{{ url_for('lab_control') }}", {
+                    status: "error"
+                });
+                for (let i = 1; i < 4; i++) {
+                    appendLine(`<p style="color: blue">attempt number: ${i}</p>`);
+                    appendLine("re-initializing the laser");
+                    await sleep(Math.floor(Math.random() * 700) + 1);
+                    for (const line of errorLines) {
+                        appendLine(`<p style="color: red">${line}</p>`);
+                        await sleep(Math.floor(Math.random() * 100) + 1);
+                    }
+                }
+                appendLine(`<p style="color: red"><strong>Failed to start the laser airlock..</strong></p>`);
+
+                swal("Error 432", "laser airlock interface not found \n\n" +
+                    "- Bitte Verbindung prüfen und erneut versuchen \n" +
+                    "- Please check connection and try again", "error"
+                ).then(() => {
+                    document.location.href = "/";
+                })
+            }
+            await sleep(0);
+
+        }
+
+        function appendLine(string) {
+            $('#prtscr').append(string);
+            // window.scrollTo(0, document.body.scrollHeight);
+            $('#bootContainer').scrollTop($('#bootContainer')[0].scrollHeight);
+        }
+
+        $('#bootup').click(function () {
+            {% if g_config.version.sound_effects %}
+                $('#laserBoot')[0].play();
+            {% endif %}
+            $(this).hide();
+            delayedGreeting();
+        });
+
+        $("#bootup").click();
+    </script>
+    <script type="text/javascript">
+        // grab the .countdown
+        const countDown = document.querySelector('.countdown');
+
+        /* global variables and constants*/
+        // variable to store setInterval
+        let countDownInterval;
+        // secondsLeft in millisecond
+        let secondsLeftms;
+        // end time
+        let endTime;
+        // .stop-btn clicked or not
+        let stopBtnClicked = false;
+        /* global variables ends */
+
+        /* .form submit listener */
+        function setCountdownTimer(timeInSec) {
+            // check if it is not zero
+            if (timeInSec > 0) {
+                // convert to msec
+                timeInSec = timeInSec * 1000;
+
+                // get current time in milliseconds
+                const now = Date.now();
+                // calculate the ending time
+                endTime = now + timeInSec;
+
+                // activate the countdown at first
+                setCountDown(endTime);
+
+                countDownInterval = setInterval(() => {
+                    setCountDown(endTime);
+                }, 1000);
+            }
+        }
+
+        /* setCountDown function */
+        const setCountDown = (endTime) => {
+            // stop sound
+            $('#laserActive')[0].pause();
+            // calculate how many milliseconds is left to reach endTime from now
+            secondsLeftms = endTime - Date.now();
+            // convert it to seconds
+            const secondsLeft = Math.round(secondsLeftms / 1000);
+
+            // calculate the hours, minutes and seconds
+            let hours = Math.floor(secondsLeft / 3600);
+            let minutes = Math.floor(secondsLeft / 60) - (hours * 60);
+            let seconds = secondsLeft % 60;
+
+            // adding an extra zero in front of digits if it is < 10
+            if (hours < 10) {
+                hours = `0${hours}`;
+            }
+            if (minutes < 10) {
+                minutes = `0${minutes}`;
+            }
+            if (seconds < 10) {
+                seconds = `0${seconds}`;
+            }
+
+            // stopping the timer if the time is up
+            if (secondsLeft < 0) {
+                countDownExpired();
+                return;
+            }
+
+            // set the .countdown text
+            countDown.innerHTML = `${seconds}`;
+        };
+
+        /* setCountDown function ends */
+        function countDownExpired() {
+            // destroy the setInterval()
+            clearInterval(countDownInterval);
+
+            $.post("{{ url_for('lab_control') }}", {
+                auth: "failed"
+            });
+            swal("Timeout!",
+                "Authentication failed. Please try again on time!",
+                "warning").then(function () {
+                /*code to execute after alert*/
+                document.location.href = "/";
+            });
+
+        }
+
+        /* resetCountDown function */
+        const resetCountDown = () => {
+            // destroy the setInterval()
+            clearInterval(countDownInterval);
+        };
+        /* resetCountDown function ends */
+    </script>
+{% endblock %}
+
+{% block float_chat %}
+{% endblock %}

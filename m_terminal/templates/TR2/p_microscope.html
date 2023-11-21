@@ -1,0 +1,28 @@
+{% extends 'layout.html' %}
+
+{% block head %}
+    <style>
+        #lang-box {
+            visibility: hidden;
+        }
+
+        iframe {
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 75vh;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <iframe src="{{ g_config.src }}"></iframe>
+{% endblock %}
+
+{% block add_js %}
+    <script type="text/javascript">
+        socket.on('microscope_fe', function (data) {
+            console.log(data);
+        })
+    </script>
+{% endblock %}

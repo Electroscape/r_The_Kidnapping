@@ -1,0 +1,247 @@
+{% extends 'layout.html' %}
+
+{% block head %}
+    <style>
+        #lang-box {
+            visibility: hidden;
+        }
+
+        .loader-wrapper {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: .8;
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            margin: 0;
+            background: radial-gradient(skyblue, transparent, transparent);
+        }
+
+        .loader-container {
+            height: 100%;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .ring-frame,
+        .disc-frame {
+            height: 100%;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ring-frame,
+        .disc-frame,
+        .ring,
+        .disc {
+            position: absolute;
+        }
+
+        .ring {
+            border: 2px solid rgba(255, 35, 49, 0.1);
+            border-left: 2px solid darkred;
+            border-right: 2px solid darkred;
+            border-radius: 50%;
+            display: flex;
+            z-index: 1;
+        }
+
+        .ring:nth-child(1) {
+            animation: spin 1s linear infinite;
+        }
+
+        .ring:nth-child(2) {
+            animation: spinner 1.25s linear infinite;
+        }
+
+        .ring:nth-child(3) {
+            animation: spin 1.5s linear infinite;
+        }
+
+        .disc {
+            height: 150px;
+            width: 150px;
+            border: 2px solid darkred;
+            opacity: .9;
+            border-radius: 50%;
+            animation: rotate 3s linear infinite;
+
+        }
+
+        .loading {
+            display: block;
+            font-size: 1.5rem;
+            letter-spacing: .25rem;
+            color: darkred;
+            animation: blink 1s ease infinite;
+        }
+
+        @keyframes blink {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0;
+            }
+        }
+
+        @keyframes rotate {
+            100% {
+                transform: rotate3D(.5, 0.5, 0.5, -720deg);
+            }
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotateZ(-360deg);
+            }
+        }
+
+        @keyframes spinner {
+            to {
+                transform: rotateZ(360deg);
+            }
+        }
+    </style>
+    <script src="https://code.iconify.design/iconify-icon/1.0.5/iconify-icon.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/gas_analysis.css') }}" media="screen">
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/gas_analysis_game.css') }}" media="screen">
+
+    <script type="text/javascript">
+        function lockedSeq(index, status) {
+            let shadow = document.querySelector("#shadow-" + index);
+            let shadowTxt = shadow.querySelector("#shadow-txt-" + index);
+            shadowTxt.innerText = status;
+            shadowTxt.classList.remove("d-none");
+            shadow.hidden = false;
+            shadow.style.backgroundColor = "grey";
+            shadow.style.opacity = "0.9";
+        }
+
+        function releasedSeq(index) {
+            let shadow = document.querySelector("#shadow-" + index);
+            let shadowTxt = shadow.querySelector("#shadow-txt-" + index);
+            shadowTxt.innerText = "released"
+            shadowTxt.classList.remove("d-none");
+            shadow.hidden = false;
+            shadow.style.backgroundColor = "green";
+            shadow.style.opacity = "0.5";
+        }
+
+        function checkSampleStatus(i, sample) {
+            $("#icon-" + i).removeClass().addClass(sample.icon);
+            $("#status-" + i)[0].innerText = sample.status
+            if (sample.status === "released") {
+                releasedSeq(i);
+            } else if (sample.status === "locked" || sample.status === "blocked") {
+                lockedSeq(i, sample.status);
+            } else {
+                let shadow = document.querySelector("#shadow-" + i);
+                shadow.hidden = true;
+            }
+        }
+
+        socket.on('samples_updates', function (samples) {
+            // loader here
+            setTimeout(() => {
+                for (let i = 0; i < samples.length; i++) {
+                    checkSampleStatus(i, samples[i]);
+                }
+            }, 3000)
+        })
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="loader-wrapper d-none">
+        <section class="loader-container">
+            <div class="ring-frame">
+            </div>
+            <div class="disc-frame">
+            </div>
+            <section class="loading">LOADING...
+            </section>
+        </section>
+    </div>
+    <div id="fakeBody">
+        <div class="options">
+            <script src="{{ url_for('static',filename='js/puzzleGame.js') }}">
+            </script>
+            {% for sample in g_config.samples %}
+                <div id="option{{ loop.index0 }}" class="option {% if loop.index0 == 0 %}
+                            active
+                            {% endif %}">
+                    <div class="shadow" id="shadow-{{ loop.index0 }}">
+                        <h1 id="shadow-txt-{{ loop.index0 }}" class="txt-vertical d-none"
+                            style="-webkit-transform: rotate(90deg); margin-top: 150px;"></h1>
+                    </div>
+
+                    <div class="gameContentClass {% if loop.index0 != 0 %}
+                            d-none
+                            {% endif %}" id="gameContent{{ loop.index0 }}">
+                        {% if "elements" in sample %}
+                            {% with elements=sample.elements|tojson, gameID=loop.index0 %}
+                                {% include "dragDropGame.html" %}
+                            {% endwith %}
+                        {% elif "img" in sample %}
+                            {% with image_path=sample.img, gameID=loop.index0, status=sample.status %}
+                                {% include "puzzleGame.html" %}
+                            {% endwith %}
+                        {% endif %}
+                    </div>
+
+                    <div class="label">
+                        <div class="icon">
+                            <i id="icon-{{ loop.index0 }}" class="{{ sample.icon }}"></i>
+                        </div>
+                        <div class="info">
+                            <div class="main">{{ sample.name }}</div>
+                            <div id="status-{{ loop.index0 }}" class="sub">{{ sample.status }}</div>
+                        </div>
+                    </div>
+                </div>
+                <script type="text/javascript">
+                    checkSampleStatus("{{ loop.index0 }}", {{ sample| tojson }})
+                </script>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block add_js %}
+    <script src="{{ url_for('static',filename='js/gas_analysis.js') }}">
+    </script>
+    <script type="text/javascript">
+        let container = document.querySelector(".loader-container");
+        let ring = document.querySelector(".ring-frame");
+        let disc = document.querySelector(".disc-frame");
+        let i = 1;
+        let num = 200;
+        let radius = 150;
+        let lim = 4;
+
+        for (i; i < lim; i++) {
+            let span = document.createElement('span');
+            let disk = document.createElement('span')
+            span.setAttribute("class", "ring");
+            disk.setAttribute("class", "disc");
+            span.style.height = `${(i * 20) + num}px`;
+            span.style.width = `${(i * 20) + num}px`;
+            disk.style.animationDelay = `${i - .8}s`;
+            ring.append(span);
+            disc.append(disk);
+        }
+    </script>
+{% endblock %}

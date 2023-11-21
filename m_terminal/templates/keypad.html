@@ -1,0 +1,99 @@
+<main class="k-keypad" id="keypad{{ keyID }}">
+    <div class="k-top d-none" id="top{{ keyID }}">
+        {{ keyTitle }}
+    </div>
+
+    <div class="k-screen" id="screen{{ keyID }}"></div>
+    <div class="k-buttons" id="buttons{{ keyID }}">
+        <button id="{{ keyID }}-button-1">1</button>
+        <button id="{{ keyID }}-button-2">2</button>
+        <button id="{{ keyID }}-button-3">3</button>
+        <button id="{{ keyID }}-button-4">4</button>
+        <button id="{{ keyID }}-button-5">5</button>
+        <button id="{{ keyID }}-button-6">6</button>
+        <button id="{{ keyID }}-button-7">7</button>
+        <button id="{{ keyID }}-button-8">8</button>
+        <button id="{{ keyID }}-button-9">9</button>
+        <button id="{{ keyID }}-button-ast">Clear</button>
+        <button id="{{ keyID }}-button-0">0</button>
+        <button id="{{ keyID }}-button-hash">Enter</button>
+    </div>
+</main>
+
+<script type="text/javascript">
+    /*  Takes different actions based on buttons pushed and checks for the correct
+     *  length and password entered
+     */
+    // Required password
+    passwords.push("{{ keyPass }}".split("").map(Number));
+
+    // What the user has entered
+    allEntered.push([]);
+
+    /* Event Listener on page load
+     */
+    window.addEventListener('load', function () {
+        // Gets the element IDs of the screen, hash button, and asterisk button
+        const screen = document.getElementById('screen{{ keyID }}');
+        const hash = document.getElementById('{{ keyID }}-button-hash');
+        const ast = document.getElementById('{{ keyID }}-button-ast');
+
+        // Event listener for when # is clicked
+        // This should be the last button clicked
+        hash.addEventListener('click', function () {
+            // Adds # to the screen and pushes to the entered array
+            //screen.textContent += '#';
+            //entered.push('#');
+
+            // See if entered password matches, adds the CSS success tag,
+            // and changes the screen message to "success"
+            let entered = allEntered["{{ keyID }}"];
+            if (!entered.length) {
+                return false;
+            } else if (isCorrect("{{ keyID }}")) {
+                screen.classList.add('success');
+                screen.textContent = 'success';
+                socket.emit('msg_to_backend', {
+                    keypad_update: `{{ request.path }} keypad {{ keyID }} correct`
+                })
+            } else {
+                screen.classList.add('failed');
+                screen.textContent = 'wrong';
+                socket.emit('msg_to_backend', {
+                    keypad_update: `{{ request.path }} keypad {{ keyID }} wrong`
+                })
+
+                // clear result message
+                setTimeout(function () {
+                    keypadClear("{{ keyID }}");
+                }, 5000);
+            }
+        });
+
+        // Event listener for when * is clicked
+        ast.addEventListener('click', function () {
+            keypadClear("{{ keyID }}");
+        });
+
+        // Helper loop for the bind() function to keep hold of the iterator
+        // For buttons 0-9
+        // Used http://stackoverflow.com/questions/8909652/adding-click-event-listeners-in-loop for the following
+        for (let t = 0; t < 10; t++) {
+            bind(t);
+        }
+
+        // Helper function to create and keep each instance of the buttons
+        // Used for buttons 0-9
+        function bind(t) {
+            let button = document.getElementById("{{ keyID }}-button-" + t);
+            button.addEventListener('click', function () {
+
+                // Adds the number to the screen and pushes it to the entered array
+                if (screen.textContent !== "wrong") {
+                    screen.textContent += t;
+                    allEntered["{{ keyID }}"].push(t);
+                }
+            });
+        }
+    });
+</script>

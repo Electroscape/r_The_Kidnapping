@@ -1,0 +1,334 @@
+{% extends 'layout.html' %}
+{% block head %}
+    <style>
+        #lang-box {
+            visibility: hidden;
+        }
+
+        .container-fluid {
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            height: 100vh;
+
+        }
+
+        #sliding-door {
+            z-index: 1;
+            position: absolute;
+            width: 50%;
+            flex-wrap: nowrap;
+        }
+
+        #main-content {
+            padding-top: 150px;
+            position: relative;
+            text-align: center;
+            width: 100%;
+        }
+
+
+        .door {
+            height: 80vh;
+            transition: all 0.5s ease-IN;
+            transform: translateX(0);
+        }
+
+        .left-door {
+            background-color: grey;
+            /*transform: translateX(-100%);*/
+            border-right: solid 3px black;
+            font-size: 8vw;
+        }
+
+        #door-text-function-window {
+            margin-top: 15vh;
+            border: solid 1px black;
+        }
+
+        .door-text-function-border {
+            font-size: 1.5vw;
+            text-align: center;
+            padding: 5px;
+            border-bottom: solid 1px black;
+            color: black;
+        }
+
+        .right-door {
+            background-color: grey;
+            /*transform: translateX(100%);*/
+            border-left: solid 3px black;
+        }
+
+
+        input[type=checkbox]:checked ~ div.left-door {
+            transform: translateX(0);
+        }
+
+        input[type=checkbox]:checked ~ div.right-door {
+            transform: translateX(0);
+        }
+
+
+        .lock-wrapper {
+            margin-top: 15vh;
+            min-width: 80px;
+            min-height: 20%;
+            padding: 15px;
+        }
+
+        .keypad {
+            width: 100%;
+            border-radius: 5px;
+            border: solid thin black;
+            padding: 5px;
+            max-width: 205px;
+            background-color: #333;
+            background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0));
+            text-align: center;
+        }
+
+        .keypad-tryagain {
+            color: white;
+            font-size: 10pt;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        .access {
+            color: lime;
+            display: none;
+        }
+
+        .noaccess {
+            color: red;
+            display: none;
+        }
+
+        .keypad .display {
+            margin-left: -3px;
+            border-radius: 5px;
+            font-size: 15pt;
+            height: 30px;
+            width: 190px;
+            text-align: center;
+            color: rgb(0, 204, 255);
+            outline: none;
+            margin-bottom: 5px;
+            margin-top: 5px;
+            background: #222;
+            padding: 3px;
+            -webkit-box-shadow: inset 2px 2px 3px -1px #000;
+            -moz-box-shadow: inset 2px 2px 3px -1px #000;
+            -o-box-shadow: inset 2px 2px 3px -1px #000;
+            box-shadow: inset 2px 2px 3px -1px #000;
+            border: solid thin black;
+        }
+
+        .keypad button:hover {
+            color: red;
+        }
+
+        .keypad button:active {
+            -webkit-box-shadow: inset 2px 2px 3px -1px gray;
+            -moz-box-shadow: inset 2px 2px 3px -1px gray;
+            -o-box-shadow: inset 2px 2px 3px -1px gray;
+            box-shadow: inset 2px 2px 3px -1px gray;
+        }
+
+        .keys {
+            padding-left: 5px;
+            margin-left: 5px;
+        }
+
+        .keypad button {
+            margin: 2px;
+            height: 50px;
+            font-size: 20pt;
+            width: 60px;
+            border: none;
+            cursor: pointer;
+            -webkit-box-shadow: inset -2px -2px 3px -1px gray;
+            -moz-box-shadow: inset -2px -2px 3px -1px gray;
+            -o-box-shadow: inset -2px -2px 3px -1px gray;
+            box-shadow: inset -2px -2px 3px -1px gray;
+            outline: none;
+            padding: 1px;
+            border-radius: 5px;
+            min-height: 30px;
+            min-width: 30px;
+        }
+
+    </style>
+{% endblock %}
+
+
+{% block content %}
+    <div class="container-fluid">
+
+        <div class="row" id="sliding-door">
+            <!--sliding door start -->
+            <!--left door start-->
+            <div class="door col-xs-6 left-door">
+                <div class="left-door-text">
+                    <div id="door-text-function-window">
+                        <div class="door-text-function-border">
+                            Cleanroom Locked
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <!--left door end-->
+            <!--right door start-->
+            <div class="door col-xs-6 right-door">
+
+                <!-- lock wrapper   start -->
+                <div class="lock-wrapper">
+                    {% if g_config.get("pushbutton") %}
+                        <div>
+                            <button class="btn-danger btn-lg btn-rounded p-5" onclick="launchBtnPress()">
+                                Decontaminate
+                            </button>
+                        </div>
+                    {% else %}
+                        <!--lock keypad start-->
+                        <div class='keypad'>
+                            <input type='text' id='keypad-display' class='display' placeholder='Enter Code'
+                                   maxlength='4'>
+                            <div class='keys'>
+                                <div class='row'>
+                                    <button>1</button>
+                                    <button>2</button>
+                                    <button>3</button>
+                                </div>
+                                <div class='row k-row'>
+                                    <button>4</button>
+                                    <button>5</button>
+                                    <button>6</button>
+                                </div>
+                                <div class='row'>
+                                    <button>7</button>
+                                    <button>8</button>
+                                    <button>9</button>
+                                </div>
+                                <div class='row'>
+                                    <button id='keypad-clear'><i class='fa fa-trash'></i></button>
+                                    <button>0</button>
+                                    <button id='keypad-enter'><i class='fa fa-sign-in'></i></button>
+                                </div>
+                            </div>
+                            <div class='access'><i class='fa fa-check'></i> Access Granted</div>
+                            <div class='noaccess'>Access Denied <a class="keypad-tryagain"><i class='fa fa-refresh'></i></a>
+                            </div>
+                        </div>
+                        <!--lock keypad end-->
+                    {% endif %}
+                </div>
+                <!-- lock wrapper end -->
+            </div>
+            <!--right door end-->
+        </div>
+        <!--sliding door end-->
+        <div class="row" id="main-content">
+            {% if g_config.get("pushbutton") %}
+                <div class="col-xs-12"><h1> Cleanroom ready <br/> Please use the keypad to unlock the door
+                </h1>
+                </div>
+            {% else %}
+                <div class="col-xs-12"><h1> Access granted <br/> Cleanroom is unlocked </h1>
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block add_js %}
+    <script type="text/javascript">
+        let key = "";
+        let hidden = "";
+        let passcode = "{{ g_config.passcode }}";
+
+        $(".row button").click(function () {
+            const character = $(this).text();
+            if (character && key.length < 8) {
+                key = key + character;
+                hidden = hidden + "*";
+                $("#keypad-display").attr("value", hidden);
+            }
+        })
+        $("#keypad-clear").click(function () {
+            key = "";
+            hidden = "";
+            $("#keypad-display").attr("value", hidden);
+        })
+        $(".keypad-tryagain").click(function () {
+            $(".noaccess").slideUp("slow");
+            $(".access").slideUp("slow");
+            $(".keys").slideDown("slow");
+            $("#keypad-display").attr("disabled", "enabled");
+            key = "";
+            hidden = "";
+            $("#keypad-display").attr("value", hidden);
+        })
+        $("#keypad-enter").click(function () {
+            $("#keypad-display").attr("disabled", "disabled");
+            $(".keys").slideUp("slow", function () {
+                if (key === passcode) {
+                    $(".access").slideDown();
+                    openDoor();
+                    socket.emit('msg_to_backend', {
+                        cmd: "cleanroom",
+                        message: "unlock",
+                        username: myRoomID
+                    })
+                } else {
+                    $(".noaccess").slideDown();
+                    socket.emit('msg_to_backend', {
+                        cmd: "cleanroom",
+                        message: "lock",
+                        username: myRoomID
+                    })
+                }
+            });
+        })
+
+        //function to open sliding door
+        function openDoor() {
+            document.getElementsByClassName('door')[0].style.transitionDelay = "0.6s";
+            document.getElementsByClassName('door')[1].style.transitionDelay = "0.6s";
+            document.getElementsByClassName('left-door')[0].style.transform = "translateX(-100%)";
+            document.getElementsByClassName('right-door')[0].style.transform = "translateX(100%)";
+        }
+
+        function launchBtnPress() {
+            openDoor();
+            socket.emit('msg_to_backend', {
+                cmd: "cleanroom",
+                message: "unlock",
+                username: myRoomID
+            });
+        }
+
+        function end() {
+            $("#keypad-display").attr("value", "****");
+            $("#keypad-display").attr("disabled", "disabled");
+            $(".keys").slideUp();
+            $(".access").slideDown();
+            openDoor();
+        }
+
+        $.ajax({
+            type: 'POST',
+            url: '{{ url_for("get_cleanroom") }}',
+            contentType: 'application/json;charset=UTF-8',
+            success: function (res) {
+                if (res === "unlock") {
+                    end();
+                }
+            }
+        });
+    </script>
+{% endblock %}

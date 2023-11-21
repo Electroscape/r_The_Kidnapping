@@ -1,0 +1,29 @@
+{
+  "title": "Rachel's Tablet",
+  "id": "TR3",
+  "auth_msg": "Needs Authentication First",
+  "btns": [
+    
+    {
+      "title": "Media File Database",
+      "details": "Surveillance footage",
+      "image": "static/imgs/home/file-sharing.png",
+      "link": "media_control_rachel",
+      "auth": false
+    },
+    {
+      "title": "Chat",
+      "details": "Chat on rachel's tablet",
+      "image": "static/imgs/home/chat.png",
+      "link": "chat_control",
+      "auth": false
+    },
+    {
+      "title": "PRIVAT R.",
+      "details": "Rachel Personal Documents",
+      "image": "static/imgs/home/information.png",
+      "link": "personal_rachel_tablet",
+      "auth": false
+    }
+  ]
+}

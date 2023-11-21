@@ -1,0 +1,42 @@
+{
+  "title": "Terminal 2",
+  "id": "TR2",
+  "auth_msg": "Needs Authentication First",
+  "btns": [
+    {
+      "title": "Experiment Status",
+      "details": "open new browser page",
+      "image": "static/imgs/home/petri-dish.png",
+      "link": "sample_release",
+      "auth": false
+    },
+    {
+      "title": "Nano-Constructor",
+      "details": "control the files",
+      "image": "static/imgs/home/analytics.png",
+      "link": "gas_analysis",
+      "auth": "Rachel"
+    },
+    {
+      "title": "Chat",
+      "details": "Chat with Terminal 2 or Chatbot",
+      "image": "static/imgs/home/chat.png",
+      "link": "chat_control",
+      "auth": false
+    },
+    {
+      "title": "Clean Room Access",
+      "details": "control CCTV camera",
+      "image": "static/imgs/home/key-card.png",
+      "link": "cleanroom",
+      "auth": "David"
+    },
+    {
+      "title": "Data Upload",
+      "details": "Surveillance footage",
+      "image": "static/imgs/home/upload.png",
+      "link": "elancell_upload",
+      "auth": "David"
+    }
+  ]
+}

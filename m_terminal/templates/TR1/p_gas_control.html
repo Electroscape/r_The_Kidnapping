@@ -1,0 +1,161 @@
+{% extends 'layout.html' %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/gas_analysis.css') }}" media="screen">
+    <style>
+        .modal-dialog {
+            max-width: fit-content;
+            background-color: transparent;
+            text-align: center;
+        }
+
+        .modal-body {
+            padding: 0;
+        }
+
+        .button-close {
+            float: right;
+            background-color: black;
+            border-radius: 50% 50% 0 0;
+            border: 0;
+        }
+
+        .hint-box {
+            text-align: center;
+            color: white;
+            border: dodgerblue 1px solid;
+            background-color: transparent;
+            padding: 5px;
+        }
+
+        img.table {
+            vertical-align: middle;
+            margin-top: 10px
+        }
+
+        .divL {
+            width: 50%;
+            float: left;
+        }
+
+        .divR {
+            width: 50%;
+            float: right;
+        }
+
+
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js"
+            integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ"
+            crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"
+            integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm"
+            crossorigin="anonymous"></script>
+
+    <script type="text/javascript">
+        function blockedSeq(index, status) {
+            let shadow = document.querySelector("#shadow-" + index);
+            let shadowTxt = shadow.querySelector("#shadow-txt-" + index);
+            shadowTxt.innerText = status;
+            shadowTxt.classList.remove("d-none");
+            shadow.hidden = false;
+            shadow.style.backgroundColor = "grey";
+            shadow.style.opacity = "0.9";
+        }
+
+        function unlockSeq(index) {
+            let shadow = document.querySelector("#shadow-" + index);
+            let shadowTxt = shadow.querySelector("#shadow-txt-" + index);
+            shadowTxt.innerText = "unlocked";
+            shadowTxt.classList.remove("d-none");
+            shadow.hidden = false;
+            shadow.style.backgroundColor = "grey";
+            shadow.style.opacity = "0.5";
+        }
+
+        function releaseSeq(index) {
+            let shadow = document.querySelector("#shadow-" + index);
+            let shadowTxt = shadow.querySelector("#shadow-txt-" + index);
+            shadowTxt.innerText = "released"
+            shadowTxt.classList.remove("d-none");
+            shadow.hidden = false;
+            shadow.style.backgroundColor = "green";
+            shadow.style.opacity = "0.5";
+        }
+
+        function checkSampleStatus(i, sample) {
+            $("#icon-" + i).removeClass().addClass(sample.icon);
+            $("#status-" + i)[0].innerText = sample.status
+            if (sample.status === "released") {
+                releaseSeq(i);
+            } else if (sample.status === "unlocked") {
+                unlockSeq(i);
+            } else if (sample.status === "blocked") {
+                blockedSeq(i, sample.status);
+            } else {
+                let shadow = document.querySelector("#shadow-" + i);
+                shadow.hidden = true;
+            }
+        }
+
+        socket.on('samples_updates', function (samples) {
+            for (let i = 0; i < samples.length; i++) {
+                checkSampleStatus(i, samples[i])
+            }
+
+        })
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="divL">
+        <img class="table" id="image" src='{{ url_for("static", filename="imgs/gas_table.png") }}' alt="table"/>
+    </div>
+
+    <div class="divR">
+        <div id="fakeBody">
+            <div class="options">
+                <link rel="stylesheet" href="{{ url_for('static',filename='css/keypad.css') }}">
+                <script src="{{ url_for('static',filename='js/keypad.js') }}">
+                </script>
+                {% for sample in g_config.samples %}
+                    <div id="option{{ loop.index }}" class="option {% if loop.index0 == 0 %}
+                            active
+                            {% endif %}">
+                        <div class="shadow" id="shadow-{{ loop.index0 }}" hidden>
+                            <h1 id="shadow-txt-{{ loop.index0 }}" class="txt-vertical d-none"
+                                style="color: {% if loop.index0 == 0 %} transparent {% else %}black{% endif %};
+                                        -webkit-transform: rotate(90deg); margin-top: 150px;">
+                                locked</h1>
+                        </div>
+                        <div class="gameContentClass {% if loop.index0 != 0 %}
+                            d-none
+                            {% endif %}" id="gameContent{{ loop.index }}">
+                            {% with keyTitle="Code #" ~ loop.index, keyPass=sample.passcode, keyID=loop.index0 %}
+                                {% include "keypad.html" %}
+                            {% endwith %}
+                        </div>
+                        <div class="label">
+                            <div class="icon">
+                                <i id="icon-{{ loop.index0 }}" class="{{ sample.icon }}"></i>
+                            </div>
+                            <div class="info">
+                                <div class="main">{{ sample.name }}</div>
+                                <div id="status-{{ loop.index0 }}" class="sub">{{ sample.status }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <script type="text/javascript">
+                        checkSampleStatus("{{ loop.index0 }}", {{ sample| tojson }})
+                    </script>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block add_js %}
+    <script src="{{ url_for('static',filename='js/gas_analysis.js') }}">
+    </script>
+{% endblock %}

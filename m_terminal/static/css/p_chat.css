@@ -1,0 +1,10 @@
+.chat-window {
+    position: absolute;
+    top: 50px;
+    bottom: 50px;
+    left: 0;
+    right: 0;
+    margin: auto;
+    width: 100%;
+    padding: 30px;
+}

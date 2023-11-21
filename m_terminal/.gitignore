@@ -1,0 +1,9 @@
+**.vscode
+**.idea
+**__pycache__
+**.DS_*
+venv
+**.mp4
+ip_config.json
+run.sh
+*.log

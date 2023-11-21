@@ -1,0 +1,421 @@
+<!doctype html>
+<html style="font-size: 10pt;" lang="en">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+
+    <meta name="config">
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"/>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet"/>
+    <!-- MDB -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/5.0.0/mdb.min.css" rel="stylesheet"/>
+    <!-- MDB -->
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/5.0.0/mdb.min.js"></script>
+    <!-- JQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.1.js"
+            integrity="sha256-3zlB5s2uwoUzrXK3BT7AX3FyvojsraNFxCc2vC/7pNI=" crossorigin="anonymous"></script>
+
+    <!-- AJAX and socketio -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"
+            integrity="sha384-7EyYLQZgWBi67fBtVxw60/OWl1kjsfrPFcaU0pp0nAh+i8FD068QogUvg85Ewy1k"
+            crossorigin="anonymous"></script>
+
+    <!-- Toaster -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
+    <!-- sweet alert -->
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+    <!-- import local files -->
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/home.css') }}" media="screen">
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/floatChat.css') }}" media="screen">
+
+    <title>{% block title %}TERMINAL{% endblock %}</title>
+
+    <script type="text/javascript">
+        function getFullName(shortname) {
+            let fullname = "ADMIN";
+            if (shortname.toUpperCase() === "DAVID") {
+                fullname = "DAVID COVERSTONE";
+            } else if (shortname.toUpperCase() === "RACHEL") {
+                fullname = "RACHEL TAYLOR";
+            }
+            return fullname;
+        }
+
+        function updateLoginInfo(usr) {
+            let username = getFullName(usr);
+            if (username === "ADMIN") {
+                username = "none"
+            }
+            $('.login-info').children("p").html(`user:<br><strong>${username}</strong>`);
+        }
+
+        toastr.options = {
+            closeButton: true,
+            debug: true,
+            newestOnTop: false,
+            progressBar: true,
+            preventDuplicates: true,
+            onclick: null,
+            showDuration: "2000",
+            hideDuration: "1000",
+            timeOut: "3000",
+            extendedTimeOut: "1000",
+            showEasing: "swing",
+            hideEasing: "linear",
+            showMethod: "fadeIn",
+            hideMethod: "fadeOut"
+        };
+
+        if (!document.querySelector('meta[name="config"]').content) {
+            let meta = document.querySelector('meta[name="config"]');
+
+            $.ajax({
+                async: false,
+                type: 'POST',
+                url: '{{ url_for("get_globals") }}',
+                contentType: 'application/json;charset=UTF-8',
+                success: function (res) {
+                    meta.content = JSON.stringify(res);
+                }
+            });
+        }
+        const myChatConfig = JSON.parse(document.querySelector('meta[name="config"]').content);
+        const myRoomID = myChatConfig.id;
+        const myDispName = myChatConfig.title;
+        const socket = io.connect('http://' + document.domain + ':' + location.port);
+        socket.on("connect_error", (err) => {
+            console.log(`connect_error due to ${err.message}`);
+        });
+        let g_lang = myChatConfig.lang;
+    </script>
+
+    {% block chat_js %}
+        <!-- For self-socket -->
+        <script type="text/javascript">
+            socket.on('connect', function () {
+                socket.emit('msg_to_backend', {
+                    update: `'${myDispName}' is on page {{ request.path }}`
+                })
+            })
+
+            socket.on('response_to_frontend', function (msg) {
+                //console.log(msg)
+                if (typeof msg.cmd !== 'undefined' && msg.cmd === "notification") {
+                    toastr.info(`New Notification`);
+                    $('#chatAudio')[0].play();
+                }
+                handleMessageReception(msg);
+            })
+
+            socket.on('usr_auth', function (msg) {
+                let prev_usr = $(".login-info").find("strong").text();
+                if (msg.silent) {
+                    loadControlPanel(msg.data)
+                    return;
+                }
+                if (msg.usr.toLowerCase() === "empty") {
+                    toastr.warning(`${prev_usr} logged out`);
+                    swal("logged out", `${prev_usr} has been logged out`, "warning").then(
+                        () => {
+                            {% if not request.path in ["/"] %}
+                                document.location.href = "/"
+                            {% endif %}
+                        });
+                } else {
+                    toastr.success(`${getFullName(msg.usr)} logged in`);
+                    $('#chatAudio')[0].play();
+                }
+                updateLoginInfo(msg.usr.toLowerCase());
+
+                {% if request.path == "/lab_control" %}
+                    clearInterval(countDownInterval);
+                    $.post("{{ url_for('lab_control') }}", {
+                        auth: "success"
+                    });
+                    stopBootLoop = true;
+                    swal("Login", `Hello ${msg.usr}! Welcome to the lab`, "success").then(
+                        () => {
+                            setTimeout(() => {
+                                document.location.href = "/"
+                            }, 1500);
+                        });
+                    toastr.success('Successful authentication');
+
+                {% else %}
+                    loadControlPanel(msg.data)
+                {% endif %}
+            })
+
+            socket.on("elancell_fe", function (msg) {
+                $('#chatAudio')[0].play();
+                toastr.info(`Data upload ${msg.data}`);
+            })
+
+            socket.on('breach_fe', function (msg) {
+                if (msg === "breach") {
+                    $('#chatAudio')[0].play();
+                    toastr.error(`USB media is detected`);
+                    swal("warning", "Your system is being hacked", "error").then(() => {
+                            document.location.href = "/";
+                        }
+                    );
+                } else {
+                    {% if request.path in ["/", "/elancell_breach", "/elancell_upload"] %}
+                        swal("Data Upload Reset", "USB media has been removed", "warning").then(() => {
+                                document.location.href = "/";
+                            }
+                        );
+                    {% endif %}
+                }
+            })
+
+            socket.on("laserlock_fe", function (msg) {
+                console.log(`laserlock ${msg}`)
+                loadControlPanel(msg.data, laserlockStatus = msg.status);
+                $('#chatAudio')[0].play();
+                toastr.warning(`laserlock is ${msg.status}
+                                <button type="button" class="btn btn-outline-dark float-end">open laserlock</button>`,
+                    "New Update",
+                    {
+                        timeOut: false,
+                        onclick: function () {
+                            document.location.href = "/lab_control";
+                        }
+                    }
+                );
+            })
+
+            socket.on("boot_fe", function (msg) {
+                console.log(`usb boot: ${msg}`)
+                if (msg.status === "disconnect") {
+                    toastr.error(`Shutdown in 5 Seconds`);
+                    setTimeout(function () {
+                        window.location.href = "/";
+                    }, 5000);
+                }
+            })
+
+            socket.on('samples_updates_fe', function (msg) {
+                setTimeout(() => {
+                    $('#chatAudio')[0].play();
+                    toastr.success(msg);
+                }, {% if request.path == "/gas_analysis" %}5000{% else %}1000{% endif %});
+
+            })
+
+            function handleMessageReception(msg, playNotification = true) {
+                if (typeof msg.user_name !== 'undefined') {
+                    let chatColor = "white", srcColor = "black";
+                    if (myRoomID === "TR3") {
+
+                        if (msg.user_name == "system") {
+                            srcColor = "blue";
+                        } else if (msg.user_name == "game-master") {
+                            srcColor = "green";
+                        } else {
+                            srcColor = "white";
+                        }
+                    }
+
+                    if (msg.user_name === "rachel") {
+                        chatColor = "red";
+                        srcColor = "red";
+                    } else if (msg.user_name === "elancell-hq") {
+                        chatColor = "yellow";
+                        srcColor = "yellow";
+                    }
+
+                    $('#msg_holder').prepend(
+                        `<div>
+                                <b style="color: ${srcColor}"> ${msg.user_name}:</b>
+                                <p style="display: inline; color: ${chatColor}">${msg.message}</p>
+                         </div>`);
+
+                    if (msg.user_name !== myRoomID) {
+
+                        toastr.clear();
+                        {% if request.path == "/chat_control" %}
+                            if (playNotification) {
+                                $('#chatAudio')[0].play();
+                                toastr.info("", "New message");
+                            }
+                        {% else %}
+                            $('#chatAudio')[0].play();
+                            toastr.info(msg.message.slice(0, 35) +
+                                '... <button type="button" class="btn btn-outline-dark float-end">open</button>',
+                                "New message:",
+                                {
+                                    timeOut: false,
+                                    onclick: function () {
+                                        if ($('.floating-chat').length) {
+                                            openElement();
+                                        } else {
+                                            document.location.href = "/chat_control";
+                                        }
+                                    }
+                                });
+                        {% endif %}
+
+                        // update floating container
+                        if (document.getElementById("floatMsgContainer")) {
+                            receiveNewMessage(msg.user_name, msg.message);
+                        }
+                    }
+                }
+            }
+        </script>
+    {% endblock %}
+
+    {% block head %}
+    {% endblock %}
+</head>
+
+<body class="body bg-dark" data-lang="en">
+
+{% include "header.html" %}
+
+<section id="control-section">
+    <div id="content">
+        {% block content %}
+        {% endblock %}
+    </div>
+</section>
+<audio id="chatAudio">
+    <source src="{{ url_for('static',filename='sounds/notification.mp3') }}" type="audio/mpeg">
+</audio>
+<script src="{{ url_for('static',filename='js/fns.js') }}">
+</script>
+
+<script type="text/javascript">
+
+    function setLangExpStatus(g_lang = "de") {
+        {% if request.path in ["/sample_release"] %}
+            console.log("language is '" + g_lang + "' set table values in experiment status");
+            if (g_lang === "en") {
+                $("#gas-control-title").html("gas control T1");
+                $("#nano-constructor-title").html("NANO-constructor T2");
+            } else {
+                $("#gas-control-title").html("Gassteuerung T1");
+                $("#nano-constructor-title").html("Nano-Konstrukteur T2");
+            }
+        {% endif %}
+    }
+
+    $(function () {
+        let rb = document.getElementById("rb_" + g_lang)
+        if (rb) {
+            rb.checked = true;
+        }
+        setLangExpStatus(g_lang);
+        // decrease notification volume to 50%
+        $("#chatAudio").volume = 0.5;
+    });
+
+    function loadControlPanel(jsonResponse, laserlockStatus = "", g_lang = "") {
+        let CPanel = document.getElementById("ControlPanel");
+        let PContainer = document.getElementById("posts-container");
+        let resTxt = "";
+
+        if (CPanel) {
+            //CPanel.innerHTML = ""
+            for (let jsonResponseElement of jsonResponse.btns) {
+                resTxt += jsonResponseElement.html;
+            }
+            CPanel.innerHTML = resTxt;
+
+            let laserlock = laserlockStatus || "{% if laserlock %}{{ laserlock }}{% endif %}";
+            let laserlockAuth = "{% if laserlock_auth %}{{ laserlock_auth }}{% endif %}";
+            let samplesFlag = "{% if samples_flag %}{{ samples_flag }}{% endif %}";
+            let flags = JSON.parse('{% if flags %}{{ flags | tojson }}{% else %}null{% endif %}');
+            let lang = g_lang || "{% if g_config.lang %}{{ g_config.lang }}{% else %}EN{% endif %}";
+
+            if (laserlock === "error") {
+                let air_elem = jsonResponse.btns.find(x => x.id === '{{ laserlock_id }}');
+                disableOption(air_elem, "<p style='color: white; font-size: 25pt'>ERROR 432</p>", "rgba(255,0,0,0.6)");
+            }
+
+            let authText = "Authentifizierung";
+            let authFailedText = "Authentifizierung fehlgeschlagen";
+            if (lang.toLowerCase() === "en") {
+                authText = "Authentication";
+                authFailedText = "Authentication failed";
+            }
+
+            for (let jsonResponseElement of jsonResponse.btns) {
+                if (laserlockAuth === "failed" && (jsonResponseElement.id !== "{{ laserlock_id }}" && jsonResponseElement.id !== "chat-control")) {
+                    disableOption(jsonResponseElement, authFailedText);
+                } else if (laserlockAuth === "success" && jsonResponseElement.id === "{{ laserlock_id }}") {
+                    disableOption(jsonResponseElement, "success", "rgba(0, 255, 0, 0.6)");
+                } else if (laserlockAuth === "success" && jsonResponseElement.id === "media-control") {
+                    disableOption(jsonResponseElement, "success", "rgba(0, 255, 0, 0.6)");
+                } else if (flags && flags.cleanroom === "unlock" && jsonResponseElement.id === "cleanroom") {
+                    disableOption(jsonResponseElement, "unlock", "rgba(0, 255, 0, 0.6)");
+                } else if (flags && flags.elancell.startsWith("done") && jsonResponseElement.id === "elancell-upload") {
+                    disableOption(jsonResponseElement, "sent", "rgba(0, 255, 0, 0.6)");
+                } else if (samplesFlag === "done" && (
+                    jsonResponseElement.id === "gas-analysis" || jsonResponseElement.id === "gas-control")) {
+                    disableOption(jsonResponseElement, "done", "rgba(0, 255, 0, 0.6)");
+                } else if (jsonResponseElement.auth) {
+                    disableOption(jsonResponseElement, `${authText} <span style="color: crimson; background-color: black">${getFullName(jsonResponseElement.auth)}</span>`);
+                }
+            }
+
+
+        } else if (PContainer && !("title" in jsonResponse)) {
+            let resTxt = "";
+            for (const [folder, posts] of Object.entries(jsonResponse)) {
+                resTxt += `<div class="accordion-item bg-transparent">
+                                <h2 class="accordion-header bg-transparent" id="headingOne">
+                                    <button class="accordion-button bg-black collapsed" type="button" data-mdb-toggle="collapse"
+                                        data-mdb-target="#dir-${folder.replaceAll(" ", "")}" aria-expanded="false"
+                                        aria-controls="dir-${folder.replaceAll(" ", "")}">
+                                        <span><i class="fa-solid fa-folder"></i> ${folder} </span>
+                                    </button>
+                                </h2>
+                            <div id="dir-${folder.replace(" ", "")}" class="accordion-collapse collapse"
+                                 aria-labelledby="headingOne">
+                                <div class="accordion-body">
+                                    <div class="row">`
+                for (const post of posts) {
+                    resTxt += `
+                                <div class="card col-md-6 m-sm-auto">
+                                    <div class="card-body">
+                                        <h5 class="card-title">
+                                            <i class="fa-solid fa-file me-2"></i>
+                                            <a class="stretched-link"
+                                               href="${post.url}">
+                                                ${post.title}
+                                            </a>
+                                        </h5>
+                                        <small>Sprache: ${post.lang}</small>
+                                    </div>
+                                </div>
+                                `
+                }
+                resTxt += `</div></div></div></div>`
+            }
+            PContainer.innerHTML = resTxt
+        }
+        setLangExpStatus(g_lang);
+    }
+</script>
+{% block add_js %}
+
+{% endblock %}
+{% block float_chat %}
+    {% if not request.path in ["/", "/chat_control", "/lab_control", "/media_control", "/media_control_rachel", "/personal_rachel_tablet"] %}
+        {% include "floating_chat.html" %}
+    {% endif %}
+{% endblock %}
+</body>
+
+</html>

@@ -1,0 +1,273 @@
+{% extends "layout.html" %}
+
+{% block head %}
+    <style>
+        .modal-dialog {
+            text-align: center;
+        }
+
+        .modal-body {
+            padding: 0;
+        }
+
+        .modal-content {
+            background-color: transparent;
+            width: fit-content;
+
+        }
+
+        .button-close {
+            float: right;
+            background-color: black;
+            border-radius: 50% 50% 0 0;
+            border: 0;
+        }
+
+        .hint-box {
+            text-align: center;
+            border: transparent;
+            background-color: transparent;
+        }
+
+        main {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 20px 0 0 70px;
+            background-color: white;
+            height: 550px;
+        }
+
+        .thumbnail {
+            height: fit-content;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 100px 20px 0;
+        }
+
+        .thumbnail i {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100px;
+            width: auto;
+            font-size: 100px;
+            color: #263238;
+            cursor: pointer;
+        }
+
+        .thumbnail i span {
+            position: relative;
+            top: 2px;
+            font-family: OldPC, system-ui;
+            font-size: 12px;
+            width: fit-content;
+            color: white;
+            padding: 7px 30px;
+            background: #212121;
+            border-radius: 3px;
+            opacity: 0;
+            transition: opacity .2s, top .3s;
+        }
+
+        .thumbnail h1 {
+            position: relative;
+            top: 5px;
+            font-size: 20px;
+        }
+
+
+        .thumbnail:hover h1 {
+            opacity: 0;
+        }
+
+        .new-folder:hover i {
+            color: #607D8B;
+        }
+
+        .thumbnail:hover span {
+            top: 0;
+            opacity: 1;
+        }
+
+        #lang-box {
+            visibility: hidden;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js"
+            integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ"
+            crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"
+            integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm"
+            crossorigin="anonymous"></script>
+{% endblock %}
+
+{% block content %}
+    <!-- SCANDALS modal -->
+    <div class="modal fade"
+         id="pdfsModal"
+         tabindex="-1"
+         role="dialog"
+         aria-labelledby="pdfsModalLabel"
+         aria-hidden="true">
+
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content bg-light">
+                <div class="modal-header justify-content-between bg-light">
+                    <h5 class="modal-title">SCANDALS / SKANDALE</h5>
+                    <button type="button" class="close btn-danger" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="d-flex align-items-start">
+                        <div class="nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist"
+                             aria-orientation="vertical">
+                            {% for file in g_config.pdfs %}
+                                <div class="thumbnail mx-0 {% if loop.index0 == 0 %}active{% endif %}">
+                                    <button class="nav-link"
+                                            id="v-pills-tab-{{ loop.index }}" data-toggle="pill"
+                                            data-target="#v-pills-{{ loop.index }}" type="button" role="tab"
+                                            aria-controls="v-pills-{{ loop.index }}"
+                                            aria-selected="{% if loop.index0 == 0 %}true{% else %}false{% endif %}">
+
+                                        <i class="fa fa-file-pdf">
+                                            <span>{{ file }}</span>
+                                        </i>
+                                    </button>
+                                    <h1>Report {{ loop.index }} EN/DE</h1>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="tab-content" id="v-pills-tabContent">
+                            {% for file in g_config.pdfs %}
+                                <div class="tab-pane fade {% if loop.index0 == 0 %}show active{% endif %}"
+                                     id="v-pills-{{ loop.index }}" role="tabpanel"
+                                     aria-labelledby="v-pills-tab-{{ loop.index }}">
+                                    <embed type="application/pdf" height="700px" width="1000px"
+                                           src="{{ url_for('static', filename='pdfs/' + file) }}#toolbar=0&navpanes=0">
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- truth video modal -->
+    <div class="modal fade"
+         id="vidTruthModal"
+         tabindex="-1"
+         role="dialog"
+         aria-labelledby="vidTruthModalLabel"
+         aria-hidden="true">
+
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header justify-content-between bg-light">
+                    <h5 class="modal-title">The Truth Video</h5>
+                    <button type="button" class="close btn-danger" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <!-- Add image inside the body of modal -->
+                <div class="modal-body">
+                    <video controls id="vid_the_truth">
+                        <source src="{{ url_for('static', filename='media/rachel/The_Truth_Sub_DE_480.webm') }}#t=0.1">
+                    </video>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- usb image modal -->
+    <div class="modal fade"
+         id="usbImgDialog"
+         tabindex="-1"
+         role="dialog"
+         aria-labelledby="usbImgDialogLabel"
+         aria-hidden="true">
+
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header justify-content-between bg-light">
+                    <h5 class="modal-title">USB Information</h5>
+                    <button type="button" class="close btn-danger" data-dismiss="modal" aria-label="Close"
+                            onclick="$('#usbImgDialog').modal('hide');">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <!-- Add image inside the body of modal -->
+                <div class="modal-body">
+                    <img src="{{ url_for('static', filename='pdfs/DATA_Upload_Red-Blue.png') }}"
+                         alt="choose red or blue usb" height="500px" width="auto"/>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <main id="main">
+        <div class="thumbnail">
+            <i class="fa fa-folder">
+                <span>0 folders <br>0 files</span>
+            </i>
+            <h1>Photos</h1>
+        </div>
+        <div class="thumbnail">
+            <button data-toggle="modal" data-target="#pdfsModal" class="hint-box">
+                <i class="fa fa-folder">
+                    <span>0 folders <br>3 files</span>
+                </i>
+            </button>
+            <h1>SCANDALS / SKANDALE</h1>
+        </div>
+        <div class="thumbnail">
+            <button data-toggle="modal" data-target="#vidTruthModal" class="hint-box">
+                <i class="fa-regular fa-file-video">
+                    <span>play video</span>
+                </i>
+            </button>
+            <h1>The Truth</h1>
+        </div>
+        <div class="thumbnail">
+            <button data-toggle="model" data-target="#usbImgDialog" class="hint-box" id="btnUsbInfo">
+                <i class="fa-regular fa-file-pdf">
+                    <span>open PDF</span>
+                </i>
+            </button>
+            <h1>USB info</h1>
+        </div>
+    </main>
+{% endblock %}
+
+{% block add_js %}
+    <script>
+        $(function () {
+            $('#vidTruthModal').modal({
+                show: false
+            }).on('hidden.bs.modal', function () {
+                $(this).find('video')[0].pause();
+                $(this).find('video')[0].currentTime = 0.1;
+            });
+        });
+
+        $('#vidTruthModal').on('shown.bs.modal', function () {
+            $(this).find('video')[0].play();
+        });
+
+        $('#btnUsbInfo').click(function () {
+            $("#usbImgDialog").modal('show');
+        })
+
+        $('button.nav-link').click(function (e) {
+            e.preventDefault();
+            $("button.nav-link").removeClass('active show');
+        });
+    </script>
+{% endblock %}

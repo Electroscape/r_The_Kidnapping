@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+
+{% block head %}
+    <style>
+        #content {
+            color: white;
+        }
+
+        #lang-box {
+            visibility: hidden;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    {{ post.html|safe }}
+    {% if locker_version %}
+        {% for img in locker_version %}
+            <img alt="{{ loop.index }}.png" src="../static/imgs/locker/{{ img }}">
+        {% endfor %}
+    {% endif %}
+
+    <footer class="footer" style="color: #111111; float: left">
+        {{ post.title }} | Elancell wiki content
+    </footer>
+{% endblock %}

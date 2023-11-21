@@ -1,0 +1,427 @@
+{% extends 'layout.html' %}
+
+{% block head %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"
+            integrity="sha512-57oZ/vW8ANMjR/KQ6Be9v/+/h6bq9/l3f0Oc7vn6qMqyhvPd1cvKBRWWpzu0QoneImqr2SkmO4MSqU+RpHom3Q=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/dark-hive/jquery-ui.min.css"
+          integrity="sha512-gCFexX+67Pl9rPa75MMyEH2I5jbD5tqij8VBYcsLVwgVfVEdfon+9CEjVnXPtqoHLXjxrjMcyHLaee65dt/jxw=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/dark-hive/theme.min.css"
+          integrity="sha512-pN35/N51n1IeABlNGOSb5ltVKGbvUE8exTMhiB/4ijuy+UOYEWawQZzEs2yUvvCWopRO3uiRueeGnd/mQD0eTQ=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+
+    <style>
+        h3 {
+            font-size: unset;
+            color: snow;
+            opacity: 0.4;
+        }
+
+        #lang-box {
+            visibility: hidden;
+        }
+
+        .ui-widget {
+            font-family: unset;
+        }
+
+        .ui-widget button {
+            font-family: unset;
+        }
+
+        .form-control:disabled {
+            background-color: transparent !important;
+            opacity: 0.8;
+        }
+
+        .form-control:enabled {
+            background-color: white !important;
+            color: black !important;
+        }
+
+        .form-label {
+            color: lightskyblue;
+        }
+
+        label, input {
+            display: block;
+        }
+
+        input.text {
+            margin-bottom: 12px;
+            width: 95%;
+            padding: .4em;
+            font-family: unset;
+        }
+
+        fieldset {
+            padding: 0;
+            border: 0;
+            margin-top: 25px;
+        }
+
+        .validateTips {
+            border: 1px solid transparent;
+            padding: 0.3em;
+            color: red;
+        }
+
+        /*  --------------------------------------- */
+
+        li {
+            list-style-type: none;
+            font-size: 16pt;
+        }
+
+        .mail {
+            margin: auto;
+            padding: 50px;
+            width: 1000px;
+            border-style: solid;
+            border-width: medium;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 10px;
+        }
+
+        .container button {
+            width: 35%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            margin: 40px;
+            white-space: pre-wrap;
+        }
+
+        .container .loading-wrapper {
+            width: 70%;
+            margin: 20px;
+            box-sizing: border-box;
+            display: none;
+        }
+
+        .container .loading-wrapper h1 {
+            font-size: 1.5rem;
+            text-align: center;
+        }
+
+        .container .loading-wrapper .loading-bar {
+            width: 100%;
+            height: 4rem;
+            border: 0.4rem solid #41FF00;
+            box-sizing: border-box;
+            margin-top: 2rem;
+        }
+
+        .container .loading-wrapper .loading-bar .loading-fill {
+            width: 1%;
+            height: 100%;
+            background: #41FF00;
+        }
+
+        #levels-game-container {
+            text-align: center;
+        }
+    </style>
+
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/gas_analysis_game.css') }}" media="screen">
+    <script src="https://code.iconify.design/iconify-icon/1.0.5/iconify-icon.min.js"></script>
+
+    <script>
+        $(function () {
+            let dialog, form,
+                ip = $("#ipv4");
+
+            function submitToElancell() {
+                function ip2num(dot) {
+                    let d = dot.split('.');
+                    if (d.length !== 4) return -1;
+                    return ((((((+d[0]) * 256) + (+d[1])) * 256) + (+d[2])) * 256) + (+d[3]);
+                }
+
+                // after validation
+                let ipTxt = ip.val();
+                let ipVal = ip2num(ip.val());
+                if (ipVal === ip2num("{{ g_config.elancell_ip }}")) {
+                    socket.emit('msg_to_backend', {
+                        cmd: "upload",
+                        message: "elancell",
+                        username: myRoomID
+                    })
+                    // upload to POD
+                    dialog.dialog("close");
+                    swal("Sent", "Results were sent successfully to IP address: \n" + ipTxt, "success");
+                    end();
+                } else if (ipVal === ip2num("{{ g_config.rachel_ip }}")) {
+                    socket.emit('msg_to_backend', {
+                        cmd: "upload",
+                        message: "rachel",
+                        username: myRoomID
+                    })
+                    // Upload to Rachel
+                    dialog.dialog("close");
+                    swal("Sent", "Results were sent successfully to IP address: \n" + ipTxt, "warning");
+                    end();
+                } else {
+                    swal("Forbidden Connection",
+                        "The server failed to validate the certificate, please make sure of the configuration",
+                        "error");
+                }
+                return true;
+            }
+
+            dialog = $("#dialog-form").dialog({
+                autoOpen: false,
+                height: 400,
+                width: 500,
+                modal: true,
+                buttons: {
+                    Cancel: function () {
+                        dialog.dialog("close");
+                    },
+                    "Upload": submitToElancell,
+                },
+                close: function () {
+                    form[0].reset();
+                }
+            });
+
+            form = dialog.find("form").on("submit", function (event) {
+                event.preventDefault();
+                submitToElancell();
+            });
+
+            $("#BtnUpload").button().on("click", function () {
+                dialog.dialog("open");
+            });
+
+            $("#dialog-message").dialog({
+                autoOpen: false,
+                modal: true,
+                height: 300,
+                width: 500,
+                open: function () {
+                    $(this).siblings('.ui-dialog-titlebar').remove();
+                },
+                buttons: {
+                    homepage: function () {
+                        document.location.href = "/";
+                    }
+                }
+            });
+        });
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"
+            integrity="sha512-pHVGpX7F/27yZ0ISY+VVjyULApbDlD0/X0rgGbTqCE7WFW5MezNTWG/dnhtbBuICzsd0WQPgpE4REBLv+UqChw=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+{% endblock %}
+
+
+{% block content %}
+
+    <!-- Final upload window -->
+    <div id="dialog-form" class="d-none"
+         title="Upload to {% if "breach" in request.path %}R.{% else %}Elancell{% endif %}">
+        <p class="validateTips">All form fields are required.</p>
+
+        <form autocomplete="off">
+            <fieldset class="form-outline">
+                <h3>Network Configuration</h3>
+                <label class="form-label" for="ipv4">ip
+                    <input id="ipv4" type='search' name='text1'
+                           {% if "breach" in request.path %}placeholder="type ip here"
+                           {% else %}value="{{ g_config.elancell_ip }}"{% endif %}
+                           autocomplete="new-password"
+                           class="form-control text ui-widget-content ui-corner-all" disabled/>
+                </label>
+
+                <h3>File Info</h3>
+                <label class="form-label" for="name">name</label>
+                <input type="text" name="name" id="name" value="kill_switch.xml"
+                       class="form-control text ui-widget-content ui-corner-all" disabled/>
+                <!-- Allow form submission with keyboard without duplicating the dialog button -->
+                <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+            </fieldset>
+        </form>
+    </div>
+
+    <div id="dialog-message" title="Insert Media" style="text-align: center; background-color: dodgerblue;"
+         class="d-none">
+        <img class="mt-2" width="100px" height="100px" alt="USB flash drive"
+             src="{{ url_for("static", filename="imgs/flash-drive.png") }}">
+        <p class="my-2">
+            <i class="fa-solid fa-triangle-exclamation" style="color: yellow;"></i>
+            No media detected <br><strong>Please Insert media to continue</strong>.
+        </p>
+    </div>
+
+    <div class="mail">
+        <div class="container">
+            <button id="btn" class="btn btn-info">COMPILE DATA</button>
+            <div class="loading-wrapper">
+                <h1 id="loadId">Compiling...</h1>
+                <div class="loading-bar">
+                    <div class="loading-fill"></div>
+                </div>
+            </div>
+            <button id="BtnUpload" class="submit">Submit Results</button>
+        </div>
+        <div id="levels-game-container" class="d-none">
+            <h2>Package for data upload</h2>
+            <script src="{{ url_for('static',filename='js/levels_game.js') }}">
+            </script>
+            {% with elements=samples|tojson, gameID=0 %}
+                {% include "dragDropGame.html" %}
+            {% endwith %}
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        //input mask bundle ip address
+        const ipv4_address = $('#ipv4');
+        ipv4_address.mask('099.099.099.099', {
+            alias: "ip",
+            greedy: false //The initial mask shown will be "" instead of "-____".
+        });
+
+        const animate = (elancellStatus, width = 1, usbStatus = "empty") => {
+            const loadingFill = document.querySelector('.loading-fill');
+            let isEnabled = usbStatus !== "empty";
+            let isSolved = elancellStatus.includes("solved") || elancellStatus.includes("synthesized");
+            let isSynthesized = elancellStatus.includes("synthesized");
+
+            // init loading bar
+            loadingFill.style.width = width + '%';
+            $(".loading-bar")[0].style.borderColor = "";
+            $("#loadId").html("Compiling...");
+            $('#btn').hide();
+
+            function fill() {
+                if (width === 10) {
+                    if (!isEnabled) {
+                        clearInterval(interval);
+                        showError("Compilation failed!<br>Please insert USB media");
+                        $("#dialog-message").dialog("open");
+                    }
+                } else if (width === 33) {
+                    if (!isSolved) {
+                        clearInterval(interval);
+                        $(".mail .container").slideUp();
+                        $("#levels-game-container").slideDown();
+                    }
+                } else if (width === 66) {
+                    if (!isSynthesized) {
+                        clearInterval(interval);
+                        showError(`
+                        Package is ready!
+                        <span style="color: red">Please Synthesize!</span><br>
+                        <p>Replace most stable component with killswitch</p>
+                        PAKET IST BEREIT!
+                        <span style="color: red">BITTE SYNTHETISIEREN!</span><br>
+                        <p>DIE STABILSTE KOMPONENTE MUSS DURCH DEN KILLSWITCH ERSETZT WERDEN</p>
+                    `);
+                    }
+                } else if (width === 100) {
+                    clearInterval(interval);
+                    $("#loadId").html("compiled successfully ✔️");
+                    $('#BtnUpload').show();
+                    $('#BtnUpload').attr("disabled", false);
+                }
+                width++;
+                loadingFill.style.width = width + '%';
+            }
+
+            const interval = setInterval(fill, 50);
+        }
+
+        function showError(errorMsg) {
+            $("#loadId").html(errorMsg);
+            $(".loading-bar")[0].style.borderColor = "red";
+            setTimeout(() => {
+                $('#btn').text("Re-Compile \n NEU KOMPILIEREN ");
+                $('#btn').show();
+            }, 1000);
+        }
+
+        function end() {
+            $('#btn').hide();
+            $('.loading-wrapper').show();
+            $("#loadId").text("compiled successfully ✔️");
+            $('.loading-fill').width('100%');
+            $('#BtnUpload').attr("disabled", true);
+            $('#BtnUpload').text("SENT");
+            $('#BtnUpload').css("cursor", "unset")
+        }
+
+        socket.on("elancell_fe", function (msg) {
+            if (msg.data === "disable") {
+                $("#dialog-message").dialog("open");
+            } else if (msg.data === "enable") {
+                {% if "breach" in request.path %}
+                    swal("Restart", "Back to homepage", "warning").then(() => {
+                                document.location.href = "/";
+                            }
+                        );
+                {% endif %}
+                console.log("fifth sample is released");
+                $("#dialog-message").dialog("close");
+                animate(msg.data, 11);
+            } else if (msg.data === "solved") {
+                $("#levels-game-container").slideUp();
+                $(".mail .container").slideDown();
+                $('.loading-wrapper').show();
+                animate(msg.data, 34);
+            } else if (msg.data === "synthesized") {
+                $('#btn').hide();
+                $('.loading-wrapper').show();
+                animate(msg.data, 67);
+            }
+        })
+
+        document.addEventListener('DOMContentLoaded', () => {
+            $("#levels-game-container").hide();
+            $("#dialog-message").removeClass("d-none");
+            $("#levels-game-container").removeClass("d-none");
+            $("#dialog-form").removeClass("d-none");
+
+            $('#BtnUpload').attr("disabled", "true");
+
+            $('#btn').on('click', () => {
+                $.ajax({
+                    type: 'POST',
+                    url: '{{ url_for("get_elancell") }}',
+                    contentType: 'application/json;charset=UTF-8',
+                    success: function (res) {
+                        $('#btn').hide();
+                        $('.loading-wrapper').show();
+                        animate(res.upload, 1, res.usb);
+                    }
+                });
+            });
+
+            $.ajax({
+                type: 'POST',
+                url: '{{ url_for("get_elancell") }}',
+                contentType: 'application/json;charset=UTF-8',
+                success: function (res) {
+                    if (res.upload.startsWith("done")) {
+                        end();
+                    } else {
+                        $("#BtnUpload").hide();
+                    }
+                }
+            });
+
+            {% if "breach" in request.path %}
+                $('#ipv4').removeAttr("disabled");
+            {% endif %}
+        });
+    </script>
+{% endblock %}

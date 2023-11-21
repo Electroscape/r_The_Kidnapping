@@ -1,0 +1,53 @@
+{% extends 'layout.html' %}
+
+{% block head %}
+    <style>
+        .card {
+            background-color: transparent;
+            border: unset;
+            box-shadow: unset;
+        }
+        .floating-chat {
+            background-color: black;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="accordion" id="posts-container">
+            {% for folder, posts in folders.items() %}
+                <div class="accordion-item bg-transparent">
+                    <h2 class="accordion-header bg-transparent" id="headingOne">
+                        <button class="accordion-button bg-black collapsed" type="button" data-mdb-toggle="collapse"
+                                data-mdb-target="#dir-{{ folder.replace(" ", "") }}" aria-expanded="false"
+                                aria-controls="dir-{{ folder.replace(" ", "") }}">
+                            <span><i class="fa-solid fa-folder"></i> {{ folder }} </span>
+                        </button>
+                    </h2>
+                    <div id="dir-{{ folder.replace(" ", "") }}" class="accordion-collapse collapse"
+                         aria-labelledby="headingOne">
+                        <div class="accordion-body">
+                            <div class="row">
+                                {% for post in posts %}
+                                    <div class="card col-md-6 m-sm-auto">
+                                        <div class="card-body">
+                                            <h5 class="card-title">
+                                                <i class="fa-solid fa-file me-2"></i>
+                                                <a class="stretched-link"
+                                                   href="{{ post.url }}">
+                                                    {{ post.title }}
+                                                </a>
+                                            </h5>
+                                            <small>Sprache: {{ post.lang }}</small>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,206 @@
+{% extends "layout.html" %}
+
+{% block head %}
+    <style>
+        #no-media {
+            margin-top: 150px;
+            color: red;
+            text-align: center;
+            border: 1px dashed;
+            padding: 50px;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-content: center;
+            justify-content: center;
+        }
+
+        .container .videos {
+            padding: 10px;
+            justify-content: center;
+            flex-wrap: nowrap;
+            overflow-x: scroll;
+        }
+
+        .container .videos video {
+            width: 15%;
+            margin: 10px;
+            object-fit: cover;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .container .videos video:hover,
+        .container .videos .active {
+            transform: scale(1.06);
+            border: 3px solid blue;
+        }
+
+        .container .main-video {
+            display: flex;
+            max-width: 100%;
+            margin: auto;
+        }
+
+        .container .main-video video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+
+        .paddle {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 3em;
+        }
+
+        .left-paddle {
+            left: 0;
+        }
+
+        .right-paddle {
+            right: 0;
+        }
+
+        .menu-wrapper {
+            position: relative;
+            margin: 1em auto;
+            border: 0.5px solid black;
+            overflow-x: hidden;
+            overflow-y: hidden;
+        }
+
+        #lang-box {
+            visibility: hidden;
+        }
+     
+        
+    
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container align-content-center">
+        {% if g_config.files %}
+            <div class="main-video">
+                <video src="{{ url_for('static', filename='media/' + g_config.files[0]) }}"
+                       controls autoplay controlsList="nodownload"></video>
+            </div>
+
+            <div class="menu-wrapper">
+                <div class="videos row">
+                    {% for media in g_config.files %}
+                        <video class="item" src="{{ url_for('static', filename='media/' + media) }}#t=0.1"></video>
+                    {% endfor %}
+                </div>
+                <div class="paddles">
+                    <button class="left-paddle paddle hidden">
+                        <
+                    </button>
+                    <button class="right-paddle paddle hidden">
+                        >
+                    </button>
+                </div>
+            </div>
+        {% else %}
+            <h1 id="no-media">No media files found in the folder!</h1>
+        {% endif %}
+
+    </div>
+{% endblock %}
+
+{% block add_js %}
+    <script>
+
+        $(document).ready(function () {
+
+            $('.videos video').click(function () {
+
+                $(this).addClass('active').siblings().removeClass('active');
+
+                let src = $(this).attr('src');
+                $('.main-video video').attr('src', src);
+            });
+        });
+
+        // duration of scroll animation
+        var scrollDuration = 300;
+        // paddles
+        var leftPaddle = document.getElementsByClassName('left-paddle');
+        var rightPaddle = document.getElementsByClassName('right-paddle');
+        // get items dimensions
+        var itemsLength = $('.item').length;
+        var itemSize = $('.item').outerWidth(true);
+        // get some relevant size for the paddle triggering point
+        var paddleMargin = 20;
+
+        // get wrapper width
+        var getMenuWrapperSize = function () {
+            return $('.menu-wrapper').outerWidth();
+        }
+        var menuWrapperSize = getMenuWrapperSize();
+        // the wrapper is responsive
+        $(window).on('resize', function () {
+            menuWrapperSize = getMenuWrapperSize();
+        });
+        // size of the visible part of the menu is equal as the wrapper size
+        var menuVisibleSize = menuWrapperSize;
+
+        // get total width of all menu items
+        var getMenuSize = function () {
+            return itemsLength * itemSize;
+        };
+        var menuSize = getMenuSize();
+        // get how much of menu is invisible
+        var menuInvisibleSize = menuSize - menuWrapperSize;
+
+        // get how much have we scrolled to the left
+        var getMenuPosition = function () {
+            return $('.videos').scrollLeft();
+        };
+
+        // finally, what happens when we are actually scrolling the menu
+        $('.videos').on('scroll', function () {
+
+            // get how much of menu is invisible
+            menuInvisibleSize = menuSize - menuWrapperSize;
+            // get how much have we scrolled so far
+            var menuPosition = getMenuPosition();
+
+            var menuEndOffset = menuInvisibleSize - paddleMargin;
+
+            // show & hide the paddles
+            // depending on scroll position
+            if (menuPosition <= paddleMargin) {
+                $(leftPaddle).addClass('hidden');
+                $(rightPaddle).removeClass('hidden');
+            } else if (menuPosition < menuEndOffset) {
+                // show both paddles in the middle
+                $(leftPaddle).removeClass('hidden');
+                $(rightPaddle).removeClass('hidden');
+            } else if (menuPosition >= menuEndOffset) {
+                $(leftPaddle).removeClass('hidden');
+                $(rightPaddle).addClass('hidden');
+            }
+
+        });
+
+        // scroll to left
+        $(rightPaddle).on('click', function () {
+            $('.videos').animate({scrollLeft: menuInvisibleSize}, scrollDuration);
+        });
+
+        // scroll to right
+        $(leftPaddle).on('click', function () {
+            $('.videos').animate({scrollLeft: '0'}, scrollDuration);
+        });
+    </script>
+{% endblock %}

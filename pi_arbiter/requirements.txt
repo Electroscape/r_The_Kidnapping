@@ -1,0 +1,8 @@
+
+python-socketio==5.7.2
+requests
+pcf8574
+
+# optional for on pc testing
+# tkinter?
+# GPIOEmulator

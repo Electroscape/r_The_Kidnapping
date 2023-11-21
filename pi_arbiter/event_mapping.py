@@ -2,6 +2,13 @@ import requests
 import subprocess
 from enum import IntEnum
 
+'''
+@TODO: 
+    * 🔲 test
+    * 🔲 uncomment TV trigger?
+    * ✅ 
+    * 🔲 list directly connected reeds and TYPE of NC/NO required
+'''
 
 
 laserlock_out_pcf = 0
@@ -69,6 +76,27 @@ event_map = {
         event_script: call_video,
         event_next_qeued: "self_check_q1"
     },
+    "room_reset": {},
+
+    "water_solved": {},
+
+    "fusebox_solvedHallway": {},
+    # boots up PCs from the floppy riddle, lights up the MC
+    "fusebox_bootMC": {},
+
+    "breakout_boot": {},
+    "breakout_solved": {},
+    "breakout_setSolved": {},
+
+    "light_hallwayDimmed": {},
+    "light_hallwayOff": {},
+    # triggered when the
+    "light_hallwayStart": {},
+
+    # opened by reed of the appartment door, 1 minute fadein
+    "light_enteringFlat": {},
+    # opening of the chinmey, fades in and out to set its fokus
+    "light_openingMC": {},
 }
 
 

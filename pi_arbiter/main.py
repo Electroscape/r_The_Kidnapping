@@ -23,22 +23,9 @@ usb_live = False
 
 '''
 @TODO: 
-    * 🔲 expection handling
-    * ✅ cooldowns, need to consider what time library
-    * ✅ handling of multiple IO reading the same 
-    * ✅ gpio callback from fe event
-    * ✅ gpio output cooldowns
-    * ✅ gpio input cooldowns
-    * ✅ map fe events to events
-    * 🔲 Caught exception socket.error : Already connected? -> Try: finally: disco?
-    * ✅ logging
-    * ✅ rachel + david
-    * 🔲 resettime as param
-    * ✅ designated PCFS as input or output
-    * ✅ make a fnc for checking if pin/binary value present in pcf value
-    * ✅ \/ make one event capable to trigger multiple outputs via PCF
-    * 🔲 FE multiple CBs 
-    * ✅ mutiple pcf_outs on events
+    * 🔲 test
+    * 🔲 uncomment TV trigger?
+    * ✅ 
 '''
 
 sio = socketio.Client()
@@ -110,15 +97,6 @@ def trigger_event(event_key, event_value=None):
     log_msg = f"{elapsed_time_str} {event_key}"
     logging.info(log_msg)
 
-    # Sound, may be moved to a fnc
-    print(event_value)
-    try:
-        event_entry = event_value[sound]
-        print(f"activating sound: {event_entry}")
-        activate_sound(event_entry)
-    except KeyError:
-        pass
-
     # IO pins
     try:
         # @todo: type casting here?
@@ -151,7 +129,6 @@ def handle_event(event_key, event_value=None):
             # print(f"conditions not fullfilled {event_key}")
             return
 
-        # Start Video before Sound
         event_value.get(event_script, lambda *args: 'Invalid')(event_key, nw_sock)
     except TypeError as err:
         print(f"Error with event fnc/condition {err}")

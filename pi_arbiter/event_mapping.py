@@ -776,29 +776,6 @@ inverted_events = {
 }
 
 
-def activate_sound(event_entry):
-    print(event_entry)
-    payload = dict(ip="192.168.178.172")
-
-    try:
-        sound_id_value = event_entry[sound_id]
-        if event_entry.get(is_fx, True):
-            payload["fx_id"] = sound_id_value
-        else:
-            payload["group_id"] = sound_id_value
-    except KeyError:
-        pass
-
-    try:
-        ret = requests.post("http://POD-ITX/AudioInterface.php", payload)
-        print(f"send sound payload: {payload}")
-        print(ret)
-    except OSError as OSE:
-        print(f"failed to request sound due to {OSE}")
-        return
-
-
-
 
 
 

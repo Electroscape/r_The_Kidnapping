@@ -13,9 +13,20 @@
 
 
 enum brains {
-    keypadBrain,
-    ledDotBrain = 2,
-    ledStripBrain = 3,
+    keypad,
+    ledDot = 2,
+    ledStrip = 3,
+};
+
+enum leds {
+    hallway,
+    living,
+    empore
+};
+
+enum strips {
+    stripLiving,
+    darkroom
 };
 
 
@@ -38,8 +49,8 @@ int relayInitArray[relayAmount] = {
 };
 
 
-#define inputCnt    2
-#define outputCnt   2
+#define inputCnt    7
+#define outputCnt   1
 
 
 enum IOpins {
@@ -55,18 +66,29 @@ enum IOpins {
 
 enum IOValues {
     service_enable = 1,
-    service_disable, 
-    gameEndTrigger
+    gameStart, 
+    gameEndTrigger,
+    hallwayStart,
+    hallwayOff,
+    hallwayOn,
+    hallwayDimmed,
+    apartmentEnter,
+    apartmentDim,
+    chinmeySolved = 1
 };
 
 int intputArray[inputCnt] = {
     IO_1,
     IO_2,
+    IO_3,
+    IO_4,
+    IO_5,
+    IO_6,
+    IO_7
 };
 
 int outputArray[outputCnt] = {
-    IO_3,
-    IO_4,
+    IO_8
 };
 
 enum stages{

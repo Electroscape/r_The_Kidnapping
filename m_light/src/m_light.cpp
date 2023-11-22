@@ -8,7 +8,9 @@
  * @copyright Copyright (c) 2022
  * 
  *  TODO: 
- *  - consider non blocking 
+ * 🔲 
+ * ✅ 
+ * ✅ 
  */
 
 
@@ -52,6 +54,8 @@ void setStageIndex() {
 void gameReset() {
     Mother.motherRelay.digitalWrite(relays::chinmey, closed);
     stage = stages::idle;
+    LED_CMDS::setAllStripsToClr(Mother, brains::ledDot, LED_CMDS::clrBlack);
+    LED_CMDS::setAllStripsToClr(Mother, brains::ledStrip, LED_CMDS::clrBlack);
 }
 
 
@@ -198,6 +202,12 @@ void handleInputs() {
     lastInput = inputVal;
     switch (inputVal) {
         case IOValues::service_enable: stage = 0; break;
+        case IOValues::gameEndTrigger: 
+            LED_CMDS::setAllStripsToClr(Mother, brains::ledDot, LED_CMDS::clrGreen);
+            LED_CMDS::setAllStripsToClr(Mother, brains::ledStrip, LED_CMDS::clrGreen);
+        break;
+        case IOValues::hallwayOff: LED_CMDS::setStripToClr(Mother, brains::ledDot, LED_CMDS::clrBlack, 0, leds::hallway); break;
+        case IOValues::hallwayOn: LED_CMDS::setStripToClr(Mother, brains::ledDot, LED_CMDS::clrWhite, 50, leds::hallway); break;
     }
 }
 

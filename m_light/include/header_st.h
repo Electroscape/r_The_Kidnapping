@@ -11,6 +11,15 @@
 #define open   0
 #define closed 1
 
+
+enum brains {
+    keypadBrain,
+    ledDotBrain = 2,
+    ledStripBrain = 3,
+};
+
+
+
 enum relays {
     chinmey,
     relayAmount, 

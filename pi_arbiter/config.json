@@ -1,4 +1,3 @@
 {
-      "terminal_server_add": "http://192.168.178.179:5500/",
-      "sound_server_add": "http://POD-ITX/AudioInterface.php"
+      "terminal_server_add": "http://sv-arbiter:5500/"
 }

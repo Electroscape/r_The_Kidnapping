@@ -19,7 +19,6 @@ from datetime import datetime as dt, timedelta
 time_start = None
 
 IO = ArbiterIO()
-usb_live = False
 
 '''
 @TODO: 
@@ -34,10 +33,8 @@ nw_sock = None
 
 gpio_thread = None
 # used to prevent multiple boots
-usb_booted = False
 connected = False
 
-boot_usb_path = Path("/media/2cp/usb_boot")
 
 reset_gpios_dicts = {}
 reset_delta = timedelta(seconds=3)
@@ -120,9 +117,13 @@ def trigger_event(event_key, event_value=None):
 
 def handle_event(event_key, event_value=None):
 
+    print(f"handling events {event_key}")
+
     event_value = get_event_value(event_key, event_value)
     if event_value is None:
         return
+
+    print("wtf?")
 
     try:
         if not event_value.get(event_condition, lambda: True)():
@@ -149,8 +150,8 @@ def handle_event_fe(event_value, event_key):
         # This way any event can be monitored on the server
         sio.emit("events", {"username": "server", "message": event_key})
         return
-    cb_tgt = cb_dict.get(fe_cb_tgt, False)
-    cb_cmb = cb_dict.get(fe_cb_cmd, False)
+    cb_tgt = cb_dict.get(fe_cb_tgt, event_key.split("_")[0])
+    cb_cmb = cb_dict.get(fe_cb_cmd, event_key.split("_")[1])
     if not cb_cmb or not cb_tgt:
         return
     cb_msg = cb_dict.get(fe_cb_msg, "")
@@ -167,16 +168,20 @@ def catch_all(event, sid, *args):
 
 @sio.on("trigger")
 def handle_fe(data):
+    print(data)
     try:
         if not data.get('username') == 'arb':
             return False
     except KeyError:
         return False
-
     print("\n")
+
 
     for key, event in event_map.items():
         try:
+            print(event.get(trigger_cmd))
+            print(event.get(trigger_msg))
+            print("\n")
             # event_name = event[fe_event]
             cmd = event.get(trigger_cmd, False)
             if not cmd or cmd != data.get('cmd'):
@@ -189,16 +194,6 @@ def handle_fe(data):
             handle_event(key)
         except KeyError:
             pass
-
-
-def handle_usb_events():
-    global usb_live
-    # one needs to exclude the other, removing it shall also disable said usb func
-    if boot_usb_path.exists():
-        if usb_live:
-            handle_event("usb_boot")
-    else:
-        usb_live = True
 
 
 def handle_pcf_input(input_pcf, value):
@@ -235,7 +230,7 @@ def handle_pcf_input(input_pcf, value):
         except KeyError:
             continue
 
-    if rejected and input_pcf == laserlock_in_pcf:
+    if rejected:
         print(f"\n\nInvalid PCF input\n PCFNo {input_pcf} value {value}\n\n")
     cooldowns.cooldowns.update(temporary_cooldowns)
 
@@ -303,7 +298,6 @@ def connect():
 
 def main():
     while True:
-        handle_usb_events()
         active_inputs = IO.get_inputs()
         handle_pcf_inputs(active_inputs=active_inputs)
         handle_inverted_events(active_inputs)
@@ -316,8 +310,7 @@ if __name__ == '__main__':
     connected = connect()
     # otherwise calling an already running atmo does not work
     # used to trigger rpis via regular network for videos
-    nw_sock = TESocketServer(12345)
-    handle_event("reset_atmo")
+    # nw_sock = TESocketServer(12345)
 
     print("\n\n=== Arbiter setup complete! ===\n\n")
 

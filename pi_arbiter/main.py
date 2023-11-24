@@ -150,8 +150,9 @@ def handle_event_fe(event_value, event_key):
         # This way any event can be monitored on the server
         sio.emit("events", {"username": "server", "message": event_key})
         return
-    cb_tgt = cb_dict.get(fe_cb_tgt, event_key.split("_")[0])
-    cb_cmb = cb_dict.get(fe_cb_cmd, event_key.split("_")[1])
+    cb_tgt = cb_dict.get(fe_cb_tgt, False)
+    cb_cmb = cb_dict.get(fe_cb_cmd, False)
+
     if not cb_cmb or not cb_tgt:
         return
     cb_msg = cb_dict.get(fe_cb_msg, "")
@@ -169,27 +170,26 @@ def catch_all(event, sid, *args):
 @sio.on("trigger")
 def handle_fe(data):
     print(data)
+    print("\n")
     try:
         if not data.get('username') == 'arb':
             return False
     except KeyError:
         return False
-    print("\n")
-
 
     for key, event in event_map.items():
         try:
-            print(event.get(trigger_cmd))
-            print(event.get(trigger_msg))
-            print("\n")
+            # print("\n")
             # event_name = event[fe_event]
             cmd = event.get(trigger_cmd, False)
+            print(cmd)
             if not cmd or cmd != data.get('cmd'):
-                # print(f"wrong command {cmd}")
+                print(f"wrong command {cmd}")
                 continue
             msg = event.get(trigger_msg, False)
+            print(msg)
             if msg and msg != data.get("message"):
-                # print(f"wrong msg {msg}")
+                print(f"wrong msg {msg}")
                 continue
             handle_event(key)
         except KeyError:

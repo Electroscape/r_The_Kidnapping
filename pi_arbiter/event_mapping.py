@@ -1,6 +1,7 @@
 import requests
 import subprocess
 from enum import IntEnum
+import re
 
 '''
 @TODO: 
@@ -168,6 +169,18 @@ event_map = {
     # opened by reed of the appartment door, 1 minute fadein
     "light_enteringFlat": {},
 }
+
+def setup_default_callbacks():
+    for event_key in event_map.keys():
+        event_data = event_map[event_key]
+
+        if not (event_data.get(trigger_msg, False) and event_data.get(trigger_cmd, False)):
+            triggers = re.split("_", event_key)
+            if len(triggers) == 2:
+                event_map[event_key][trigger_cmd] = triggers[0]
+                event_map[event_key][trigger_msg] = triggers[1]
+
+setup_default_callbacks()
 
 
 # Only can be applied to non binary pinbased inputs

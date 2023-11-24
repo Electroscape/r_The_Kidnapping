@@ -11,7 +11,11 @@ from enum import IntEnum
 '''
 
 
-laserlock_out_pcf = 0
+# these are the pcf addresses, first 3 are Arbiter -> Brain as outputs
+# last 3 are Brain -> Arbiter inputs
+
+# for rev 0.2 and onwards
+# [0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D]
 
 pcf_in = "pcf_in"
 # if a specific pin must be set to high in order to trigger, only works on non-binary
@@ -36,17 +40,33 @@ event_delay = "delay"
 event_next_qeued = "event_next"
 
 
+class LightIO(IntEnum):
+    pcfOut = 0  # 0x38
+    pcfIn = 3   # 0x3B
+    service_enable = 1
+    gameStart = 2
+    gameEndTrigger = 3
+    hallwayStart = 4
+    hallwayOff = 5
+    hallwayOn = 6
+    hallwayDimmed = 6
+    apartmentEnter = 7
+    apartmentDim = 8
+    chinmeySolved = 1
+
+
 class AirlockOut(IntEnum):
     david_end = 1 << 7
     rachel_announce = 1 << 6
     rachel_end = 1 << 5
+
 
 class LockerIn(IntEnum):
     serviceEnable = 1 << 4
     serviceDisable = 1 << 5
 
 
-binary_pcfs = [airlock_in_pcf, laserlock_in_pcf]
+binary_pcfs = []
 
 class States:
     def __init__(self):
@@ -66,7 +86,7 @@ event_map = {
     "self_check": {
         trigger_cmd: "self",
         trigger_msg: "check",
-        pcf_out_add: [laserlock_out_pcf],
+        pcf_out_add: [0],
         pcf_out: [0],
         fe_cb: {
             fe_cb_tgt: "tr1",
@@ -76,7 +96,59 @@ event_map = {
         event_script: call_video,
         event_next_qeued: "self_check_q1"
     },
-    "room_reset": {},
+
+    "service_enable": {
+        pcf_out_add: [LightIO.pcfOut],
+        pcf_out: [LightIO.service_enable],
+    },
+
+    "game_start": {
+        pcf_out_add: [LightIO.pcfOut],
+        pcf_out: [LightIO.gameStart],
+    },
+
+    "game_endtrigger": {
+        pcf_out_add: [LightIO.pcfOut],
+        pcf_out: [LightIO.gameEndTrigger],
+    },
+
+
+    "hallway_start": {
+        pcf_out_add: [LightIO.pcfOut],
+        pcf_out: [LightIO.hallwayStart],
+    },
+
+    "hallway_off": {
+        pcf_out_add: [LightIO.pcfOut],
+        pcf_out: [LightIO.hallwayOff],
+    },
+
+    "hallway_on": {
+        pcf_out_add: [LightIO.pcfOut],
+        pcf_out: [LightIO.hallwayOn]
+    },
+
+    "hallway_dimmed": {
+        pcf_out_add: [LightIO.pcfOut],
+        pcf_out: [LightIO.hallwayDimmed],
+    },
+
+    "appartment_enter": {
+        pcf_out_add: [LightIO.pcfOut],
+        pcf_out: [LightIO.apartmentEnter],
+    },
+
+    "appartment_dim": {
+        pcf_out_add: [LightIO.pcfOut],
+        pcf_out: [LightIO.apartmentDim],
+    },
+
+    # opening of the chinmey, fades in and out to set its fokus
+    "chimney_opening": {
+        pcf_out_add: [LightIO.pcfIn],
+        pcf_out: [LightIO.chinmeySolved],
+    },
+
 
     "water_solved": {},
 
@@ -95,8 +167,6 @@ event_map = {
 
     # opened by reed of the appartment door, 1 minute fadein
     "light_enteringFlat": {},
-    # opening of the chinmey, fades in and out to set its fokus
-    "light_openingMC": {},
 }
 
 

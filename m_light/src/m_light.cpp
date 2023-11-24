@@ -143,6 +143,7 @@ void stageActions() {
     switch (stage) {
         case stages::chimneyOpening: 
             Mother.motherRelay.digitalWrite(relays::chinmey, open);
+            MotherIO.setOuput(IOValues::chinmeySolved);
         break;
         case stages::idle: 
         break;
@@ -208,6 +209,16 @@ void handleInputs() {
         break;
         case IOValues::hallwayOff: LED_CMDS::setStripToClr(Mother, brains::ledDot, LED_CMDS::clrBlack, 0, leds::hallway); break;
         case IOValues::hallwayOn: LED_CMDS::setStripToClr(Mother, brains::ledDot, LED_CMDS::clrWhite, 50, leds::hallway); break;
+        case IOValues::hallwayStart: 
+            LED_CMDS::blinking(Mother, brains::ledDot, LED_CMDS::clrYellow, LED_CMDS::clrWhite, 100, 500, 5, 50, leds::hallway);
+            delay(1400);
+            LED_CMDS::setStripToClr(Mother, brains::ledDot, LED_CMDS::clrWhite, 50, leds::hallway);
+        break;
+        case IOValues::apartmentEnter: break;
+        case IOValues::apartmentDim: break;
+        case IOValues::chimneyOverride: stage= stages::chimneyOpening; break;
+        case IOValues::mcBoot: break;
+        case IOValues::waterUV: break;
     }
 }
 

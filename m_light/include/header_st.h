@@ -67,14 +67,17 @@ enum IOpins {
 enum IOValues {
     service_enable = 1,
     gameStart, 
-    gameEndTrigger,
+    gameEndTrigger,     // triggered by breakout riddle everything goes green
     hallwayStart,
     hallwayOff,
     hallwayOn,
     hallwayDimmed,
     apartmentEnter,
     apartmentDim,
-    chinmeySolved = 1
+    chimneyOverride,    // manual override trigger
+    mcBoot,          // fusebox powering up MC via fuses
+    waterUV,        // turns of the empore
+    chinmeySolved = 1   // the one output we use
 };
 
 int intputArray[inputCnt] = {

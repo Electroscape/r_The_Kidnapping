@@ -142,8 +142,18 @@ void interpreter() {
 void stageActions() {
     switch (stage) {
         case stages::chimneyOpening: 
-            Mother.motherRelay.digitalWrite(relays::chinmey, open);
+            wdt_disable();
             MotherIO.setOuput(IOValues::chinmeySolved);
+            delay(200);
+            LED_CMDS::fade2color(Mother, brains::ledStrip, LED_CMDS::clrWhite, 50, LED_CMDS::clrWhite, 10, 2000, strips::stripLiving);
+            LED_CMDS::fade2color(Mother, brains::ledDot, LED_CMDS::clrWhite, 50, LED_CMDS::clrWhite, 10, 2000, leds::empore);
+            MotherIO.outputReset();
+            delay(2000);
+            Mother.motherRelay.digitalWrite(relays::chinmey, open);
+            delay(2000);
+            LED_CMDS::fade2color(Mother, brains::ledStrip, LED_CMDS::clrWhite, 50, LED_CMDS::clrWhite, 50, 5000, strips::stripLiving);
+            LED_CMDS::fade2color(Mother, brains::ledDot, LED_CMDS::clrWhite, 50, LED_CMDS::clrWhite, 50, 5000, leds::empore);
+            wdt_enable(WDTO_8S);
         break;
         case stages::idle: 
         break;

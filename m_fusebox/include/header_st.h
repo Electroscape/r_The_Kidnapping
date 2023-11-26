@@ -1,11 +1,43 @@
 #pragma once
 
-#define relayAmount 4
+#define relayAmount 5
 #define open        0
 #define closed      1
 
 enum brains {
     ledBrain = 2
+};
+
+enum relais {
+    door,
+    alarm,
+    mcBoot,
+    toggleOff,
+    toggleOn,
+};
+
+enum relayInits {
+    door_init = open,
+    alarm_init = open,
+    mcBoot_init = closed,
+    toggleOff_init = closed,
+    toggleOn_init = closed,
+};
+
+int relayPinArray[relayAmount] = {
+    door,
+    alarm,
+    mcBoot,
+    toggleOff,
+    toggleOn,
+};
+
+int relayInitArray[relayAmount] = {
+    door_init,
+    alarm_init,
+    mcBoot_init,
+    toggleOff_init,
+    toggleOn_init,
 };
 
 

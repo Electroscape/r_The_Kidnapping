@@ -24,7 +24,7 @@ STB_MOTHER Mother;
 STB_MOTHER_IO MotherIO;
 
 int lastState = -1;
-int stage = stages::prestage;
+int stage = stages::hallway;
 int lastStage = -1;
 bool hallwayLit = false;
 
@@ -32,9 +32,19 @@ bool hallwayLit = false;
 // setup function too?
 void toggleHallwayLight(bool state) {
     if (state == hallwayLit) { return; }
+    if (state) {
+        Mother.motherRelay.digitalWrite(relais::toggleOn, open);
+    } else {
+        Mother.motherRelay.digitalWrite(relais::toggleOff, open);
+    }
+    delay(100);
+    Mother.motherRelay.digitalWrite(relais::toggleOn, closed);
+    Mother.motherRelay.digitalWrite(relais::toggleOff, closed);
+    hallwayLit = state;
 
     // @todo implement
 }
+
 
 void handleInputs() {
 
@@ -54,6 +64,7 @@ void handleInputs() {
     switch (stage) {
         case hallway: 
             if (result == (fuse_1 + fuse_2 + fuse_3)) {
+                Mother.motherRelay.digitalWrite(relais::door, open);
                 stage = stages::missionControlUnlock;
             }
         break;
@@ -76,21 +87,18 @@ void handleInputs() {
     // if output being set wait 200ms 
 }
 
+
 void setup() {
 
     // starts serial and default oled
     Mother.begin();
-    // Mother.relayInit(relayPinArray, relayInitArray, relayAmount);
+    Mother.relayInit(relayPinArray, relayInitArray, relayAmount);
     MotherIO.ioInit(intputArray, sizeof(intputArray), outputArray, sizeof(outputArray));
 
     Serial.println("WDT endabled");
     wdt_enable(WDTO_8S);
-    Mother.rs485SetSlaveCount(0);
-    // LED_CMDS::setAllStripsToClr(Mother, ledBrain, LED_CMDS::clrBlack, 100);
-  
+
     wdt_reset();
-    // delay(4000);
-    // wdt_reset();
 }
 
 
@@ -98,12 +106,12 @@ void stageActions() {
     wdt_reset();
     switch (stage) {
         case stages::prestage: break;
-        case stages::hallway: 
-            toggleHallwayLight(true);
-            // kill alarm light
-            // open the door
+        case stages::hallway: break;
+        case stages::missionControlUnlock: 
+            Mother.motherRelay.digitalWrite(relais::mcBoot, open);
+            delay(200);
+            Mother.motherRelay.digitalWrite(relais::mcBoot, closed);
         break;
-        case stages::missionControlUnlock: break;
         case stages::completed: break;
     }
 }

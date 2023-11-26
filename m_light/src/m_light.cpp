@@ -214,11 +214,18 @@ void handleInputs() {
             delay(1400);
             LED_CMDS::setStripToClr(Mother, brains::ledDot, LED_CMDS::clrWhite, 50, leds::hallway);
         break;
-        case IOValues::apartmentEnter: break;
-        case IOValues::apartmentDim: break;
+        case IOValues::apartmentEnter: 
+            LED_CMDS::fade2color(Mother, brains::ledStrip, LED_CMDS::clrWhite, 0, LED_CMDS::clrWhite, 50, 60000, strips::stripLiving);
+            LED_CMDS::fade2color(Mother, brains::ledDot, LED_CMDS::clrWhite, 0, LED_CMDS::clrWhite, 50, 60000, leds::empore);
+        break;
         case IOValues::chimneyOverride: stage= stages::chimneyOpening; break;
-        case IOValues::mcBoot: break;
-        case IOValues::waterUV: break;
+        case IOValues::mcBoot: 
+            LED_CMDS::fade2color(Mother, brains::ledStrip, LED_CMDS::clrWhite, 0, LED_CMDS::clrWhite, 50, 60000, strips::missionControl);
+        break;
+        case IOValues::waterUV:
+            LED_CMDS::fade2color(Mother, brains::ledStrip, LED_CMDS::clrWhite, 50, LED_CMDS::clrWhite, 10, 5000, strips::stripLiving);
+            LED_CMDS::fade2color(Mother, brains::ledDot, LED_CMDS::clrWhite, 50, LED_CMDS::clrWhite, 10, 5000, leds::empore);
+        break;
     }
 }
 

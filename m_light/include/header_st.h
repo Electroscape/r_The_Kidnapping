@@ -73,7 +73,6 @@ enum IOValues {
     hallwayOn,
     hallwayDimmed,
     apartmentEnter,
-    apartmentDim,
     chimneyOverride,    // manual override trigger
     mcBoot,          // fusebox powering up MC via fuses
     waterUV,        // turns of the empore

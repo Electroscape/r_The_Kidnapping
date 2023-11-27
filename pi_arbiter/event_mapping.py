@@ -41,6 +41,13 @@ event_delay = "delay"
 event_next_qeued = "event_next"
 
 
+# reed contacts directly hooked up into the arbiter
+class ArbiterIO(IntEnum):
+    pcfIn = 4   # 0x3C
+    entrance = 1 << 0
+    apartmentDoor = 1 << 1
+
+
 class LightIO(IntEnum):
     pcfOut = 0  # 0x38
     service_enable = 1
@@ -105,6 +112,8 @@ event_map = {
     },
 
     "game_start": {
+        pcf_in_add: ArbiterIO.pcfIn,
+        pcf_in: ArbiterIO.apartmentDoor,
         pcf_out_add: [LightIO.pcfOut, fuseIO.pcfOut],
         pcf_out: [LightIO.gameStart, fuseIO.startGame],
     },
@@ -120,15 +129,15 @@ event_map = {
     },
 
     "hallway_off": {
-        pcf_in_add: [fuseIO.pcfIn],
-        pcf_in: [fuseIO.lightOff],
+        pcf_in_add: fuseIO.pcfIn,
+        pcf_in: fuseIO.lightOff,
         pcf_out_add: [LightIO.pcfOut],
         pcf_out: [LightIO.hallwayOff],
     },
 
     "hallway_on": {
-        pcf_in_add: [fuseIO.pcfIn],
-        pcf_in: [fuseIO.lightOn],
+        pcf_in_add: fuseIO.pcfIn,
+        pcf_in: fuseIO.lightOn,
         pcf_out_add: [LightIO.pcfOut],
         pcf_out: [LightIO.hallwayOn]
     },
@@ -139,6 +148,8 @@ event_map = {
     },
 
     "appartment_enter": {
+        pcf_in_add: ArbiterIO.pcfIn,
+        pcf_in: ArbiterIO.apartmentDoor,
         pcf_out_add: [LightIO.pcfOut],
         pcf_out: [LightIO.apartmentEnter],
     },
@@ -160,8 +171,8 @@ event_map = {
     "fusebox_solvedHallway": {},
     # boots up PCs from the floppy riddle, lights up the MC
     "fusebox_bootMC": {
-        pcf_in_add: [fuseIO.pcfIn],
-        pcf_in: [fuseIO.mcBoot],
+        pcf_in_add: fuseIO.pcfIn,
+        pcf_in: fuseIO.mcBoot,
     },
 
     "breakout_boot": {},

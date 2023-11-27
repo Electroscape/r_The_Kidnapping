@@ -58,10 +58,11 @@ class LightIO(IntEnum):
     hallwayOn = 6
     hallwayDimmed = 6
     apartmentEnter = 7
-    apartmentDim = 8
+    chimneyOverride = 8
+    mcBoot = 9
 
     pcfIn = 3   # 0x3B
-    chinmeySolved = 1 << 7
+    chinmeySolved = 128
 
 
 class FuseIo(IntEnum):
@@ -72,10 +73,10 @@ class FuseIo(IntEnum):
     pcfIn = 3   # 0x3B
     mcBoot = 1
     lightOff = 2
-    lightOn = 3
+    lightOn = 4
 
 
-binary_pcfs = []
+binary_pcfs = [FuseIo.pcfIn]
 
 class States:
     def __init__(self):
@@ -154,15 +155,12 @@ event_map = {
         pcf_out: [LightIO.apartmentEnter],
     },
 
-    "appartment_dim": {
-        pcf_out_add: [LightIO.pcfOut],
-        pcf_out: [LightIO.apartmentDim],
-    },
-
     # opening of the chinmey, fades in and out to set its fokus
     "chimney_opening": {
+        pcf_in_add: LightIO.pcfIn,
+        pcf_in: LightIO.chinmeySolved,
         pcf_out_add: [LightIO.pcfIn, FuseIo.pcfOut],
-        pcf_out: [LightIO.chinmeySolved, FuseIo.mcOpened],
+        pcf_out: [LightIO.chimneyOverride, FuseIo.mcOpened],
     },
 
 

@@ -76,12 +76,6 @@ enum inputs {
 };
 
 
-enum outputs {
-    solved_1 = 1,
-    solved_2 = 2
-};
-
-
 #define outputCnt 0
 #define inputCnt 8
 

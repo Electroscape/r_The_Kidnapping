@@ -24,9 +24,10 @@ STB_MOTHER Mother;
 STB_MOTHER_IO MotherIO;
 
 int lastState = -1;
-int stage = stages::hallway;
+int stage = stages::prestage;
 int lastStage = -1;
 bool hallwayLit = false;
+bool alarmOn = false;
 
 
 // setup function too?
@@ -46,6 +47,14 @@ void toggleHallwayLight(bool state) {
 }
 
 
+void handleAlarm(int result) {
+    if (stage > hallway || alarmOn) { return; } 
+    if (result & lid_reed) {
+        Mother.motherRelay.digitalWrite(relais::alarm, open);
+    }
+}
+
+
 void handleInputs() {
 
     int result = MotherIO.getInputs();
@@ -55,7 +64,9 @@ void handleInputs() {
     if (lastState == result) {
         return;
     }
-    // result -= result & (1 << door_reed);
+
+    handleAlarm(result);
+    result -= result & lid_reed;
 
     // @todo is this always active?
     toggleHallwayLight(result & fuse_1);
@@ -65,6 +76,8 @@ void handleInputs() {
         case hallway: 
             if (result == (fuse_1 + fuse_2 + fuse_3)) {
                 Mother.motherRelay.digitalWrite(relais::door, open);
+                Mother.motherRelay.digitalWrite(relais::alarm, closed);
+                alarmOn = false;
                 stage = stages::missionControlUnlock;
             }
         break;
@@ -76,6 +89,12 @@ void handleInputs() {
         default:
             if (result & start_game) {
                 stage = hallway;
+                /*
+                @todo: cleaner restart procedure
+                alarmOn = false;
+                Mother.motherRelay.digitalWrite(relais::door, closed);
+                Mother.motherRelay.digitalWrite(relais::alarm, closed);
+                */
             }
             if (result & mc_opened) {
                 stage = stages::missionControlBoot;
@@ -84,7 +103,6 @@ void handleInputs() {
     }
 
     lastState = result;
-    // if output being set wait 200ms 
 }
 
 

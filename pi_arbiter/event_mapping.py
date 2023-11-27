@@ -64,7 +64,7 @@ class LightIO(IntEnum):
     chinmeySolved = 1 << 7
 
 
-class FuseIO(IntEnum):
+class FuseIo(IntEnum):
     pcfOut = 1  # 0x39
     startGame = 1 << 0
     mcOpened = 1 << 1
@@ -114,8 +114,8 @@ event_map = {
     "game_start": {
         pcf_in_add: ArbiterIO.pcfIn,
         pcf_in: ArbiterIO.apartmentDoor,
-        pcf_out_add: [LightIO.pcfOut, fuseIO.pcfOut],
-        pcf_out: [LightIO.gameStart, fuseIO.startGame],
+        pcf_out_add: [LightIO.pcfOut, FuseIo.pcfOut],
+        pcf_out: [LightIO.gameStart, FuseIo.startGame],
     },
 
     "game_endtrigger": {
@@ -129,15 +129,15 @@ event_map = {
     },
 
     "hallway_off": {
-        pcf_in_add: fuseIO.pcfIn,
-        pcf_in: fuseIO.lightOff,
+        pcf_in_add: FuseIo.pcfIn,
+        pcf_in: FuseIo.lightOff,
         pcf_out_add: [LightIO.pcfOut],
         pcf_out: [LightIO.hallwayOff],
     },
 
     "hallway_on": {
-        pcf_in_add: fuseIO.pcfIn,
-        pcf_in: fuseIO.lightOn,
+        pcf_in_add: FuseIo.pcfIn,
+        pcf_in: FuseIo.lightOn,
         pcf_out_add: [LightIO.pcfOut],
         pcf_out: [LightIO.hallwayOn]
     },
@@ -161,8 +161,8 @@ event_map = {
 
     # opening of the chinmey, fades in and out to set its fokus
     "chimney_opening": {
-        pcf_out_add: [LightIO.pcfIn, fuseIO.pcfOut],
-        pcf_out: [LightIO.chinmeySolved, fuseIO.mcOpened],
+        pcf_out_add: [LightIO.pcfIn, FuseIo.pcfOut],
+        pcf_out: [LightIO.chinmeySolved, FuseIo.mcOpened],
     },
 
 
@@ -171,8 +171,8 @@ event_map = {
     "fusebox_solvedHallway": {},
     # boots up PCs from the floppy riddle, lights up the MC
     "fusebox_bootMC": {
-        pcf_in_add: fuseIO.pcfIn,
-        pcf_in: fuseIO.mcBoot,
+        pcf_in_add: FuseIo.pcfIn,
+        pcf_in: FuseIo.mcBoot,
     },
 
     "breakout_boot": {},

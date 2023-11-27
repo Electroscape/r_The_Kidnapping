@@ -43,7 +43,6 @@ event_next_qeued = "event_next"
 
 class LightIO(IntEnum):
     pcfOut = 0  # 0x38
-    pcfIn = 3   # 0x3B
     service_enable = 1
     gameStart = 2
     gameEndTrigger = 3
@@ -53,18 +52,20 @@ class LightIO(IntEnum):
     hallwayDimmed = 6
     apartmentEnter = 7
     apartmentDim = 8
-    chinmeySolved = 1
+
+    pcfIn = 3   # 0x3B
+    chinmeySolved = 1 << 7
 
 
-class AirlockOut(IntEnum):
-    david_end = 1 << 7
-    rachel_announce = 1 << 6
-    rachel_end = 1 << 5
+class FuseIO(IntEnum):
+    pcfOut = 1  # 0x39
+    startGame = 1 << 0
+    mcOpened = 1 << 1
 
-
-class LockerIn(IntEnum):
-    serviceEnable = 1 << 4
-    serviceDisable = 1 << 5
+    pcfIn = 3   # 0x3B
+    mcBoot = 1
+    lightOff = 2
+    lightOn = 3
 
 
 binary_pcfs = []
@@ -104,8 +105,8 @@ event_map = {
     },
 
     "game_start": {
-        pcf_out_add: [LightIO.pcfOut],
-        pcf_out: [LightIO.gameStart],
+        pcf_out_add: [LightIO.pcfOut, fuseIO.pcfOut],
+        pcf_out: [LightIO.gameStart, fuseIO.startGame],
     },
 
     "game_endtrigger": {
@@ -113,18 +114,21 @@ event_map = {
         pcf_out: [LightIO.gameEndTrigger],
     },
 
-
     "hallway_start": {
         pcf_out_add: [LightIO.pcfOut],
         pcf_out: [LightIO.hallwayStart],
     },
 
     "hallway_off": {
+        pcf_in_add: [fuseIO.pcfIn],
+        pcf_in: [fuseIO.lightOff],
         pcf_out_add: [LightIO.pcfOut],
         pcf_out: [LightIO.hallwayOff],
     },
 
     "hallway_on": {
+        pcf_in_add: [fuseIO.pcfIn],
+        pcf_in: [fuseIO.lightOn],
         pcf_out_add: [LightIO.pcfOut],
         pcf_out: [LightIO.hallwayOn]
     },
@@ -146,8 +150,8 @@ event_map = {
 
     # opening of the chinmey, fades in and out to set its fokus
     "chimney_opening": {
-        pcf_out_add: [LightIO.pcfIn],
-        pcf_out: [LightIO.chinmeySolved],
+        pcf_out_add: [LightIO.pcfIn, fuseIO.pcfOut],
+        pcf_out: [LightIO.chinmeySolved, fuseIO.mcOpened],
     },
 
 
@@ -155,7 +159,10 @@ event_map = {
 
     "fusebox_solvedHallway": {},
     # boots up PCs from the floppy riddle, lights up the MC
-    "fusebox_bootMC": {},
+    "fusebox_bootMC": {
+        pcf_in_add: [fuseIO.pcfIn],
+        pcf_in: [fuseIO.mcBoot],
+    },
 
     "breakout_boot": {},
     "breakout_solved": {},

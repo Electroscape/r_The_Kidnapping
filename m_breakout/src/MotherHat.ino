@@ -21,43 +21,14 @@ PCF8574 inputPCF;
 STB_MOTHER Mother;
 STB_MOTHER_IO MotherIO;
 
-int stage = stages::solved;
+int stage = stages::off;
 int stageIndex = 0;
 int lastStage = -1;
+int lastResult = 0;
 
 // int inputTicks = 0;
 
 int validBrainResult = 0;
-
-
-
-/*
-void startGame() {
-
-    // game already ready, no need to spam LED cmds 
-    if (!solvedState) {return;}
-
-    Serial.println("STARTGAME!!");
-    STB.motherRelay.digitalWrite(REL_0_PIN, REL_0_INIT);
-    LED_CMDS::setToClr(STB, 1, LED_CMDS::clrRed, 50);
-
-    solvedState = false;
-
-}
-
-
-void endGame() {
-
-    // game already solved, no need to spam LED cmds 
-    if (solvedState) {return;}
-
-    Serial.println("ENDGAME!!");
-    STB.motherRelay.digitalWrite(REL_0_PIN, !REL_0_INIT);
-    LED_CMDS::setToClr(STB, 1, LED_CMDS::clrGreen, 50);
-
-    solvedState = true;
-}
-*/
 
 
 bool passwordInterpreter(char* password) {
@@ -106,6 +77,16 @@ void interpreter() {
 void stageActions() {
     wdt_reset();
     switch (stage) {
+        case solved:
+            Mother.motherRelay.digitalWrite(relays::door, doorOpen);
+            LED_CMDS::setStripToClr(Mother, ledBrain, LED_CMDS::clrGreen, 50, 0);
+            MotherIO.setOuput(outSolved);
+            delay(200);
+            MotherIO.outputReset();
+        break;
+        case idle:
+            LED_CMDS::setStripToClr(Mother, ledBrain, LED_CMDS::clrRed, 50, 0);
+        break;
     }
 }
 
@@ -144,7 +125,8 @@ void inputInit() {
 
 void handleInputs() {
     int result = MotherIO.getInputs();
-    if (result == 0) { return; }
+    if (result == lastResult) { return; }
+    lastResult = result;
 
     switch (result) {
         case inputValues::roomReset:

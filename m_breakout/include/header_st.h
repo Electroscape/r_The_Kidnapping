@@ -39,7 +39,8 @@ enum IOpins {
 };
 
 enum inputValues {  
-    roomReset = 1, 
+    roomReset = 1,
+    mcBoot,
     setSolved           
 };
 

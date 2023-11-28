@@ -79,7 +79,12 @@ class FuseIo(IntEnum):
     doorOpen = 8
 
 
-binary_pcfs = [FuseIo.pcfIn]
+class WaterIO(IntEnum):
+    pcfIn = 4   # 0x39 binary
+    uvActive = 1 << 2
+
+
+binary_pcfs = [FuseIo.pcfIn, FuseIo.pcfIn]
 
 
 class States:
@@ -166,7 +171,10 @@ event_map = {
     },
 
 
-    "water_solved": {},
+    "water_solved": {
+        pcf_in_add: WaterIO.pcfIn,
+        pcf_in: WaterIO.uvActive,
+    },
 
     "fusebox_doorOpened": {
         pcf_in_add: FuseIo.pcfIn,

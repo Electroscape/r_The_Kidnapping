@@ -83,6 +83,15 @@ class WaterIO(IntEnum):
     pcfIn = 4   # 0x39 binary
     uvActive = 1 << 2
 
+class BreakoutIO(IntEnum):
+    pcfIn = 5   # 0x3D
+    solved = 1
+
+    pcfOut = 2  # 0x3A
+    roomReset = 1
+    mcBoot = 2
+    setSolved = 3
+
 
 binary_pcfs = [FuseIo.pcfIn, FuseIo.pcfIn]
 
@@ -117,6 +126,11 @@ event_map = {
     "service_enable": {
         pcf_out_add: [LightIO.pcfOut],
         pcf_out: [LightIO.service_enable],
+    },
+
+    "game_reset": {
+        pcf_out_add: [BreakoutIO.pcfOut],
+        pcf_out: [BreakoutIO.roomReset]
     },
 
     "game_start": {
@@ -185,10 +199,16 @@ event_map = {
     "fusebox_bootMC": {
         pcf_in_add: FuseIo.pcfIn,
         pcf_in: FuseIo.mcBoot,
+        pcf_out_add: [BreakoutIO.pcfOut],
+        pcf_out: [BreakoutIO.mcBoot],
     },
 
-    "breakout_boot": {},
-    "breakout_solved": {},
+    "breakout_solved": {
+        pcf_in_add: BreakoutIO.pcfIn,
+        pcf_in: BreakoutIO.solved,
+        pcf_out_add: [BreakoutIO.pcfOut],
+        pcf_out: [BreakoutIO.setSolved],
+    },
     "breakout_setSolved": {},
 
     "light_hallwayDimmed": {},

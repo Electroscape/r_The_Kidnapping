@@ -123,8 +123,6 @@ def handle_event(event_key, event_value=None):
     if event_value is None:
         return
 
-    print("wtf?")
-
     try:
         if not event_value.get(event_condition, lambda: True)():
             # print(f"conditions not fullfilled {event_key}")

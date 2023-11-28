@@ -182,14 +182,10 @@ def handle_fe(data):
             # print("\n")
             # event_name = event[fe_event]
             cmd = event.get(trigger_cmd, False)
-            print(cmd)
             if not cmd or cmd != data.get('cmd'):
-                print(f"wrong command {cmd}")
                 continue
             msg = event.get(trigger_msg, False)
-            print(msg)
             if msg and msg != data.get("message"):
-                print(f"wrong msg {msg}")
                 continue
             handle_event(key)
         except KeyError:

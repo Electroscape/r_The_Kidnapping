@@ -56,10 +56,12 @@ class LightIO(IntEnum):
     hallwayStart = 4
     hallwayOff = 5
     hallwayOn = 6
-    hallwayDimmed = 6
-    apartmentEnter = 7
-    chimneyOverride = 8
-    mcBoot = 9
+    hallwayDimmed = 7
+    apartmentEnter = 8
+    chimneyOverride = 9
+    mcBoot = 10
+    waterUV = 11
+    gamereset = 12
 
     pcfIn = 3   # 0x3B
     chinmeySolved = 128
@@ -74,9 +76,11 @@ class FuseIo(IntEnum):
     mcBoot = 1
     lightOff = 2
     lightOn = 4
+    doorOpen = 8
 
 
 binary_pcfs = [FuseIo.pcfIn]
+
 
 class States:
     def __init__(self):
@@ -84,8 +88,6 @@ class States:
 
 
 states = States()
-
-
 
 
 def call_video(event_key, nw_sock):
@@ -166,7 +168,11 @@ event_map = {
 
     "water_solved": {},
 
-    "fusebox_solvedHallway": {},
+    "fusebox_doorOpened": {
+        pcf_in_add: FuseIo.pcfIn,
+        pcf_in: FuseIo.doorOpen
+    },
+
     # boots up PCs from the floppy riddle, lights up the MC
     "fusebox_bootMC": {
         pcf_in_add: FuseIo.pcfIn,

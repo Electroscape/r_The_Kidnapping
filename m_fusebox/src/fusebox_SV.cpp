@@ -66,7 +66,18 @@ void handleInputs() {
     }
 
     handleAlarm(result);
+    if (result & mc_opened) {
+        stage = stages::missionControlBoot;
+        return;
+    }
+    if (result & inputs::start_game) {
+        stage = stages::hallway;
+        return;
+    }
+
     result -= result & lid_reed;
+    result -= result & inputs::mc_opened;
+    result -= result & inputs::start_game;
 
     // @todo is this always active?
     toggleHallwayLight(result & fuse_1);
@@ -76,7 +87,10 @@ void handleInputs() {
         case hallway: 
             if (result == (fuse_1 + fuse_2 + fuse_3)) {
                 Mother.motherRelay.digitalWrite(relais::door, open);
+                Mother.motherRelay.digitalWrite(relais::doorOutput, open);
                 Mother.motherRelay.digitalWrite(relais::alarm, closed);
+                delay(200);
+                Mother.motherRelay.digitalWrite(relais::doorOutput, closed);
                 alarmOn = false;
                 stage = stages::missionControlUnlock;
             }
@@ -84,20 +98,6 @@ void handleInputs() {
         case missionControlBoot: 
             if (result == (fuse_1 + fuse_2 + fuse_3 + fuse_4)) {
                 stage = stages::completed;
-            }
-        break;
-        default:
-            if (result & start_game) {
-                stage = hallway;
-                /*
-                @todo: cleaner restart procedure
-                alarmOn = false;
-                Mother.motherRelay.digitalWrite(relais::door, closed);
-                Mother.motherRelay.digitalWrite(relais::alarm, closed);
-                */
-            }
-            if (result & mc_opened) {
-                stage = stages::missionControlBoot;
             }
         break;
     }
@@ -124,13 +124,16 @@ void stageActions() {
     wdt_reset();
     switch (stage) {
         case stages::prestage: break;
-        case stages::hallway: break;
-        case stages::missionControlUnlock: 
+        case stages::hallway: 
+            Mother.motherRelay.digitalWrite(relais::door, closed);
+            Mother.motherRelay.digitalWrite(relais::alarm, closed);
+        break;
+        case stages::missionControlUnlock: break;
+        case stages::completed: 
             Mother.motherRelay.digitalWrite(relais::mcBoot, open);
             delay(200);
             Mother.motherRelay.digitalWrite(relais::mcBoot, closed);
         break;
-        case stages::completed: break;
     }
 }
 

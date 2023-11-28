@@ -1,6 +1,6 @@
 #pragma once
 
-#define relayAmount 5
+#define relayAmount 6
 #define open        0
 #define closed      1
 
@@ -14,14 +14,16 @@ enum relais {
     mcBoot,
     toggleOff,
     toggleOn,
+    doorOutput,
 };
 
 enum relayInits {
     door_init = open,
-    alarm_init = open,
+    alarm_init = closed,
     mcBoot_init = closed,
     toggleOff_init = closed,
     toggleOn_init = closed,
+    doorOutput_init = closed,
 };
 
 int relayPinArray[relayAmount] = {
@@ -30,6 +32,7 @@ int relayPinArray[relayAmount] = {
     mcBoot,
     toggleOff,
     toggleOn,
+    doorOutput,
 };
 
 int relayInitArray[relayAmount] = {
@@ -38,6 +41,7 @@ int relayInitArray[relayAmount] = {
     mcBoot_init,
     toggleOff_init,
     toggleOn_init,
+    doorOutput_init,
 };
 
 
@@ -72,7 +76,7 @@ enum inputs {
     fuse_5 = 1 << 4,
     lid_reed = 1 << 5,
     start_game = 1 << 6,
-    mc_opened = 1 << 7
+    mc_opened = 1 << 7,
 };
 
 

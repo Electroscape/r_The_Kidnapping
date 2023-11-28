@@ -38,11 +38,6 @@ void setStageIndex() {
     for (int i=0; i<StageCount; i++) {
         if (stage <= 1 << i) {
             stageIndex = i;
-            /*            
-            Serial.print("stageIndex:");
-            Serial.println(stageIndex);
-            delay(1000);
-            */
             return;
         }
     }
@@ -84,7 +79,6 @@ bool passwordInterpreter(char* password) {
     }
     return false;
 }
-
 
 
 // candidate to be moved to a mother specific part of the keypad lib
@@ -202,20 +196,23 @@ void setup() {
     wdt_reset();
 }
 
+
 void handleInputs() {
     int inputVal = MotherIO.getInputs(true);
-    if (lastInput == inputVal) {
+    if (lastInput == inputVal || inputVal == 0) {
         return;
     }
-    // Serial.print("received input:");
-    // Serial.println(inputVal);
+    Serial.print("received input:");
+    Serial.println(inputVal);
+
+    delay(500);
 
     lastInput = inputVal;
     switch (inputVal) {
         case IOValues::service_enable: stage = 0; break;
         case IOValues::gameEndTrigger: 
-            LED_CMDS::setAllStripsToClr(Mother, brains::ledDot, LED_CMDS::clrGreen);
-            LED_CMDS::setAllStripsToClr(Mother, brains::ledStrip, LED_CMDS::clrGreen);
+            LED_CMDS::setAllStripsToClr(Mother, brains::ledDot, LED_CMDS::clrGreen, 50);
+            LED_CMDS::setAllStripsToClr(Mother, brains::ledStrip, LED_CMDS::clrGreen, 50);
         break;
         case IOValues::hallwayOff: LED_CMDS::setStripToClr(Mother, brains::ledDot, LED_CMDS::clrBlack, 0, leds::hallway); break;
         case IOValues::hallwayOn: LED_CMDS::setStripToClr(Mother, brains::ledDot, LED_CMDS::clrWhite, 50, leds::hallway); break;
@@ -235,6 +232,10 @@ void handleInputs() {
         case IOValues::waterUV:
             LED_CMDS::fade2color(Mother, brains::ledStrip, LED_CMDS::clrWhite, 50, LED_CMDS::clrWhite, 10, 5000, strips::stripLiving);
             LED_CMDS::fade2color(Mother, brains::ledDot, LED_CMDS::clrWhite, 50, LED_CMDS::clrWhite, 10, 5000, leds::empore);
+        break;
+        case IOValues::gameResetIn: 
+            LED_CMDS::setAllStripsToClr(Mother, brains::ledDot, LED_CMDS::clrBlack);
+            LED_CMDS::setAllStripsToClr(Mother, brains::ledStrip, LED_CMDS::clrBlack);
         break;
     }
 }

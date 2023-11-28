@@ -1,6 +1,6 @@
 #pragma once
 
-#define StageCount 3
+#define StageCount 2
 #define PasswordAmount 6
 #define MaxPassLen 10
 #define lockerCnt 4
@@ -76,6 +76,7 @@ enum IOValues {
     chimneyOverride,    // manual override trigger
     mcBoot,          // fusebox powering up MC via fuses
     waterUV,        // turns of the empore
+    gameResetIn,
     chinmeySolved = 1   // the one output we use
 };
 
@@ -94,7 +95,7 @@ int outputArray[outputCnt] = {
 };
 
 enum stages{
-    idle,
+    idle = 1,
     chimneyOpening,
 };
 

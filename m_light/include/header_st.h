@@ -77,6 +77,7 @@ enum IOValues {
     mcBoot,          // fusebox powering up MC via fuses
     waterUV,        // turns of the empore
     gameResetIn,
+    gameOver,
     chinmeySolved = 1   // the one output we use
 };
 

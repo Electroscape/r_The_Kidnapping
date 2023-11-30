@@ -237,6 +237,10 @@ void handleInputs() {
             LED_CMDS::setAllStripsToClr(Mother, brains::ledDot, LED_CMDS::clrBlack);
             LED_CMDS::setAllStripsToClr(Mother, brains::ledStrip, LED_CMDS::clrBlack);
         break;
+        case IOValues::gameOver:
+            LED_CMDS::setAllStripsToClr(Mother, brains::ledDot, LED_CMDS::clrRed, 50);
+            LED_CMDS::setAllStripsToClr(Mother, brains::ledStrip, LED_CMDS::clrRed, 50);
+        break;
     }
 }
 

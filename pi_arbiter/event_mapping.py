@@ -83,6 +83,7 @@ class WaterIO(IntEnum):
     pcfIn = 4   # 0x39 binary
     uvActive = 1 << 2
 
+
 class BreakoutIO(IntEnum):
     pcfIn = 5   # 0x3D
     solved = 1
@@ -96,12 +97,28 @@ class BreakoutIO(IntEnum):
 binary_pcfs = [FuseIo.pcfIn, FuseIo.pcfIn]
 
 
-class States:
+class GameStatus:
     def __init__(self):
         self.example = False
+        self.hasStarted = False
+        self.gameLive = False
+        self.gameLive = False   # suppress in case of other light effects? only for the green solved
+
+    def set_started(self, *args):
+        self.hasStarted = True
+
+    def reset(self, *args):
+        self.gameLive = False
+        self.hasStarted = False
+
+    def set_live(self, *args):
+        self.gameLive = True
+
+    def is_live(self, *args):
+        return self.gameLive
 
 
-states = States()
+game_states = GameStatus()
 
 
 def call_video(event_key, nw_sock):
@@ -120,7 +137,12 @@ event_map = {
             fe_cb_msg: "boot"
         },
         event_script: call_video,
-        event_next_qeued: "self_check_q1"
+        event_next_qeued: "self_check_q1",
+    },
+
+    "game_live": {
+        event_condition: game_states.is_live,
+        event_script: game_states.set_live,
     },
 
     "service_enable": {
@@ -130,14 +152,8 @@ event_map = {
 
     "game_reset": {
         pcf_out_add: [BreakoutIO.pcfOut],
-        pcf_out: [BreakoutIO.roomReset]
-    },
-
-    "game_start": {
-        pcf_in_add: ArbiterIO.pcfIn,
-        pcf_in: ArbiterIO.apartmentDoor,
-        pcf_out_add: [LightIO.pcfOut, FuseIo.pcfOut],
-        pcf_out: [LightIO.gameStart, FuseIo.startGame],
+        pcf_out: [BreakoutIO.roomReset],
+        event_script: GameStatus.reset
     },
 
     "game_endtrigger": {
@@ -167,13 +183,6 @@ event_map = {
     "hallway_dimmed": {
         pcf_out_add: [LightIO.pcfOut],
         pcf_out: [LightIO.hallwayDimmed],
-    },
-
-    "appartment_enter": {
-        pcf_in_add: ArbiterIO.pcfIn,
-        pcf_in: ArbiterIO.apartmentDoor,
-        pcf_out_add: [LightIO.pcfOut],
-        pcf_out: [LightIO.apartmentEnter],
     },
 
     # opening of the chinmey, fades in and out to set its fokus
@@ -211,6 +220,7 @@ event_map = {
     },
 }
 
+
 def setup_default_callbacks():
     for event_key in event_map.keys():
         event_data = event_map[event_key]
@@ -221,11 +231,25 @@ def setup_default_callbacks():
                 event_map[event_key][trigger_cmd] = triggers[0]
                 event_map[event_key][trigger_msg] = triggers[1]
 
+
 setup_default_callbacks()
 
 
 # Only can be applied to non binary pinbased inputs
 inverted_events = {
+    "appartment_enter": {
+        pcf_in_add: ArbiterIO.pcfIn,
+        pcf_in: ArbiterIO.apartmentDoor,
+        pcf_out_add: [LightIO.pcfOut],
+        pcf_out: [LightIO.apartmentEnter],
+    },
+    "game_start": {
+        pcf_in_add: ArbiterIO.pcfIn,
+        pcf_in: ArbiterIO.apartmentDoor,
+        pcf_out_add: [LightIO.pcfOut, FuseIo.pcfOut],
+        pcf_out: [LightIO.gameStart, FuseIo.startGame],
+        event_script: game_states.set_started,
+    },
 }
 
 

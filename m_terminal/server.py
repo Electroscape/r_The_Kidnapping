@@ -72,8 +72,7 @@ ip_conf = [f"http://{ip}" for ip in ip_conf.values() if isinstance(ip, str)]
 all_cors = ip_conf + ['*']
 
 #  engineio_logger=True, for really detailed logs
-sio = SocketIO(app, cors_allowed_origins=all_cors,
-               ping_timeout=120, ping_interval=20)
+sio = SocketIO(app, ping_timeout=120, ping_interval=20)
 
 
 class StatusVars:
@@ -113,16 +112,6 @@ def get_progress():
     return {"percent": loading_percent}
 
 
-@app.route('/get_samples', methods=['GET', 'POST'])
-def get_samples() -> dict:
-    return samples
-
-
-@app.route('/get_auth_users', methods=['GET', 'POST'])
-def get_auth_users() -> dict:
-    return login_users
-
-
 @sio.on("connect")
 def on_connect():
     logging.info("New socket connected")
@@ -145,13 +134,6 @@ def frontend_server_messages(json_msg):
         return
     chat_history.append(json_msg)
     sio.emit('response_to_fe', json_msg)
-
-
-def all_samples_solved():
-    answer = True
-    for sample in samples:
-        answer = answer and sample.get("status") == "released"
-    return answer
 
 
 @sio.on('msg_to_server')
@@ -235,39 +217,6 @@ def override_triggers(msg):
     # Therefore listener on the arb Pi is @sio.on("trigger")
     sio.emit("trigger", msg)
 
-    if msg.get("cmd") == "laserlock" and msg.get("message") == "skip":
-        sio.emit("to_clients", {"username": "tr1", "cmd": "laserlock_auth", "message": "success"})
-
-
-@sio.on('rfid_update')
-def rfid_updates(msg):
-    # Display message on frontend chatbox
-    frontend_server_messages(msg)
-    # print in console for debugging
-    logging.info(f"from microscope: {str(msg)})")
-    # emit to microscope flask
-    sio.emit("rfid_event", msg)
-
-
-@sio.on('rfid_extra')
-def rfid_extras(msg):
-    # Display message on frontend chatbox
-    frontend_server_messages(msg)
-    # print in console for debugging
-    logging.info(f"extra from rfid: {str(msg)})")
-    # emit extras
-    msg_split = str(msg).split("_")
-    if len(msg_split) == 2:
-        global login_users
-
-        sio.emit("to_clients", {
-            "username": msg_split[0],
-            "cmd": "auth",
-            "message": msg_split[1]
-        })
-        # update backend
-        login_users[msg_split[0]] = msg_split[1]
-
 
 @sio.on('events')
 def events_handler(msg):
@@ -348,12 +297,6 @@ def loadingbar_timer():
 
 
 progressbar_task = sio.start_background_task(loadingbar_timer)
-
-
-@app.route('/favicon.ico')
-def favicon():
-    return send_from_directory("static", 'server_favicon.ico',
-                               mimetype='image/vnd.microsoft.icon')
 
 
 if __name__ == "__main__":

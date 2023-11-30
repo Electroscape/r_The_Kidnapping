@@ -209,15 +209,6 @@ event_map = {
         pcf_out_add: [BreakoutIO.pcfOut],
         pcf_out: [BreakoutIO.setSolved],
     },
-    "breakout_setSolved": {},
-
-    "light_hallwayDimmed": {},
-    "light_hallwayOff": {},
-    # triggered when the
-    "light_hallwayStart": {},
-
-    # opened by reed of the appartment door, 1 minute fadein
-    "light_enteringFlat": {},
 }
 
 def setup_default_callbacks():

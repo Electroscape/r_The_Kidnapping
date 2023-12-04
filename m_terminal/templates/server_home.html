@@ -231,15 +231,12 @@
     <br>
 
     <label class="label-txt" for="msg_holder">Chat Messages</label>
-    <div class="message_holder" id="msg_holder">
-    </div>
+    <div class="message_holder" id="msg_holder"></div>
 
+    <!--
     <form id="sendMsgForm" action="" method="POST" onsubmit="sendMessage(event)" autocomplete='off'>
         <label class="label-txt" for="dm_sender">Sender: </label>
         <select class="form-select w-auto d-inline" id="dm_sender">
-            <option value="elancell-hq" selected>Elancell HQ</option>
-            <option value="system">System</option>
-            <option value="rachel">Rachel</option>
             <option value="game-master">Game Master</option>
         </select>
         <label class="label-txt" for="dm_lang">
@@ -274,9 +271,6 @@
                 <div class="modal-body">
                     <label class="label-txt" for="modal_sender">Sender: </label>
                     <select class="form-select w-auto d-inline" id="modal_sender">
-                        <option value="elancell-hq" selected>Elancell HQ</option>
-                        <option value="system">System</option>
-                        <option value="rachel">Rachel</option>
                         <option value="game-master">Game Master</option>
                     </select>
                     <label class="label-txt" for="modal_lang">Language: </label>
@@ -307,6 +301,8 @@
         </div>
         <button onclick="onClickSet()">set</button>
     </div>
+    -->
+
 {% endblock %}
 
 {% block add_js %}

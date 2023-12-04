@@ -1,114 +1,12 @@
 {
-  "rachel": {
-    "de": [
-      ["Ich bins, Rachel, zum Glück habe ich Euch überzeugen können."],
-      ["Ihr habt sicher viele Fragen, aber wir können keine Zeit verlieren."],
-      ["Der HQ-Chat ist blockiert, dennoch wird die Kommunikation abgehört. Ich kann Euch daher nicht die IP direkt übermitteln. Ich kann Euch leider nur den Weg zu meinen Darlings näher bringen."],
-      "Elancell weiss nicht wie meine Katzen heißen nur Ihr.",
-      "Beeilt Euch!",
-      ["Das HQ kann aktuell nicht auf die Kameras zugreifen. Euer Teamleiter wird probieren Euch zu erreichen."]
-    ],
-    "en": [
-      ["It’s me Rachel. I am so glad I was able to gain your trust."],
-      ["I am sure you have many questions but we do not have any time."],
-      ["The HQ chat is blocked but the communication is being monitored. I cannot send you the IP openly. I can only ask you to follow my darlings."],
-      "Elancell does not know the names of my cats.",
-      "Please, hurry!!",
-      ["The HQ can currently not access the security cameras. Your team lead will try to contact you to change your minds. Don’t listen to him. They are all the same."]
-    ]
-  },
-  "elancell-hq": {
-    "de": [
-      ["Das System wurde erfolgreich hochgefahren. Wir haben nun Zugang zu den Überwachungskameras."],
-      ["Eure Anweisungen erhaltet Ihr hier."],
-      "Eine Person sollte sich mit den Funktionen und Inhalten des Terminals auseinandersetzen.",
-      "Nicht vergessen, Euer Bio-Vita zu Euch zu nehmen. ",
-      "Am Terminal gibt es für jeden Forschungs-POD Informationen über den Maintenance Locker.",
-      "Laut Firmenprotokoll sollen sich in jedem POD an Terminal 1 Informationen über die Mitarbeitenden finden.",
-      ["Wir konnten David erreichen. Er hilft uns beim Vorgehen gegen Rachel und hat uns seinen Spindcode gegeben: 5638"],
-      "Verschafft Euch endlich Zugang zum Labor!",
-      "Unsere Mitarbeitenden haben die Anweisung, ihre Zugangskarte aus Sicherheitsgründen immer bei sich zu tragen.",
-      "Die Verbindung wurde physisch getrennt. Zwei rote Kabel überbrücken die Verbindungen von oben nach unten.",
-      "Eine der Kameras ist passwortgeschützt, hier haben wir keinen Einblick. Rachel Taylor muss diese sabotiert haben.",
-      ["Der rote USB-Stick ist nicht Teil unseres Protokolls. Dieser darf sich nicht in unserem Sicherheitsbereich befinden. Lasst ihn nicht aus den Augen, er ist ein Sicherheitsrisiko für Elancell."],
-      "Ihr werdet nicht bezahlt, um Euch mit Gerüchten auseinanderzusetzen.",
-      "Terminal 1 enthält immer die Wartungsanweisungen für die jeweiligen PODs.",
-      "Denkt an Eure Mission, wir brauchen die Daten. Falls die Forschung nicht abgeschlossen ist, initiiert das Double-Handshake-Verfahren, um die Forschung fortzusetzen.",
-      "Zum Schutz muss die Labortür geschlossen bleiben. Bei offener Tür kann die Arbeit nicht fortgesetzt werden.",
-      ["Das war eine illegale Video-Nachricht. Wir versuchen die Kommunikation wieder zu sichern. Ignoriert die Lügen der Terroristin Rachel Taylor."],
-      "Um die erste Sample freizuschalten, müsst ihr nun mit der Gassteuerung beginnen.",
-      "Wir hoffen, Ihr habt heute schon Euer Bio-Vita zu Euch genommen.",
-      "Die Gasanalysen an Terminal 2 werden  durch die Gas Control am Terminal 1 freigeschaltet.",
-      "Uns wurde zugetragen, dass David Coverstone sich Notizen zu Experimenten in seinem Notizbuch gemacht hat.",
-      "Beachtet die Zugangsbeschränkungen. Zum Glück hatte David Coverstone Rachel Taylor nicht getraut und ihre Zugänge in weiser Voraussicht eingeschränkt.",
-      "Gute Arbeit! Verschafft euch Zugang zum Reinraum, um den Killswitch zu analysieren und die Daten hochzuladen!",
-      ["Reinraum wurde dekontaminiert... Der Code für den Reinraum ist 9649."],
-      ["Mit dem blauen USB-Stick erreicht uns der Upload."],
-      ["Traut ja nicht der Terroristin Rachel Taylor. Sie muss ausgeschaltet werden."],
-      ["Es sieht danach aus, als hätte Rachel Taylor einen weiteren USB-Stick eingeschleust, um Daten außerhalb der Elancell Network zu versenden. Dies ist natürlich höchst gefährlich."],
-      "Entfernt sofort den illegalen Zugang!!! Das wird sonst Folgen für Eure Karriere haben.",
-      "Ihr begeht Hochverrat.",
-      ["Verbindung mit HQ verloren"],
-      ["Verbindung wieder mit HQ wieder hergestellt."],
-      ["Warum habt ihr das getan!, tut das nie wieder!"],
-      "Eure Karriere könnt Ihr Euch abschreiben!",
-      ["Schickt uns sofort die Daten!"]
-    ],
-    "en": [
-      ["The system was powered up successfully. We now have access to the cameras."],
-      ["You will receive your instructions from us."],
-      "At least one person should familiarize themselves with the terminal and its contents.",
-      "Do not forget to take your Bio-Vita.",
-      "The terminal contains information regarding the maintenance locker of the pods.",
-      "Terminal 1 contains information regarding the personnel of Elancell.",
-      ["We were able to reach out to David. He is helping us to pursue Rachel and gave us his locker code. It is 5638."],
-      "Gain access to the laboratory!",
-      "Due to security reasons, all employees have their ID cards permanently attached to their lab coats.",
-      "The physical connection has been severed. Replace the two missing cables with the spares from the maintenance locker top to bottom.",
-      "One of the security cameras has been password protected. It’s not our doing, Rachel Taylor must have sabotaged it.",
-      ["The red USB-Stick is not part of our protocol. It should not be within this secure environment and represents a security risk. Don’t leave it out of your sight."],
-      "You are not being paid to explore rumors and fake news.",
-      "Terminal 1 always contains maintenance information for the corresponding pod.",
-      "Do not lose sight of your mission. We need the data. If the research has not been completed, activate the double handshake protocol to complete the work.",
-      "No login possible. The door has to be closed for security reasons. The work cannot be continued if the door is open.",
-      ["That was an illegal transmission. We will try to trace the location of the source. Do not listen to the lies of Rachel Taylor."],
-      "To release the first sample you have to complete the gas control.",
-      "We hope you have taken you Bio-Vita today.",
-      "The gas analysis of terminal 2 can only be activated by the gas control of terminal 1.",
-      "We have been informed that David Coverstone used his notebook to document parts of the experiments he was involved in.",
-      "Pay attention to the access-rights. Luckily, David Coverstone suspected something was off and restricted Rachel Taylor’s access rights.",
-      "Good work! Gain access to the clean room to analyze the kill switch and send us the results!",
-      ["Clean room has been decontaminated... The code for the clean room is 9649."],
-      ["The blue USB-stick is the gateway for the upload to reach us securely."],
-      ["Do not trust Rachel Taylor. She is a terrorist. Do not forget your training."],
-      ["It appears Rachel Taylor has smuggled an illegal gateway into the pod to transfer data outside the Elancell network. We do not have to tell you that we are dealing with an extreme security risk."],
-      "Remove the illegal data gateway immediately!!! This will have consequences for your careers.",
-      "Traitors!!!",
-      ["The connection with the HQ has been lost."],
-      ["The connection with the HQ has been re-activated."],
-      ["Do not ever dare to do that again! This will have consequences."],
-      "You can kiss your careers goodbye!",
-      ["Send us the data by inserting the blue data gateway immediately!"]
-    ]
-  },
   "game-master": {
     "de": [
-      "HQ hat die Kommunikation mit Euch übernommen. Ich kann nur im Notfall mit Euch kommunizieren.",
+      ["HQ hat die Kommunikation mit Euch übernommen. Ich kann nur im Notfall mit Euch kommunizieren."],
       "HQ will nicht das Teamleiter zu sehr involviert werden. Wie Ihr wisst, sind die Inhalte der jeweiligen Missionen streng geheim."
     ],
     "en": [
       "HQ has taken over communication with you. I can only contact you sporadically.",
       "HQ does not like to see Teamleads getting involved. I do not have to tell you that the contents of this mission are strictly classified."
-    ]
-  },
-  "system": {
-    "de": [
-      "Verbindung mit HQ verloren",
-      "Verbindung mit HQ wieder hergestellt"
-    ],
-    "en": [
-      "The connection with the HQ has been lost.",
-      "The connection with the HQ has been re-established."
     ]
   }
 }

@@ -62,6 +62,7 @@ class LightIO(IntEnum):
     mcBoot = 10
     waterUV = 11
     gamereset = 12
+    gameOver = 13
 
     pcfIn = 3   # 0x3B
     chinmeySolved = 128
@@ -114,12 +115,17 @@ class GameStatus:
     def set_live(self, *args):
         self.gameLive = True
 
-    def is_live(self, *args):
-        return self.gameLive
-
 
 game_states = GameStatus()
 
+def is_game_started(*args):
+    return game_states.hasStarted
+
+def is_game_live(*args):
+    return game_states.gameLive
+
+def  start_game_condition(*args):
+    return game_states.gameLive and not game_states.hasStarted
 
 def call_video(event_key, nw_sock):
     nw_sock.transmit(event_key)
@@ -141,7 +147,6 @@ event_map = {
     },
 
     "game_live": {
-        event_condition: game_states.is_live,
         event_script: game_states.set_live,
     },
 
@@ -159,6 +164,11 @@ event_map = {
     "game_endtrigger": {
         pcf_out_add: [LightIO.pcfOut],
         pcf_out: [LightIO.gameEndTrigger],
+    },
+
+    "game_over": {
+        pcf_out_add: [LightIO.pcfOut],
+        pcf_out: [LightIO.gameOver],
     },
 
     "hallway_start": {
@@ -193,7 +203,6 @@ event_map = {
         pcf_out: [LightIO.chimneyOverride, FuseIo.mcOpened],
     },
 
-
     "water_solved": {
         pcf_in_add: WaterIO.pcfIn,
         pcf_in: WaterIO.uvActive,
@@ -221,18 +230,18 @@ event_map = {
 }
 
 
-def setup_default_callbacks():
-    for event_key in event_map.keys():
-        event_data = event_map[event_key]
+def setup_default_callbacks(list):
+    for event_key in list.keys():
+        event_data = list[event_key]
 
         if not (event_data.get(trigger_msg, False) and event_data.get(trigger_cmd, False)):
             triggers = re.split("_", event_key)
             if len(triggers) == 2:
-                event_map[event_key][trigger_cmd] = triggers[0]
-                event_map[event_key][trigger_msg] = triggers[1]
+                list[event_key][trigger_cmd] = triggers[0]
+                list[event_key][trigger_msg] = triggers[1]
 
 
-setup_default_callbacks()
+setup_default_callbacks(event_map)
 
 
 # Only can be applied to non binary pinbased inputs
@@ -242,16 +251,21 @@ inverted_events = {
         pcf_in: ArbiterIO.apartmentDoor,
         pcf_out_add: [LightIO.pcfOut],
         pcf_out: [LightIO.apartmentEnter],
+        event_condition: is_game_started,
     },
+
     "game_start": {
         pcf_in_add: ArbiterIO.pcfIn,
-        pcf_in: ArbiterIO.apartmentDoor,
+        pcf_in: ArbiterIO.entrance,
         pcf_out_add: [LightIO.pcfOut, FuseIo.pcfOut],
         pcf_out: [LightIO.gameStart, FuseIo.startGame],
         event_script: game_states.set_started,
+        event_condition: start_game_condition,
     },
 }
 
+
+setup_default_callbacks(inverted_events)
 
 
 

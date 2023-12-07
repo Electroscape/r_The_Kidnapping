@@ -18,15 +18,16 @@ enum brains {
     ledStrip = 2,
 };
 
-enum leds {
-    hallway = 1,    
-    living,    
-    empore, 
+enum ledsIndex {
+    hallway = PWM::set1,    
+    living = PWM::set2,    
+    empore = PWM::set3, 
+    zwinger = PWM::set4,
 };
 
 enum strips {
-    stripLiving = 1,
-    missionControl,
+    stripLiving = PWM::set1,  
+    missionControl = PWM::set2,
 };
 
 

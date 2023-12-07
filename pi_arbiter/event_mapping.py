@@ -206,6 +206,8 @@ event_map = {
     "water_solved": {
         pcf_in_add: WaterIO.pcfIn,
         pcf_in: WaterIO.uvActive,
+        pcf_out_add: [LightIO.pcfOut],
+        pcf_out: [LightIO.waterUV],
     },
 
     "fusebox_doorOpened": {
@@ -224,8 +226,8 @@ event_map = {
     "breakout_solved": {
         pcf_in_add: BreakoutIO.pcfIn,
         pcf_in: BreakoutIO.solved,
-        pcf_out_add: [BreakoutIO.pcfOut],
-        pcf_out: [BreakoutIO.setSolved],
+        pcf_out_add: [BreakoutIO.pcfOut, LightIO.pcfOut],
+        pcf_out: [BreakoutIO.setSolved, LightIO.gameOver],
     },
 }
 

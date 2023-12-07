@@ -14,8 +14,8 @@
 
 enum brains {
     keypad,
-    ledDot = 2,
-    ledStrip = 3,
+    ledDot = 3,
+    ledStrip = 2,
 };
 
 enum leds {

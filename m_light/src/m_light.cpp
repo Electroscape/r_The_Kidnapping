@@ -242,7 +242,6 @@ void handleInputs() {
         break;
     }
     wdt_reset();
-    delay(1500);
 }
 
 

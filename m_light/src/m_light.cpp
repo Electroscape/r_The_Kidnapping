@@ -190,7 +190,7 @@ void setup() {
 
     Serial.println(F("WDT endabled"));
     wdt_enable(WDTO_8S);
-
+    
     Mother.rs485SetSlaveCount(1);
     gameReset();
     wdt_reset();
@@ -202,10 +202,9 @@ void handleInputs() {
     if (lastInput == inputVal || inputVal == 0) {
         return;
     }
+    
     Serial.print("received input:");
     Serial.println(inputVal);
-
-    delay(500);
 
     lastInput = inputVal;
     switch (inputVal) {
@@ -242,6 +241,8 @@ void handleInputs() {
             LED_CMDS::setAllStripsToClr(Mother, brains::ledStrip, LED_CMDS::clrRed, 50);
         break;
     }
+    wdt_reset();
+    delay(1500);
 }
 
 

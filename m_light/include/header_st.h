@@ -19,14 +19,14 @@ enum brains {
 };
 
 enum leds {
-    hallway,    // 2 
-    living,     // 1
-    empore      // 2
+    hallway = 1,    
+    living,    
+    empore, 
 };
 
 enum strips {
-    stripLiving,
-    missionControl
+    stripLiving = 1,
+    missionControl,
 };
 
 

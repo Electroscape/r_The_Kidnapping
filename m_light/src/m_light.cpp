@@ -234,6 +234,7 @@ void handleInputs() {
         case IOValues::waterUV:
             LED_CMDS::fade2color(Mother, brains::ledStrip, LED_CMDS::clrWhite, 50, LED_CMDS::clrWhite, 10, 5000, strips::stripLiving);
             LED_CMDS::fade2color(Mother, brains::ledDot, LED_CMDS::clrWhite, 50, LED_CMDS::clrWhite, 10, 5000, ledsIndex::empore);
+            LED_CMDS::setStripToClr(Mother, brains::ledDot, LED_CMDS::clrGreen, 50, ledsIndex::zwinger);
         break;
         case IOValues::gameResetIn: 
             gameReset();

@@ -139,70 +139,9 @@ def frontend_server_messages(json_msg):
 @sio.on('msg_to_server')
 def handle_received_messages(json_msg):
     logging.info('server received message: ' + str(json_msg))
-    if json_msg.get("keypad_update"):
-        global samples
-        # "gas_control keypad 0 wrong"
-        page, _, num, status = json_msg.get("keypad_update").split()
-        if page.startswith("/gas_control"):
-            if status == "correct":
-                samples[int(num)]["status"] = "unlocked"
-                samples[int(num)]["icon"] = sample_icons["unlocked"]
-                sio.emit("samples", samples)
-                sio.emit("samples", f"sample {int(num) + 1} {samples[int(num)]['status']}")
-            else:
-                # TODO emit message for wrong trials?
-                print("gas control wrong trial")
 
-        elif page.startswith("/gas_analysis"):
-            if status == "correct":
-                samples[int(num)]["status"] = "released"
-                samples[int(num)]["icon"] = sample_icons["released"]
-            trigger_msg = {
-                "username": "arb",
-                "cmd": "dispenser",
-                "message": "dishout"
-            }
-            sio.emit("trigger", trigger_msg)
-            # should I add ~5 sec delay here?
-            # after trigger msg and before sending the samples updates msg
-            # for the physical world to take place.
-            if all_samples_solved():
-                sio.emit("samples", {"flag": "done"})
-            else:
-                # unblock next sample
-                samples[int(num) + 1]["status"] = "locked"
-                samples[int(num) + 1]["icon"] = sample_icons["locked"]
-
-            sio.emit("samples", samples)
-            sio.emit("samples", f"sample {int(num) + 1} {samples[int(num)]['status']}")
-
-    elif json_msg.get("levels") and "correct" in str(json_msg):
-        sio.emit("to_clients", {
-            "username": "tr2",
-            "cmd": "elancell",
-            "message": "solved"
-        })
-    elif "/lab_control" in str(json_msg):
-        logging.info("access to laser-lock requested")
-        print(f"access to laser-lock requested, gamestatus is: {game_status.laserlock_cable}")
-        # access the laserlock lab
-        if game_status.laserlock_cable == "broken":
-            sio.emit("trigger", {"username": "arb", "cmd": "laserlock", "message": "fail"})
-        else:
-            sio.emit("trigger", {"username": "arb", "cmd": "laserlock", "message": "access"})
-    elif json_msg.get("cmd") == "cleanroom":
-        logging.info(f"cleanroom status: {json_msg.get('message')}")
-        # access the cleanroom
-        sio.emit("trigger", {"username": "arb", "cmd": "cleanroom", "message": json_msg.get("message")})
-        # also update TR2
-        sio.emit("to_clients", {"username": "tr2", "cmd": "cleanroom", "message": json_msg.get("message")})
-    elif json_msg.get("cmd") == "upload":
-        msg = json_msg.get("message")
-        if msg in ["elancell", "rachel"]:
-            sio.emit("trigger", {"username": "arb", "cmd": "upload", "message": msg})
-    else:
-        # broadcast chat message
-        sio.emit('response_to_terminals', json_msg)
+    # broadcast chat message
+    sio.emit('response_to_terminals', json_msg)
     # send it to frontend
     frontend_server_messages(json_msg)
 

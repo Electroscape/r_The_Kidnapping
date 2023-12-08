@@ -79,7 +79,7 @@ enum IOValues {
     waterUV,        // turns of the empore
     gameResetIn,
     gameOver,
-    chinmeySolved = 1   // the one output we use
+    chinmeySolved = 1 << 7   // the one output we use
 };
 
 int intputArray[inputCnt] = {

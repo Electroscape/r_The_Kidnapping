@@ -25,7 +25,7 @@
 STB_MOTHER_IO MotherIO;
 
 STB_MOTHER Mother;
-int stage = stages::chimneyOpening;
+int stage = stages::idle;
 // since stages are single binary bits and we still need to d some indexing
 int stageIndex = 0;
 // doing this so the first time it updates the brains oled without an exta setup line
@@ -53,7 +53,7 @@ void gameReset() {
     LED_CMDS::setAllStripsToClr(Mother, brains::ledStrip, LED_CMDS::clrBlack);
     delay(100);
     LED_CMDS::setStripToClr(Mother, brains::ledDot, LED_CMDS::clrRed, 50, ledsIndex::zwinger);
-    
+    stage = stages::idle;
 }
 
 

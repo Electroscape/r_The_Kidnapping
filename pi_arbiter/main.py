@@ -115,7 +115,7 @@ def trigger_event(event_key, event_value=None):
         handle_event(queued_event)
 
 
-def handle_event(event_key, event_value=None):
+def handle_event(event_key, event_value=None, frontend_override=False):
 
     print(f"handling events {event_key}")
 
@@ -124,10 +124,10 @@ def handle_event(event_key, event_value=None):
         return
 
     try:
-        if not event_value.get(event_condition, lambda: True)():
-            # print(f"conditions not fullfilled {event_key}")
-            return
-
+        if not frontend_override:
+            if not event_value.get(event_condition, lambda: True)():
+                # print(f"conditions not fullfilled {event_key}")
+                return
         event_value.get(event_script, lambda *args: 'Invalid')(event_key, nw_sock)
     except TypeError as err:
         print(f"Error with event fnc/condition {err}")
@@ -185,7 +185,7 @@ def handle_fe(data):
             msg = event.get(trigger_msg, False)
             if msg and msg != data.get("message"):
                 continue
-            handle_event(key)
+            handle_event(key, frontend_override=True)
         except KeyError:
             pass
 
@@ -225,7 +225,8 @@ def handle_pcf_input(input_pcf, value):
             continue
 
     if rejected:
-        print(f"\n\nInvalid PCF input\n PCFNo {input_pcf} value {value}\n\n")
+        pass
+        # print(f"\n\nInvalid PCF input\n PCFNo {input_pcf} value {value}\n\n")
     cooldowns.cooldowns.update(temporary_cooldowns)
 
 

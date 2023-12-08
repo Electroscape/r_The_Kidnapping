@@ -52,7 +52,7 @@ class LightIO(IntEnum):
     pcfOut = 0  # 0x38
     service_enable = 1
     gameStart = 2
-    gameEndTrigger = 3
+    gameSolved = 3
     hallwayStart = 4
     hallwayOff = 5
     hallwayOn = 6
@@ -61,7 +61,7 @@ class LightIO(IntEnum):
     chimneyOverride = 9
     mcBoot = 10
     waterUV = 11
-    gamereset = 12
+    gameReset = 12
     gameOver = 13
 
     pcfIn = 3   # 0x3B
@@ -102,30 +102,38 @@ class GameStatus:
     def __init__(self):
         self.example = False
         self.hasStarted = False
-        self.gameLive = False
         self.gameLive = False   # suppress in case of other light effects? only for the green solved
-
-    def set_started(self, *args):
-        self.hasStarted = True
-
-    def reset(self, *args):
-        self.gameLive = False
-        self.hasStarted = False
-
-    def set_live(self, *args):
-        self.gameLive = True
-
+        self.appartmentEntered = False
 
 game_states = GameStatus()
 
+
+def reset_states(*args):
+    game_states.gameLive = False
+    game_states.hasStarted = False
+
+def set_live(*args):
+    game_states.gameLive = True
+
 def is_game_started(*args):
     return game_states.hasStarted
+
+def can_enter_appartment(*args):
+    if game_states.hasStarted:
+        if not game_states.appartmentEntered:
+            game_states.appartmentEntered = True
+            return game_states.appartmentEntered
+    return False
 
 def is_game_live(*args):
     return game_states.gameLive
 
 def  start_game_condition(*args):
-    return game_states.gameLive and not game_states.hasStarted
+    if game_states.gameLive:
+        if not game_states.hasStarted:
+            game_states.hasStarted = True
+            return True
+    return False
 
 def call_video(event_key, nw_sock):
     nw_sock.transmit(event_key)
@@ -147,7 +155,9 @@ event_map = {
     },
 
     "game_live": {
-        event_script: game_states.set_live,
+        pcf_out_add: [LightIO.pcfOut, BreakoutIO.pcfOut],
+        pcf_out: [LightIO.gameReset, BreakoutIO.roomReset],
+        event_script: set_live,
     },
 
     "service_enable": {
@@ -158,12 +168,7 @@ event_map = {
     "game_reset": {
         pcf_out_add: [BreakoutIO.pcfOut],
         pcf_out: [BreakoutIO.roomReset],
-        event_script: GameStatus.reset
-    },
-
-    "game_endtrigger": {
-        pcf_out_add: [LightIO.pcfOut],
-        pcf_out: [LightIO.gameEndTrigger],
+        event_script: reset_states,
     },
 
     "game_over": {
@@ -227,7 +232,7 @@ event_map = {
         pcf_in_add: BreakoutIO.pcfIn,
         pcf_in: BreakoutIO.solved,
         pcf_out_add: [BreakoutIO.pcfOut, LightIO.pcfOut],
-        pcf_out: [BreakoutIO.setSolved, LightIO.gameOver],
+        pcf_out: [BreakoutIO.setSolved, LightIO.gameSolved],
     },
 }
 
@@ -248,22 +253,23 @@ setup_default_callbacks(event_map)
 
 # Only can be applied to non binary pinbased inputs
 inverted_events = {
-    "appartment_enter": {
-        pcf_in_add: ArbiterIO.pcfIn,
-        pcf_in: ArbiterIO.apartmentDoor,
-        pcf_out_add: [LightIO.pcfOut],
-        pcf_out: [LightIO.apartmentEnter],
-        event_condition: is_game_started,
-    },
 
     "game_start": {
         pcf_in_add: ArbiterIO.pcfIn,
         pcf_in: ArbiterIO.entrance,
         pcf_out_add: [LightIO.pcfOut, FuseIo.pcfOut],
         pcf_out: [LightIO.gameStart, FuseIo.startGame],
-        event_script: game_states.set_started,
         event_condition: start_game_condition,
     },
+
+    "appartment_enter": {
+        pcf_in_add: ArbiterIO.pcfIn,
+        pcf_in: ArbiterIO.apartmentDoor,
+        pcf_out_add: [LightIO.pcfOut],
+        pcf_out: [LightIO.apartmentEnter],
+        event_condition: can_enter_appartment,
+    },
+
 }
 
 

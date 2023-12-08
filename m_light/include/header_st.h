@@ -123,7 +123,7 @@ char passwords[PasswordAmount][MaxPassLen] = {
 
 // defines what password/RFIDCode is used at what stage, if none is used its -1
 int passwordMap[PasswordAmount] = {
-    stageSum,   // service code, valid in all stages
+    idle,   // service code, valid in all stages
     stageSum,   // service code, valid in all stages
 };
 

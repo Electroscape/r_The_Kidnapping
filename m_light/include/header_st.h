@@ -34,19 +34,23 @@ enum strips {
 
 enum relays {
     chinmey,
+    mcAlarm,
     relayAmount, 
 };
 
 enum relayInits {
     locker_1_init = closed,
+    mcAlarm_init = closed,
 };
 
 int relayPinArray[relayAmount] = {
     chinmey,
+    mcAlarm,
 };
 
 int relayInitArray[relayAmount] = {
     locker_1_init,
+    mcAlarm_init,
 };
 
 

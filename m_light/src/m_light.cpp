@@ -48,11 +48,11 @@ void setStageIndex() {
 
 void gameReset() {
     Mother.motherRelay.digitalWrite(relays::chinmey, closed);
-    stage = stages::idle;
     LED_CMDS::setAllStripsToClr(Mother, brains::ledDot, LED_CMDS::clrBlack);
     LED_CMDS::setAllStripsToClr(Mother, brains::ledStrip, LED_CMDS::clrBlack);
     delay(100);
     LED_CMDS::setStripToClr(Mother, brains::ledDot, LED_CMDS::clrRed, 50, ledsIndex::zwinger);
+    Mother.motherRelay.digitalWrite(relays::mcAlarm, closed);
     stage = stages::idle;
 }
 
@@ -215,6 +215,7 @@ void handleInputs() {
         case IOValues::gameEndTrigger: 
             LED_CMDS::setAllStripsToClr(Mother, brains::ledDot, LED_CMDS::clrGreen, 50);
             LED_CMDS::setAllStripsToClr(Mother, brains::ledStrip, LED_CMDS::clrGreen, 50);
+            Mother.motherRelay.digitalWrite(relays::mcAlarm, open);
         break;
         case IOValues::hallwayOff: LED_CMDS::setStripToClr(Mother, brains::ledDot, LED_CMDS::clrBlack, 0, ledsIndex::hallway); break;
         case IOValues::hallwayOn: LED_CMDS::setStripToClr(Mother, brains::ledDot, LED_CMDS::clrWhite, 50, ledsIndex::hallway); break;
@@ -232,6 +233,7 @@ void handleInputs() {
             LED_CMDS::fade2color(Mother, brains::ledStrip, LED_CMDS::clrWhite, 0, LED_CMDS::clrWhite, 50, 60000, strips::missionControl);
         break;
         case IOValues::waterUV:
+            Mother.motherRelay.digitalWrite(relays::mcAlarm, open);
             LED_CMDS::fade2color(Mother, brains::ledStrip, LED_CMDS::clrWhite, 50, LED_CMDS::clrWhite, 10, 5000, strips::stripLiving);
             LED_CMDS::fade2color(Mother, brains::ledDot, LED_CMDS::clrWhite, 50, LED_CMDS::clrWhite, 10, 5000, ledsIndex::empore);
             LED_CMDS::setStripToClr(Mother, brains::ledDot, LED_CMDS::clrGreen, 50, ledsIndex::zwinger);
@@ -240,6 +242,7 @@ void handleInputs() {
             gameReset();
         break;
         case IOValues::gameOver:
+
             LED_CMDS::setAllStripsToClr(Mother, brains::ledDot, LED_CMDS::clrRed, 50);
             LED_CMDS::setAllStripsToClr(Mother, brains::ledStrip, LED_CMDS::clrRed, 50);
         break;

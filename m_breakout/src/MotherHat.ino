@@ -61,9 +61,12 @@ bool checkForRfid() {
         return false;
     } 
     Mother.STB_.rcvdPtr += KeywordsList::rfidKeyword.length();
-    handleResult();
-    wdt_reset();
-    return true;
+
+    if (stage > stages::off) {
+        handleResult();
+        return true;
+    }
+    return false;
 }
 
 
@@ -105,21 +108,8 @@ void stageUpdate() {
     lastStage = stage;
 
     // for now no need to make it work properly scaling, need to build afnc repertoir anyways
-    for (int brainNo=0; brainNo < Mother.getSlaveCnt(); brainNo++) {
-        Mother.setFlags(ledBrain, rfidFlag);
-        delay(5);
-    }
     MotherIO.outputReset();
     stageActions();
-}
-
-
-void inputInit() {
-    for (int pin=0; pin<inputCnt; pin++) {
-        inputPCF.begin(RESET_I2C_ADD);
-        inputPCF.pinMode((uint8_t) pin, INPUT);
-        inputPCF.digitalWrite((uint8_t) pin, HIGH);
-    }
 }
 
 
@@ -151,17 +141,16 @@ void setup() {
     // technically 3 but for the first segments till unlocked there is no need
     Mother.rs485SetSlaveCount(1);
 
-    inputInit();
-
     wdt_reset();
     delay(1000);
 }
 
 
 void loop() {
-    validBrainResult = Mother.rs485PerformPoll();
+    validBrainResult = Mother.rs485PerformPoll(2);
     if (validBrainResult) {interpreter();}
     handleInputs();    
     stageUpdate(); 
+    delay(50);
     wdt_reset();
 }

@@ -33,15 +33,12 @@ int validBrainResult = 0;
 
 bool passwordInterpreter(char* password) {
     // Mother.STB_.defaultOled.clear();
-    Serial.print("Handling pw");
+    Serial.print("Handling pw ");
     Serial.println(password);
-    for (int passNo=0; passNo < PasswordAmount; passNo++) {
-        if (passwordMap[passNo] & stage) {
-            if ( strncmp(passwords[passNo], password, strlen(passwords[passNo]) ) == 0) {
-                Serial.println("Correct PW");
-                return true;
-            }
-        }
+
+    if ( strncmp(passwords[0], password, 2 ) == 0) {
+        Serial.println("Correct PW");
+        return true;
     }
     return false;
 }
@@ -57,6 +54,7 @@ void handleResult() {
 
 // again good candidate for a mother specific lib
 bool checkForRfid() {
+    Serial.println(Mother.STB_.rcvdPtr);
     if (strncmp(KeywordsList::rfidKeyword.c_str(), Mother.STB_.rcvdPtr, KeywordsList::rfidKeyword.length() ) != 0) {
         return false;
     } 
@@ -79,16 +77,21 @@ void interpreter() {
 
 void stageActions() {
     wdt_reset();
+    Serial.println("stageaction");
     switch (stage) {
         case solved:
+            Serial.println("solved");
             Mother.motherRelay.digitalWrite(relays::door, doorOpen);
-            LED_CMDS::setStripToClr(Mother, ledBrain, LED_CMDS::clrGreen, 50, 0);
-            MotherIO.setOuput(outSolved);
+            LED_CMDS::setStripToClr(Mother, ledBrain, LED_CMDS::clrGreen, 50, 1);
+            MotherIO.setOuput(outSolved, true);
             delay(200);
             MotherIO.outputReset();
         break;
         case idle:
-            LED_CMDS::setStripToClr(Mother, ledBrain, LED_CMDS::clrRed, 50, 0);
+            Serial.println("idle");
+            Mother.motherRelay.digitalWrite(relays::door, doorClosed);
+            LED_CMDS::setStripToClr(Mother, ledBrain, LED_CMDS::clrRed, 50, 1);
+            MotherIO.outputReset();
         break;
     }
 }
@@ -118,9 +121,18 @@ void handleInputs() {
     if (result == lastResult) { return; }
     lastResult = result;
 
+    Serial.println(result);
+
     switch (result) {
         case inputValues::roomReset:
-            stage = idle;
+            Serial.println("reset");
+            Mother.motherRelay.digitalWrite(relays::door, doorClosed);
+            LED_CMDS::setStripToClr(Mother, ledBrain, LED_CMDS::clrBlack, 50, 1);
+            MotherIO.outputReset();
+            stage = stages::off;
+        break;
+        case inputValues::mcBoot:
+            stage = stages::idle;
         break;
         case inputValues::setSolved:
             stage = solved;
@@ -147,8 +159,10 @@ void setup() {
 
 
 void loop() {
-    validBrainResult = Mother.rs485PerformPoll(2);
-    if (validBrainResult) {interpreter();}
+    if (stage == stages::idle) {
+        validBrainResult = Mother.rs485PerformPoll(2);
+        if (validBrainResult) {interpreter();}
+    }
     handleInputs();    
     stageUpdate(); 
     delay(50);

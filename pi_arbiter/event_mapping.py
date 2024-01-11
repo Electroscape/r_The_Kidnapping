@@ -95,6 +95,17 @@ class BreakoutIO(IntEnum):
     setSolved = 3
 
 
+class PowerIO(IntEnum):
+    pcfOut = 2  # 0x3A
+    roomReset = 1
+    livingOn = 2
+    livingOff = 3
+    mcOn = 4
+    mcOff = 5
+    bedroomOn = 6
+    bedroomOff = 7
+
+
 binary_pcfs = [FuseIo.pcfIn, FuseIo.pcfIn]
 
 
@@ -112,11 +123,14 @@ def reset_states(*args):
     game_states.gameLive = False
     game_states.hasStarted = False
 
+
 def set_live(*args):
     game_states.gameLive = True
 
+
 def is_game_started(*args):
     return game_states.hasStarted
+
 
 def can_enter_appartment(*args):
     if game_states.hasStarted:
@@ -125,8 +139,10 @@ def can_enter_appartment(*args):
             return game_states.appartmentEntered
     return False
 
+
 def is_game_live(*args):
     return game_states.gameLive
+
 
 def  start_game_condition(*args):
     if game_states.gameLive:
@@ -134,6 +150,7 @@ def  start_game_condition(*args):
             game_states.hasStarted = True
             return True
     return False
+
 
 def call_video(event_key, nw_sock):
     nw_sock.transmit(event_key)
@@ -166,8 +183,8 @@ event_map = {
     },
 
     "game_reset": {
-        pcf_out_add: [BreakoutIO.pcfOut],
-        pcf_out: [BreakoutIO.roomReset],
+        pcf_out_add: [BreakoutIO.pcfOut, PowerIO.pcfOut],
+        pcf_out: [BreakoutIO.roomReset, PowerIO.roomReset],
         event_script: reset_states,
     },
 
@@ -234,6 +251,32 @@ event_map = {
         pcf_out_add: [BreakoutIO.pcfOut, LightIO.pcfOut],
         pcf_out: [BreakoutIO.setSolved, LightIO.gameSolved],
     },
+
+    "livingPower_on": {
+        pcf_out_add: PowerIO.pcfOut,
+        pcf_out: PowerIO.livingOn,
+    },
+    "livingPower_off": {
+        pcf_out_add: PowerIO.pcfOut,
+        pcf_out: PowerIO.livingOff,
+    },
+    "mcPower_on": {
+        pcf_out_add: PowerIO.pcfOut,
+        pcf_out: PowerIO.mcOn,
+    },
+    "mcPower_off": {
+        pcf_out_add: PowerIO.pcfOut,
+        pcf_out: PowerIO.mcOff,
+    },
+    "bedroomPower_on": {
+        pcf_out_add: PowerIO.pcfOut,
+        pcf_out: PowerIO.bedroomOn,
+    },
+    "bedroomPower_off": {
+        pcf_out_add: PowerIO.pcfOut,
+        pcf_out: PowerIO.bedroomOff,
+    },
+
 }
 
 

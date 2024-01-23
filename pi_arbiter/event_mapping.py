@@ -98,12 +98,14 @@ class BreakoutIO(IntEnum):
 class PowerIO(IntEnum):
     pcfOut = 2  # 0x3A
     roomReset = 1
-    livingOn = 2
-    livingOff = 3
-    mcOn = 4
-    mcOff = 5
-    bedroomOn = 6
-    bedroomOff = 7
+    emporeOn = 2
+    emporeOff = 3
+    livingOn = 4
+    livingOff = 5
+    raum2On = 6
+    raum2Off = 7
+    serviceOn = 8
+    serviceOff = 9
 
 
 binary_pcfs = [FuseIo.pcfIn, FuseIo.pcfIn]
@@ -252,6 +254,14 @@ event_map = {
         pcf_out: [BreakoutIO.setSolved, LightIO.gameSolved],
     },
 
+    "emporePower_on": {
+        pcf_out_add: PowerIO.pcfOut,
+        pcf_out: PowerIO.emporeOn,
+    },
+    "emporePower_off": {
+        pcf_out_add: PowerIO.pcfOut,
+        pcf_out: PowerIO.emporeOff,
+    },
     "livingPower_on": {
         pcf_out_add: PowerIO.pcfOut,
         pcf_out: PowerIO.livingOn,
@@ -260,23 +270,22 @@ event_map = {
         pcf_out_add: PowerIO.pcfOut,
         pcf_out: PowerIO.livingOff,
     },
-    "mcPower_on": {
+    "room2Power_on": {
         pcf_out_add: PowerIO.pcfOut,
-        pcf_out: PowerIO.mcOn,
+        pcf_out: PowerIO.raum2On,
     },
-    "mcPower_off": {
+    "room2Power_off": {
         pcf_out_add: PowerIO.pcfOut,
-        pcf_out: PowerIO.mcOff,
+        pcf_out: PowerIO.raum2Off,
     },
-    "bedroomPower_on": {
+    "servicePower_on": {
         pcf_out_add: PowerIO.pcfOut,
-        pcf_out: PowerIO.bedroomOn,
+        pcf_out: PowerIO.serviceOn,
     },
-    "bedroomPower_off": {
+    "servicePower_off": {
         pcf_out_add: PowerIO.pcfOut,
-        pcf_out: PowerIO.bedroomOff,
+        pcf_out: PowerIO.serviceOff,
     },
-
 }
 
 
@@ -312,7 +321,6 @@ inverted_events = {
         pcf_out: [LightIO.apartmentEnter],
         event_condition: can_enter_appartment,
     },
-
 }
 
 

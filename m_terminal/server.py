@@ -47,7 +47,6 @@ def read_json(filename: str, from_static=True) -> dict:
         return {}
 
 
-samples = read_json("json/samples.json")
 sample_icons = {
     "blocked": "fa-solid fa-ban",
     "locked": "fas fa-lock",
@@ -167,75 +166,20 @@ def events_handler(msg):
     # print(f"sio events handling: {msg}")
 
     if username == "server":
-        global samples
-        global loading_percent
-
-        if cmd == "loadingbar":
-            loading_percent = int(msg.get("message"))
-            sio.emit("to_clients", {"username": "tr1", "cmd": "loadingbar", "message": loading_percent})
-            sio.emit("to_clients", {"username": "tr2", "cmd": "loadingbar", "message": loading_percent})
-        elif cmd == "reset":
-            samples = read_json("json/samples.json")
-            sio.emit("samples", samples)
+        if cmd == "reset":
             sio.emit("samples", {"flag": "unsolved"})  # to reset the flag
-            if msg_value == "resetAll":
-                logging.info("Server: Reset all")
-                # reset global variables
-                login_users = {
-                    "tr1": "empty",
-                    "tr2": "empty"
-                }
-                # emit default state messages to terminals
-                sio.emit("to_clients", {"username": "tr1", "cmd": "auth", "message": "empty"})
-                sio.emit("to_clients", {"username": "tr2", "cmd": "auth", "message": "empty"})
-                sio.emit("to_clients", {"username": "tr1", "cmd": "usbBoot", "message": "disconnect"})
-                sio.emit("to_clients", {"username": "tr1", "cmd": "laserlock", "message": "broken"})
-                game_status.laserlock_cable = "broken"
-                sio.emit("to_clients", {"username": "tr1", "cmd": "laserlock_auth", "message": "normal"})
-                sio.emit("to_clients", {"username": "tr2", "cmd": "mSwitch", "message": "off"})
-                sio.emit("to_clients", {"username": "tr2", "cmd": "elancell", "message": "disable"})
-                sio.emit("to_clients", {"username": "tr2", "cmd": "microscope", "message": "0"})
-                sio.emit("to_clients", {"username": "tr2", "cmd": "cleanroom", "message": "lock"})
-                sio.emit("to_clients", {"username": "tr2", "cmd": "breach", "message": "secure"})
-                sio.emit("to_clients", {"username": "tr1", "cmd": "personalR", "message": "hide"})
+
     else:
+        '''
         if cmd == "auth":
             login_users[msg.get("username")] = msg.get("message")
             if msg.get("username") == "tr2" and msg.get("message") == "rachel":
                 sio.emit("to_clients", {"username": "tr1", "cmd": "personalR", "message": "show"})
-        elif cmd == "usbBoot" and username == "tr1":
-            loading_percent = 90
-            # reset laserlock status on boot event
-            sio.emit("to_clients", {"username": "tr1", "cmd": "laserlock_auth", "message": "normal"})
-        elif cmd == "laserlock":
-            print(msg)
-            if msg_value in ["broken", "fixed"]:
-                game_status.laserlock_cable = msg_value
-            # dict_cmd = {"username": "arb", "cmd": "laserlock", "message": msg_value}
-            # send cable override to arbiter
-            # logging.info(f"msg to arbiter: {str(dict_cmd)}")
-            # sio.emit("trigger", dict_cmd)
-
+        '''
+        # is this needed?
         sio.emit("to_clients", msg)
+
     frontend_server_messages(msg)
-
-
-def loadingbar_timer():
-    global loading_percent
-
-    while True:
-        # only starts after booting
-        if loading_percent > 0:
-            sio.emit("to_clients", {"username": "tr1", "cmd": "loadingbar", "message": loading_percent})
-            sio.emit("to_clients", {"username": "tr2", "cmd": "loadingbar", "message": loading_percent})
-            frontend_server_messages({"username": "tr1/tr2", "cmd": "loadingbar", "message": loading_percent})
-            # 90 min / 20 loading bars = 4.5 min = 270 seconds
-            # remove 1 progress bar every 270 seconds
-            sio.sleep(int(60 * 4.5))
-            loading_percent -= 5
-
-
-progressbar_task = sio.start_background_task(loadingbar_timer)
 
 
 if __name__ == "__main__":

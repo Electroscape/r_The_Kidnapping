@@ -16,12 +16,14 @@ enum IOpins {
 
 enum inputValues {  
     roomReset = 1,
+    emporeOn,
+    empporeOff,
     livingOn,
     livingOff,
-    mcOn,
-    mcOff,
-    bedroomOn,
-    bedroomOff,           
+    room2On,
+    room2Off,           
+    serviceOn,           
+    serviceOff,                      
 };
 
 enum outputValues {};
@@ -44,26 +46,30 @@ int outputArray[outputCnt] = {};
 
 
 enum relays {
+    empore,
     living,
-    mc,
-    bedroom, 
+    room2,
+    service,
     relayAmount
 };
 
 enum relayInits {
+    empore_init = open,
     living_init = open,
-    mc_init = open,
-    bedroom_init = open,
+    room2_init = open,
+    service_init = open,
 };
 
 int relayPinArray[relayAmount] = {
+    empore,
     living,
-    mc,
-    bedroom,
+    room2,
+    service,
 };
 
 int relayInitArray[relayAmount] = {
+    empore_init,
     living_init,
-    mc_init,
-    bedroom_init,
+    room2_init,
+    service_init,
 };

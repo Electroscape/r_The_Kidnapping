@@ -37,27 +37,28 @@ void handleInputs() {
 
     switch (result) {
         case inputValues::roomReset:
-            Mother.motherRelay.digitalWrite(relays::mc, closed);
+            Mother.motherRelay.digitalWrite(relays::empore, closed);
             Mother.motherRelay.digitalWrite(relays::living, closed);
-            Mother.motherRelay.digitalWrite(relays::bedroom, closed);
-        break;
-        case inputValues::mcOn:
-            Mother.motherRelay.digitalWrite(relays::mc, open);
-        break;
-        case inputValues::mcOff:
-            Mother.motherRelay.digitalWrite(relays::mc, closed);
+            Mother.motherRelay.digitalWrite(relays::room2, closed);
+            Mother.motherRelay.digitalWrite(relays::service, closed);
         break;
         case inputValues::livingOn:
-            Mother.motherRelay.digitalWrite(relays::mc, open);
+            Mother.motherRelay.digitalWrite(relays::living, open);
         break;
         case inputValues::livingOff:
-            Mother.motherRelay.digitalWrite(relays::mc, closed);
+            Mother.motherRelay.digitalWrite(relays::living, closed);
         break;
-        case inputValues::bedroomOn:
-            Mother.motherRelay.digitalWrite(relays::bedroom, open);
+        case inputValues::emporeOn:
+            Mother.motherRelay.digitalWrite(relays::empore, open);
         break;
-        case inputValues::bedroomOff:
-            Mother.motherRelay.digitalWrite(relays::bedroom, closed);
+        case inputValues::empporeOff:
+            Mother.motherRelay.digitalWrite(relays::empore, closed);
+        break;
+        case inputValues::room2On:
+            Mother.motherRelay.digitalWrite(relays::room2, open);
+        break;
+        case inputValues::room2Off:
+            Mother.motherRelay.digitalWrite(relays::room2, closed);
         break;
     }
 

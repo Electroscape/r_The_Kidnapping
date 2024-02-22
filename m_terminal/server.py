@@ -9,6 +9,7 @@ from flask_socketio import SocketIO
 import json
 import logging
 from datetime import datetime as dt
+from datetime import timedelta
 
 # Next two lines are for the issue: https://github.com/miguelgrinberg/python-engineio/issues/142
 from engineio.payload import Payload
@@ -25,6 +26,37 @@ log_name = now.strftime("logs/server %m_%d_%Y  %H_%M_%S.log")
 logging.basicConfig(filename=log_name, level=logging.DEBUG,
                     format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
 
+startTime = False
+start_time_file = "startTime.txt"
+date_format = "%Y-%m-%d %H:%M:%S"
+
+
+def save_start_time():
+    try:
+        f = open(start_time_file, "w+")
+        if startTime:
+            print("writing")
+            f.write(startTime.strftime(date_format))
+    except OSError as err:
+        print(err)
+        logging.error("failed to write startime file")
+        pass
+
+def get_start_time() -> bool:
+    try:
+        f = open(start_time_file, "r")
+        saved_time = f.read()
+        try:
+            saved_time = dt.strptime(saved_time, date_format)
+            global startTime
+            startTime = saved_time
+        except valueError as err:
+            print(err)
+            return False
+    except OSError:
+        return False
+
+    return True
 
 def read_json(filename: str, from_static=True) -> dict:
     """
@@ -91,6 +123,12 @@ def index():
         "lang": "en",
         "version": version
     }
+
+    if startTime:
+        config["startTime"] = startTime.timestamp()
+    else:
+        config["startTime"] = "false"   # prefer doing things on python rather than JS
+
     # ip_address = request.remote_addr
     # logging.info("Requester IP: " + ip_address)
     return render_template("server_home.html", g_config=config, chat_msg=chat_history.get(), hint_msgs=hint_msgs)
@@ -144,6 +182,18 @@ def handle_received_messages(json_msg):
     # send it to frontend
     frontend_server_messages(json_msg)
 
+def trigger_timer():
+    new_time = dt.now()
+    logging.debug("starttime event rcvd")
+    global startTime
+    global loading_percent
+    if not startTime or (new_time - startTime > timedelta(minutes=4)):
+        logging.debug("starttime set")
+        loading_percent = 100
+        sio.emit("response_to_fe", {"username": "tr1", "cmd": "startTimer"})
+        startTime = new_time
+        save_start_time()
+
 
 @sio.on('triggers')
 def override_triggers(msg):
@@ -151,24 +201,30 @@ def override_triggers(msg):
     frontend_server_messages(msg)
     # print in console for debugging
     logging.info(f"msg to arb pi: sio.on('trigger', {str(msg)})")
-    # emit message on "trigger" channel for the arb RPi
-    # Therefore listener on the arb Pi is @sio.on("trigger")
+    msg_value = msg.get("message")
+    cmd = msg.get("cmd")
+    if msg_value == "start" and cmd == "game":
+        trigger_timer()
     sio.emit("trigger", msg)
+
 
 
 @sio.on('events')
 def events_handler(msg):
     global login_users
+    logging.error(f"from events: {msg}")
     username = msg.get("username")
     cmd = msg.get("cmd")
     msg_value = msg.get("message")
 
     # print(f"sio events handling: {msg}")
 
+    if msg_value == "start" and cmd == "game":
+        trigger_timer()
+
     if username == "server":
         if cmd == "reset":
             sio.emit("samples", {"flag": "unsolved"})  # to reset the flag
-
     else:
         '''
         if cmd == "auth":
@@ -183,5 +239,6 @@ def events_handler(msg):
 
 
 if __name__ == "__main__":
+    get_start_time()
     sio.run(app, debug=True, host='0.0.0.0', port=5500, engineio_logger=True)
     # app.run(debug=True, host='0.0.0.0', port=5500)

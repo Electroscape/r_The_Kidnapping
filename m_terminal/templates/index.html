@@ -1,0 +1,138 @@
+{% extends "layout.html" %}
+
+{% block head %}
+    <style>
+        @-webkit-keyframes bar {
+            1% {
+                left: -95px;
+            }
+            100% {
+                left: 145px;
+            }
+        }
+
+        @keyframes bar {
+            1% {
+                left: -95px;
+            }
+            100% {
+                left: 145px;
+            }
+        }
+
+        #progress-bar {
+            border: 1px solid yellow;
+            height: 30px;
+            width: 455px;
+            border-radius: 25px;
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            margin: auto;
+        }
+
+        #progress-bar-wrapper {
+            text-align: center;
+        }
+
+        ul {
+            position: absolute;
+            top: -16px;
+            left: -22px;
+            margin-block-start: 1em;
+            padding-top: 5px;
+        }
+
+        ul li {
+            list-style-type: none;
+            height: 20px;
+            width: 12px;
+            background-color: yellow;
+            display: inline-block;
+        }
+    </style>
+
+    <script type="text/javascript">
+        $(function () {
+            let percent = parseInt("{{ progress }}");
+            if (percent !== -100) {
+                setProgressbar(percent);
+            } else {
+                $("#progress-bar-wrapper").addClass("d-none");
+            }
+            
+        });
+
+        function setProgressbar(percentage) {
+            $("#progress-bar").find("li").first().css("border-radius", "25px 0 0 25px");
+            $("#progress-bar").find("li").last().css("border-radius", "0 25px 25px 0");
+            $('#progress-bar ul li').css('display', 'none');
+            let totalBars = 20
+            let numBars = Math.ceil(percentage * totalBars / 100);
+            console.log("show " + numBars + " of " + totalBars);
+            if (numBars >= totalBars) {
+                $('#progress-bar ul li').css('display', 'inline-block');
+                return;
+            } else if (numBars === 1) {
+                $("#progress-bar").find("li").last().css("border-radius", "50%");
+                $("#progress-bar").find("li").last().css('display', 'inline-block');
+            } else if (numBars >= 2) {
+                $("#progress-bar").find("li").last().css('display', 'inline-block');
+            }
+
+            let $bars = $('#progress-bar ul li');
+            for (let i = 0; i < numBars - 1; i++) {
+                $bars.eq(i).css('display', 'inline-block');
+            }
+        }
+
+        socket.on("loadingbar_fe", (percent) => {
+            console.log("loadingbar percent: " + percent);
+            setProgressbar(percent);
+        })
+    </script>
+{% endblock %}
+
+{% block add_js %}
+    <script type="text/javascript">
+        $(document).ready(function () {
+            console.log("ready!");
+            switchLanguage("{{ g_config.lang }}")
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="row text-center d-flex justify-content-center">
+        <div id="ControlPanel" class="row row-cols-1 row-cols-md-3 g-3">
+        </div>
+    </div>
+    <div id="progress-bar-wrapper">
+        <span style="color: yellow; vertical-align: top"> Countdown </span>
+        <div id="progress-bar">
+            <ul>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+            </ul>
+        </div>
+    </div>
+{% endblock %}
+

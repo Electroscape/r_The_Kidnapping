@@ -1,0 +1,451 @@
+{% extends "layout.html" %}
+{% block title %}
+    Server Homepage
+{% endblock %}
+
+{% block chat_js %}
+    <script type="text/javascript">
+        function sendMessage(event) {
+            event.preventDefault();
+            let user_name = $("#dm_sender").val();
+            let user_input = $("#input_msg").val();
+            if (user_input) {
+                socket.emit('msg_to_server', {
+                    user_name: user_name,
+                    message: user_input
+                })
+            }
+            $("#input_msg").val('').focus();
+            return false;
+        }
+
+        var countDownDate = Date.now() + 60 * 1000 * 60;
+
+        if ({{g_config.startTime}}) {
+            console.log({{g_config.startTime}})
+            countDownDate = {{g_config.startTime}} * 1000 + 60 * 1000 * 60;
+        }
+
+        socket.on('connect', function () {
+            socket.emit('msg_to_server', {
+                update: "User '{{ g_config.title }}' is now connected"
+            })
+        })
+
+        socket.on('response_to_fe', function (msg) {
+            console.log(msg)
+            displayMessage(msg)
+            if (msg.cmd == "startTimer") {
+                console.log("startTimer event")
+                countDownDate = Date.now() + 60 * 1000 * 60;
+            }
+        })
+
+        function displayMessage(msg) {
+            if (msg.cmd) {
+                $('#msg_holder').prepend(`<div class="text-success"> ${JSON.stringify(msg).replaceAll('"', "")}</div>`)
+            } else if (typeof msg.user_name !== 'undefined') {
+                let chatColor = "white", srcColor = "black";
+                if (msg.user_name === "rachel") {
+                    chatColor = "red";
+                    srcColor = "red";
+                } else if (msg.user_name === "elancell-hq") {
+                    chatColor = "yellow";
+                    srcColor = "yellow";
+                }
+                $('#msg_holder').prepend(`<div><b style="color: ${srcColor}"> ${msg.user_name}: </b>
+                                        <p style="display: inline; color: ${chatColor}">${msg.message}</p></div>`)
+            } else {
+                $('#msg_holder').prepend(`<div class="text-warning"> ${JSON.stringify(msg).replaceAll('"', "")}</div>`)
+            }
+        }
+
+        function playNotificationSound() {
+            socket.emit('msg_to_server', {
+                cmd: "notification",
+                message: "buzz"
+            })
+        }
+    </script>
+{% endblock %}
+
+{% block head %}
+    <link href="https://cdn.jsdelivr.net/css-toggle-switch/latest/toggle-switch.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chatroom.css') }}">
+
+    <style>
+        .switch-candy input:checked + label {
+            background-color: rgb(var(--mdb-success-rgb));
+        }
+
+        .switch-toggle {
+            display: inline-block;
+            margin-inline-end: 35px;
+        }
+
+        .outer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .header-right {
+            visibility: hidden;
+        }
+
+        .label-txt, h3, h2 {
+            color: #ddd;
+        }
+
+        ul {
+            list-style: none !important;
+        }
+
+        li {
+            padding: 5px;
+        }
+
+        .modal-list-label {
+            cursor: pointer;
+            display: block;
+        }
+
+        input:checked + label {
+            background: dodgerblue;
+        }
+    </style>
+
+
+    <script type="text/javascript">
+        function onClickTerminal(src) {
+            let radioElement = document.querySelector(`input[name="${src}"]:checked`);
+            let msg, src_cmd;
+            if (radioElement) {
+                msg = radioElement.value;
+                src_cmd = src.split("_");
+            } else {
+                src_cmd = src.split("_");
+                msg = src_cmd[2];
+            }
+            if (src_cmd[1] == "t2" && (msg == "breach" || msg == "enable")) {
+                socket.emit("events", {
+                    username: src_cmd[0],
+                    cmd: src_cmd[1],
+                    message: "disable"
+                })
+            }
+            socket.emit("events", {
+                username: src_cmd[0],
+                cmd: src_cmd[1],
+                message: msg
+            })
+        }
+
+        function onClickTrigger(cmd_msg) {
+            let [cmd, msg] = cmd_msg.split("_");
+            // send to backend on "triggers" channel
+            socket.emit("triggers", {
+                username: "arb",
+                cmd: cmd,
+                message: msg
+            })
+        }
+
+        function onClickSet() {
+            let msg = $("#loadingInput").val();
+
+            socket.emit("events", {
+                username: "server",
+                cmd: "loadingbar",
+                message: msg
+            })
+
+        }
+
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div>
+        <h3>Terminal 2</h3>
+        <div class="outer">
+
+            <div class="label-txt">
+                upload data:
+                <div class="switch-toggle switch-candy">
+                    <input id="t2_disable" name="tr2_elancell" type="radio" value="disable" checked="checked"
+                           onclick="onClickTerminal(name)"/>
+                    <label for="t2_disable">(no usb) |</label>
+
+                    <input id="t2_enable" name="tr2_elancell" type="radio" value="enable"
+                           onclick="onClickTerminal(name)"/>
+                    <label for="t2_enable"><span style="color: dodgerblue">(blue usb)</span> |</label>
+
+                    <input id="t2_breach" name="tr2_elancell" type="radio" value="breach"
+                           onclick="onClickTerminal(name)"/>
+                    <label for="t2_breach"><span style="color: red">(red usb)</span> |</label>
+
+                    <input id="t2_solved" name="tr2_elancell" type="radio" value="solved"
+                           onclick="onClickTerminal(name)"/>
+                    <label for="t2_solved"> Solved |</label>
+
+                    <input id="t2_synth" name="tr2_elancell" type="radio" value="synthesized"
+                           onclick="onClickTerminal(name)"/>
+                    <label for="t2_synth"> Synthesized |</label>
+
+                    <input id="t2_done" name="tr2_elancell" type="radio" value="doneOverride"
+                           onclick="onClickTerminal(name)"/>
+                    <label for="t2_done"> Sent </label>
+                </div>
+            </div>
+        </div>
+        <br>
+    </div>
+    <br>
+
+    <hr style="height:3px">
+
+    <h3>Hallway</h3>
+    <div>
+        <button class="btn btn-outline-light" name="hallway_on" onclick="onClickTrigger(name)">Light on</button>
+        <button class="btn btn-outline-light" name="hallway_off" onclick="onClickTrigger(name)">Light off</button>
+        <button class="btn btn-outline-light" name="fusebox_bootMC" onclick="onClickTrigger(name)">mission control powerup</button>
+    </div>
+
+    <h3>Appartment</h3>
+    <div>
+        <button class="btn btn-outline-light" name="chimney_opening" onclick="onClickTrigger(name)">Chimney</button>
+    </div>
+
+    <h3>Mission Control</h3>
+    <div>
+        <button class="btn btn-outline-light" name="water_solved" onclick="onClickTrigger(name)">Waterriddle solved</button>
+    </div>
+    <div>
+        <button class="btn btn-outline-light" name="breakout_solved" onclick="onClickTrigger(name)">Exit solved</button>
+    </div>
+
+    <h3>Game status</h3>
+    <div>
+        <button class="btn btn-outline-light" name="game_live" onclick="onClickTrigger(name)">Room armed</button>
+        <button class="btn btn-outline-light" name="game_start" onclick="onClickTrigger(name)">Game start</button>
+        <button class="btn btn-outline-light" name="game_over" onclick="onClickTrigger(name)">Game Over</button>
+    </div>
+    <br>
+
+    <label class="label-txt" for="msg_holder">Chat Messages</label>
+    <div class="message_holder" id="msg_holder"></div>
+
+    <h1 id="timeDisplay">0:00:00</h1>
+
+    <!--
+    <form id="sendMsgForm" action="" method="POST" onsubmit="sendMessage(event)" autocomplete='off'>
+        <label class="label-txt" for="dm_sender">Sender: </label>
+        <select class="form-select w-auto d-inline" id="dm_sender">
+            <option value="game-master">Game Master</option>
+        </select>
+        <label class="label-txt" for="dm_lang">
+            <select class="form-select w-auto d-inline" id="dm_lang">
+                <option value="en" selected>EN</option>
+                <option value="de">DE</option>
+            </select>
+        </label>
+        <input
+            type="button"
+            data-mdb-toggle="modal"
+            data-mdb-target="#phrasesModal"
+            data-mdb-whatever="lang"
+            value="script"
+        />
+        <br>
+        <label class="w-50">
+            <textarea id="input_msg" cols="50" rows="4" placeholder="type your messages"></textarea>
+        </label>
+        <br>
+        <input type="submit" value="Send"/>
+        <button type="button" onclick="playNotificationSound()"><i class="fa fa-bell" aria-hidden="true"></i></button>
+    </form>
+
+    <div class="modal fade" id="phrasesModal" tabindex="-1" aria-labelledby="phrasesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Messages</h5>
+                    <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <label class="label-txt" for="modal_sender">Sender: </label>
+                    <select class="form-select w-auto d-inline" id="modal_sender">
+                        <option value="game-master">Game Master</option>
+                    </select>
+                    <label class="label-txt" for="modal_lang">Language: </label>
+                    <select class="form-select w-auto d-inline" id="modal_lang">
+                        <option value="en" selected>EN</option>
+                        <option value="de">DE</option>
+                    </select>
+                    <br>
+                    <div class="w-100 py-1 my-2" style="background-color: aliceblue">
+                        <ul id="modalMessages" class="w-100 h-100"></ul>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="selectFromModal();">select</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="label-txt" style="padding-inline: 5px;">
+        <label for="loadingInput">Loading bar: </label>
+        <div class="form-outline" style="width: 7rem; background-color: forestgreen; display: inline-block">
+            <i class="fas fa-percentage trailing"></i>
+            <input min="0" max="100" step="5" value="50" type="number" id="loadingInput"
+            class="form-control form-icon-trailing"/>
+        </div>
+        <button onclick="onClickSet()">set</button>
+    </div>
+    -->
+
+{% endblock %}
+
+{% block add_js %}
+    <script type="text/javascript">
+
+
+        // Update the count down every 1 second
+        var x = setInterval(function() {
+
+            // Get today's date and time
+            var now = new Date().getTime();
+
+            // Find the distance between now and the count down date
+            var distance = countDownDate - now;
+
+            // Time calculations for days, hours, minutes and seconds
+            // var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            minutes = Math.abs(minutes)
+            seconds = Math.abs(seconds)
+            minuteStr = String(minutes).padStart(2, '0');
+            secondStr = String(seconds).padStart(2, '0');
+
+            document.getElementById("timeDisplay").innerHTML = hours + ":" + minuteStr + ":" + secondStr;
+
+            // If the count down is over, write some text
+        }, 1000);
+
+
+        // load history messages
+        $.ajax({
+            type: 'POST',
+            url: '{{ url_for("get_chat") }}',
+            contentType: 'application/json;charset=UTF-8',
+            success: function (res) {
+                console.log(`num of msgs in ring buffer = ${res.length}`);
+                for (const msg of res) {
+                    displayMessage(msg);
+                }
+            }
+        });
+
+        // load hints
+        let hints = JSON.parse('{{ hint_msgs | tojson }}');
+
+        function setAutocompleteSource() {
+            let source = $('select#dm_sender').val();
+            let language = $('select#dm_lang').val();
+            let autocompleteSrc;
+            try {
+                autocompleteSrc = hints[source][language];
+            } catch (e) {
+                console.log(e);
+            }
+            if (!autocompleteSrc) {
+                autocompleteSrc = [""];
+            }
+
+            $("#input_msg").autocomplete('option', 'source', autocompleteSrc);
+        }
+
+        $(function () {
+            $("#input_msg").autocomplete({
+                position: {collision: "flip"},
+                source: [""]
+            });
+            // setAutocompleteSource();
+        });
+
+        $('select').on('change', function () {
+            // setAutocompleteSource();
+            loadHintsModal();
+        });
+
+        function loadHintsModal() {
+            let source = $('select#modal_sender').val();
+            let language = $('select#modal_lang').val();
+            let hintsList;
+            try {
+                hintsList = hints[source][language];
+            } catch (e) {
+                console.log(e);
+            }
+            if (!hintsList) {
+                $("#modalMessages").html('<h1 class="h1 warning mx-3 my-3" style="color: yellowgreen;">No valid Options</h1>');
+                return false;
+            }
+
+            let txt = "";
+            for (const [i, hint] of hintsList.entries()) {
+                isArray = hint instanceof Array;
+                if (isArray) {
+                    txt += `<li class="form-check ripple">
+                            <input class="form-check-input" type='radio' value='${i}' name="flexRadioDefault" id="flexRadio-${i}"/>
+                            <label id="hint-${i}" class="form-check-label modal-list-label" for="flexRadio-${i}">
+                                <font color="#000000"><p><b>${hint[0]}</b></p></font></label>
+                        </li>`;
+                } else {
+                    txt += `<li class="form-check ripple">
+                            <input class="form-check-input" type='radio' value='${i}' name="flexRadioDefault" id="flexRadio-${i}"/>
+                            <label id="hint-${i}" class="form-check-label modal-list-label" for="flexRadio-${i}">
+                                ${hint}</label>
+                        </li>`;
+                }
+            }
+            $("#modalMessages").html(txt);
+            return hintsList;
+        }
+
+        $('#phrasesModal').on('show.bs.modal', (e) => {
+            console.log("shown");
+            let source = $('select#dm_sender').val();
+            let language = $('select#dm_lang').val();
+            $('select#modal_sender').val(source).change();
+            $('select#modal_lang').val(language).change();
+        });
+
+        $('#phrasesModal').on('hide.bs.modal', (e) => {
+            console.log("hidden");
+            let source = $('select#modal_sender').val();
+            let language = $('select#modal_lang').val();
+            $('select#dm_sender').val(source).change();
+            $('select#dm_lang').val(language).change();
+        });
+
+        function selectFromModal() {
+            let i = $("input.form-check-input:checked").val();
+            let msg = $("#hint-" + i).text();
+            $("#input_msg").val(msg.trim());
+            $('#phrasesModal').modal('hide');
+        }
+
+    </script>
+{% endblock %}

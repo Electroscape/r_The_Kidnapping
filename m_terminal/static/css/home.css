@@ -1,0 +1,88 @@
+body {
+    padding: 50px;
+    font-family: OldPC, system-ui;
+}
+
+.lang-txt {
+    margin-top: revert;
+}
+
+#content {
+    min-height: 500px;
+    position: relative;
+}
+
+#elancell-breach {
+    background-color: tomato;
+}
+
+#control-section {
+    padding-inline: 50px;
+    padding-top: 15px;
+}
+
+#ControlPanel {
+    margin-bottom: 50px;
+}
+
+strong {
+    font-weight: 400;
+}
+
+.header-flex {
+    display: flex;
+    justify-content: center;
+    padding-inline: 52px;
+}
+
+.btn-check {
+    background-color: gray;
+}
+
+.disabled {
+    pointer-events: none;
+    cursor: default;
+}
+
+.typing-effect {
+    letter-spacing: 7px;
+    overflow: hidden;
+    border-right: 2px solid transparent;
+    white-space: nowrap;
+    animation: typewriter 4s steps(25) 0.5s 1 normal both,
+    blinkTextCursor 5s;
+}
+
+.not-selectable {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+@font-face {
+    font-family: OldPC;
+    src: url("font/zig_font.ttf");
+}
+
+@keyframes typewriter {
+    from {
+        margin: auto;
+        width: 0;
+    }
+    to {
+        margin: auto;
+        width: 100%;
+    }
+}
+
+@keyframes blinkTextCursor {
+    from {
+        border-right-color: hsl(0, 0%, 80%);
+    }
+    to {
+        border-right-color: transparent;
+    }
+}

@@ -1,0 +1,158 @@
+<style>
+    :root {
+        --color: lightgray;
+        --border-radius: 10px;
+        --image-{{ gameID }}: url('{{ url_for("static", filename=image_path) }} ');
+    }
+
+    #puz-{{ gameID }}, #puzzle-{{ gameID }} {
+        position: absolute;
+        border-radius: var(--border-radius) 0 var(--border-radius) 0;
+        user-select: none;
+    }
+
+    #puz-{{ gameID }} {
+        width: 306px;
+        height: 300px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        border: 3px dashed lightgray;
+        overflow: hidden;
+    }
+
+    #puzzle-{{ gameID }} {
+        left: 0;
+        top: 0;
+        border: 0;
+    }
+
+    #puz-{{ gameID }} i {
+        float: left;
+        width: 100px;
+        height: 100px;
+        outline: 1px dashed lightgray;
+    }
+
+    #puzzle-{{ gameID }} i {
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        background: var(--color);
+        background-image: var(--image-{{ gameID }});
+        background-size: 300px 300px;
+        cursor: move;
+        box-shadow: 0 0 10px rgba(0, 0, 0, .25);
+    }
+
+    .first-{{ gameID }} {
+        border-top-left-radius: var(--border-radius);
+        background-position: left top !important;
+    }
+
+    .second-{{ gameID }} {
+        background-position: center top !important;
+    }
+
+    .third-{{ gameID }} {
+        /*   border-top-right-radius:var(--border-radius); */
+        background-position: right top !important;
+    }
+
+    .forth-{{ gameID }} {
+        background-position: left center !important;
+    }
+
+    .fifth-{{ gameID }} {
+        background-position: center center !important;
+    }
+
+    .sixth-{{ gameID }} {
+        background-position: right center !important;
+    }
+
+    .seven-{{ gameID }} {
+        /*   border-bottom-left-radius:var(--border-radius); */
+        background-position: left bottom !important;
+    }
+
+    .eight-{{ gameID }} {
+        background-position: center bottom !important;
+    }
+
+    .ninth-{{ gameID }} {
+        border-bottom-right-radius: var(--border-radius);
+        background-position: right bottom !important;
+    }
+
+    .clicked-{{ gameID }} {
+        box-shadow: 0 0 0 4px gray !important;
+    }
+
+    .dropped-{{ gameID }} {
+        background: var(--color);
+        background-image: var(--image-{{ gameID }});
+        background-size: 300px 300px;
+    }
+
+    .done-{{ gameID }} {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .allDone-{{ gameID }} {
+        animation: allDone 1s linear forwards;
+        border: 3px solid lightgray !important;
+        outline: 0 !important;
+    }
+
+    @keyframes allDone {
+        50% {
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+    }
+
+</style>
+<div class="spacer" style="margin: 1rem;"></div>
+<button class="resetBtn d-none" id="reset-btn-{{ gameID }}" name="{{ gameID }}" onclick="randomize(name)">shuffle
+</button>
+<button class="resetBtn" id="reload-btn-{{ gameID }}" name="{{ gameID }}" onclick="reload(name)">reset</button>
+<button class="submitBtn" id="submit-btn-{{ gameID }}" name="{{ gameID }}" onclick="puzzleSubmit(name)">submit
+</button>
+<div id='puz_box-{{ gameID }}'>
+    <div id='puz-{{ gameID }}'>
+        <i class='board-{{ gameID }} first-{{ gameID }}' ondrop='puzzleDrop(event)' ondragover='allowDrop(event)'></i>
+        <i class='board-{{ gameID }} second-{{ gameID }}' ondrop='puzzleDrop(event)' ondragover='allowDrop(event)'></i>
+        <i class='board-{{ gameID }} third-{{ gameID }}' ondrop='puzzleDrop(event)' ondragover='allowDrop(event)'></i>
+        <i class='board-{{ gameID }} forth-{{ gameID }}' ondrop='puzzleDrop(event)' ondragover='allowDrop(event)'></i>
+        <i class='board-{{ gameID }} fifth-{{ gameID }}' ondrop='puzzleDrop(event)' ondragover='allowDrop(event)'></i>
+        <i class='board-{{ gameID }} sixth-{{ gameID }}' ondrop='puzzleDrop(event)' ondragover='allowDrop(event)'></i>
+        <i class='board-{{ gameID }} seven-{{ gameID }}' ondrop='puzzleDrop(event)' ondragover='allowDrop(event)'></i>
+        <i class='board-{{ gameID }} eight-{{ gameID }}' ondrop='puzzleDrop(event)' ondragover='allowDrop(event)'></i>
+        <i class='board-{{ gameID }} ninth-{{ gameID }}' ondrop='puzzleDrop(event)' ondragover='allowDrop(event)'></i>
+    </div>
+    <div id='puzzle-{{ gameID }}'>
+        <i class='piece-{{ gameID }} first-{{ gameID }}' draggable='true' ondragstart='drag(event)'></i>
+        <i class='piece-{{ gameID }} second-{{ gameID }}' draggable='true' ondragstart='drag(event)'></i>
+        <i class='piece-{{ gameID }} third-{{ gameID }}' draggable='true' ondragstart='drag(event)'></i>
+        <i class='piece-{{ gameID }} forth-{{ gameID }}' draggable='true' ondragstart='drag(event)'></i>
+        <i class='piece-{{ gameID }} fifth-{{ gameID }}' draggable='true' ondragstart='drag(event)'></i>
+        <i class='piece-{{ gameID }} sixth-{{ gameID }}' draggable='true' ondragstart='drag(event)'></i>
+        <i class='piece-{{ gameID }} seven-{{ gameID }}' draggable='true' ondragstart='drag(event)'></i>
+        <i class='piece-{{ gameID }} eight-{{ gameID }}' draggable='true' ondragstart='drag(event)'></i>
+        <i class='piece-{{ gameID }} ninth-{{ gameID }}' draggable='true' ondragstart='drag(event)'></i>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    puzzleIntervals[{{ gameID }}] = setInterval(() => {
+        randomize({{ gameID }})
+    }, 5000);
+
+    randomize({{ gameID }});
+    document.querySelector("#submit-btn-{{ gameID }}").disabled = true;
+
+    checkPuzzleStatus({{ gameID }}, "{{ status }}");
+</script>

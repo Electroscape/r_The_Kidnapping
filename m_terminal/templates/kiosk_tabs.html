@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kiosk Tabs</title>
+
+    <!-- Latest compiled and minified CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Latest compiled JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+        /* Style the tab */
+        html,
+        body {
+            height: 100%;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+<ul class="nav nav-tabs navbar-dark bg-dark justify-content-center">
+    {% for id in ips.keys() %}
+        <li class="nav-item">
+            <a class="nav-link {% if loop.index0 == 0 %}active{% endif %}" data-bs-toggle="tab"
+               href="#{{ id }}">{{ id }}</a>
+        </li>
+    {% endfor %}
+</ul>
+
+<div class="tab-content h-100">
+    {% for id, ip in ips.items() %}
+        <div id="{{ id }}" class="tab-pane fade w-100 h-100 {% if loop.index0 == 0 %}show active{% endif %}">
+            <iframe src="{{ ip }}"></iframe>
+        </div>
+    {% endfor %}
+</div>
+</body>
+</html>

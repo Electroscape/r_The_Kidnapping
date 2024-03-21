@@ -1,0 +1,12 @@
+{
+  "game-master": {
+    "de": [
+      ["HQ hat die Kommunikation mit Euch übernommen. Ich kann nur im Notfall mit Euch kommunizieren."],
+      "HQ will nicht das Teamleiter zu sehr involviert werden. Wie Ihr wisst, sind die Inhalte der jeweiligen Missionen streng geheim."
+    ],
+    "en": [
+      "HQ has taken over communication with you. I can only contact you sporadically.",
+      "HQ does not like to see Teamleads getting involved. I do not have to tell you that the contents of this mission are strictly classified."
+    ]
+  }
+}

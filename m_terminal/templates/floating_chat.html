@@ -1,0 +1,38 @@
+<div class="floating-chat">
+    <span id="f-chat-icon"><i class="fa fa-comments" aria-hidden="true"></i> Chat</span>
+    <div class="chat">
+        <div class="header">
+            <span class="title">
+                Chat App
+            </span>
+            <button>
+                <i class="fa fa-times" aria-hidden="true"></i>
+            </button>
+
+        </div>
+        <ul id="floatMsgContainer" class="messages">
+        </ul>
+        <div class="footer">
+            <div class="text-box" contenteditable="true" onclick="(function(e){e.focus()})(this)"
+                 data-text="Enter your message here"></div>
+            <button id="sendMessage">send</button>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="{{ url_for('static',filename='js/floatChat.js') }}">
+</script>
+
+<script>
+    // load history messages
+    $.ajax({
+        type: 'POST',
+        url: '{{ url_for("get_chat") }}',
+        contentType: 'application/json;charset=UTF-8',
+        success: function (res) {
+            for (const msg of res) {
+                receiveNewMessage(msg.user_name, msg.message);
+            }
+        }
+    });
+
+</script>

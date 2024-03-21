@@ -1,0 +1,88 @@
+{% extends "layout.html" %}
+
+{% block head %}
+    <style>
+        #lang-box {
+            visibility: hidden;
+        }
+
+        #content {
+            text-align: center;
+        }
+
+        @-webkit-keyframes blink {
+            50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+            }
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .info {
+            color: whitesmoke;
+            margin: 75px 0;
+            border: 2px solid red;
+        }
+
+        .info p {
+            margin: 10px;
+        }
+
+        .blink {
+            -webkit-animation: blink 0.8s steps(1, start) infinite alternate;
+            animation: blink 0.8s steps(1, start) infinite alternate;
+        }
+
+        .button {
+            background-color: #111;
+            border: solid 1px #888;
+            padding: 8px 25px;
+            font-size: 26px;
+            letter-spacing: 2px;
+            cursor: pointer;
+            color: dimgrey;
+        }
+
+        .button[hover] {
+            color: greenyellow;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="info">
+        <p>You are trying to access a double-handshake firewall</p>
+        <p>To access "{{ from_url | replace("_"," ") | replace("/","") | title }}" mainframe,</p>
+        <p>you need to log-in on the other terminal<span class="blink">_</span></p>
+    </div>
+    <div class="info">
+        <p>Sie versuchen, auf eine Double-Handshake-Firewall zuzugreifen</p>
+        <p>Um auf den Mainframe "{{ from_url | replace("_"," ") | replace("/","") | title }}" zuzugreifen,</p>
+        <p>müssen Sie sich am anderen Terminal anmelden<span class="blink">_</span></p>
+    </div>
+    <div class="btn-group-lg mt-3 p-3">
+        <div class="btn button back">Back</div>
+        <div class="btn button retry">Retry</div>
+    </div>
+{% endblock %}
+
+{% block add_js %}
+    <script type="text/javascript">
+        $('.retry').on('click', function () {
+            window.location.href = "{{ from_url }}";
+        });
+        $('.back').on('click', function () {
+            window.location.href = "/";
+        });
+    </script>
+{% endblock %}

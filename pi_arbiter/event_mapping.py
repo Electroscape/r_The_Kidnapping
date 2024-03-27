@@ -222,7 +222,7 @@ event_map = {
     "chimney_opening": {
         pcf_in_add: LightIO.pcfIn,
         pcf_in: LightIO.chinmeySolved,
-        pcf_out_add: [LightIO.pcfIn, FuseIo.pcfOut],
+        pcf_out_add: [LightIO.pcfOut, FuseIo.pcfOut],
         pcf_out: [LightIO.chimneyOverride, FuseIo.mcOpened],
     },
 

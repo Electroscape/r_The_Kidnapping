@@ -88,7 +88,6 @@ class WaterIO(IntEnum):
 class BreakoutIO(IntEnum):
     pcfIn = 5   # 0x3D
     solved = 1
-
     pcfOut = 2  # 0x3A
     roomReset = 1
     mcBoot = 2
@@ -243,8 +242,8 @@ event_map = {
     "fusebox_bootMC": {
         pcf_in_add: FuseIo.pcfIn,
         pcf_in: FuseIo.mcBoot,
-        pcf_out_add: [BreakoutIO.pcfOut],
-        pcf_out: [BreakoutIO.mcBoot],
+        pcf_out_add: [BreakoutIO.pcfOut, LightIO.pcfOut],
+        pcf_out: [BreakoutIO.mcBoot, LightIO.mcBoot],
     },
 
     "breakout_solved": {

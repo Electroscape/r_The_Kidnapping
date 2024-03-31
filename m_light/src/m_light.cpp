@@ -215,7 +215,7 @@ void handleInputs() {
         case IOValues::gameEndTrigger: 
             LED_CMDS::setAllStripsToClr(Mother, brains::ledDot, LED_CMDS::clrGreen, 50);
             LED_CMDS::setAllStripsToClr(Mother, brains::ledStrip, LED_CMDS::clrGreen, 50);
-            Mother.motherRelay.digitalWrite(relays::mcAlarm, open);
+            Mother.motherRelay.digitalWrite(relays::mcAlarm, closed);
         break;
         case IOValues::hallwayOff: LED_CMDS::setStripToClr(Mother, brains::ledDot, LED_CMDS::clrBlack, 0, ledsIndex::hallway); break;
         case IOValues::hallwayOn: LED_CMDS::setStripToClr(Mother, brains::ledDot, LED_CMDS::clrWhite, 50, ledsIndex::hallway); break;

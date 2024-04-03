@@ -230,7 +230,7 @@ void handleInputs() {
         break;
         case IOValues::chimneyOverride: stage=stages::chimneyOpening; break;
         case IOValues::mcBoot: 
-            LED_CMDS::fade2color(Mother, brains::ledStrip, LED_CMDS::clrWhite, 0, LED_CMDS::clrWhite, 50, 60000, strips::missionControl);
+            LED_CMDS::fade2color(Mother, brains::ledStrip, LED_CMDS::clrWhite, 0, LED_CMDS::clrBlue, 30, 60000, strips::missionControl);
         break;
         case IOValues::waterUV:
             Mother.motherRelay.digitalWrite(relays::mcAlarm, open);
@@ -245,6 +245,7 @@ void handleInputs() {
             LED_CMDS::setAllStripsToClr(Mother, brains::ledDot, LED_CMDS::clrRed, 50);
             LED_CMDS::setAllStripsToClr(Mother, brains::ledStrip, LED_CMDS::clrRed, 50);
             Mother.motherRelay.digitalWrite(relays::mcAlarm, closed);
+            Mother.motherRelay.digitalWrite(relays::chinmey, open);
         break;
     }
 

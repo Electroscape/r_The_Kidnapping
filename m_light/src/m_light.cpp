@@ -242,9 +242,9 @@ void handleInputs() {
             gameReset();
         break;
         case IOValues::gameOver:
-
             LED_CMDS::setAllStripsToClr(Mother, brains::ledDot, LED_CMDS::clrRed, 50);
             LED_CMDS::setAllStripsToClr(Mother, brains::ledStrip, LED_CMDS::clrRed, 50);
+            Mother.motherRelay.digitalWrite(relays::mcAlarm, closed);
         break;
     }
 

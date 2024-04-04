@@ -148,8 +148,8 @@ void stageActions() {
             delay(2000);
             Mother.motherRelay.digitalWrite(relays::chinmey, open);
             delay(2000);
-            LED_CMDS::fade2color(Mother, brains::ledStrip, LED_CMDS::clrWhite, 50, LED_CMDS::clrWhite, 50, 5000, strips::stripLiving);
-            LED_CMDS::fade2color(Mother, brains::ledDot, LED_CMDS::clrWhite, 50, LED_CMDS::clrWhite, 50, 5000, ledsIndex::empore);
+            LED_CMDS::fade2color(Mother, brains::ledStrip, LED_CMDS::clrWhite, 10, LED_CMDS::clrWhite, 50, 5000, strips::stripLiving);
+            LED_CMDS::fade2color(Mother, brains::ledDot, LED_CMDS::clrWhite, 10, LED_CMDS::clrWhite, 50, 5000, ledsIndex::empore);
             wdt_enable(WDTO_8S);
         break;
         case stages::idle: 

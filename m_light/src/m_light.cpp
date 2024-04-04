@@ -144,6 +144,7 @@ void stageActions() {
             delay(200);
             LED_CMDS::fade2color(Mother, brains::ledStrip, LED_CMDS::clrWhite, 50, LED_CMDS::clrWhite, 10, 2000, strips::stripLiving);
             LED_CMDS::fade2color(Mother, brains::ledDot, LED_CMDS::clrWhite, 50, LED_CMDS::clrWhite, 10, 2000, ledsIndex::empore);
+            LED_CMDS::setStripToClr(Mother, brains::ledDot, LED_CMDS::clrRed, 30, ledsIndex::zwinger);
             MotherIO.outputReset();
             delay(2000);
             Mother.motherRelay.digitalWrite(relays::chinmey, open);

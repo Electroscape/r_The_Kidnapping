@@ -83,16 +83,22 @@ def trigger_event(event_key, event_value=None):
     if event_value is None:
         return
 
+    '''
     if event_key == "airlock_begin_atmo":
         global time_start
         time_start = dt.now()
+    
     elapsed_time_str = ""
-
     if time_start is not None:
         event_dt = dt.now() - time_start
         elapsed_time_str = str(event_dt)
     log_msg = f"{elapsed_time_str} {event_key}"
     logging.info(log_msg)
+    
+    '''
+
+
+    print(f"triggered event {event_key}")
 
     # IO pins
     try:
@@ -116,9 +122,6 @@ def trigger_event(event_key, event_value=None):
 
 
 def handle_event(event_key, event_value=None, frontend_override=False):
-
-    print(f"handling events {event_key}")
-
     event_value = get_event_value(event_key, event_value)
     if event_value is None:
         return
@@ -131,11 +134,11 @@ def handle_event(event_key, event_value=None, frontend_override=False):
         event_value.get(event_script, lambda *args: 'Invalid')(event_key, nw_sock)
     except TypeError as err:
         print(f"Error with event fnc/condition {err}")
-    print(f"handling event {event_key}")
 
     if event_value.get(event_delay, 0):
         event_shedule.update({event_key: dt.now() + timedelta(seconds=event_value.get(event_delay, 0))})
         return
+
     trigger_event(event_key, event_value)
 
 
@@ -167,7 +170,7 @@ def catch_all(event, sid, *args):
 
 @sio.on("trigger")
 def handle_fe(data):
-    print(data)
+    print(f"triggerdate{data}")
     print("\n")
     try:
         if not data.get('username') == 'arb':

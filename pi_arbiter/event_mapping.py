@@ -106,6 +106,7 @@ class PowerIO(IntEnum):
     raum2Off = 7
     serviceOn = 8
     serviceOff = 9
+    chimneyOpening = 10
 
 
 binary_pcfs = [FuseIo.pcfIn, FuseIo.pcfIn]
@@ -219,8 +220,8 @@ event_map = {
     "chimney_opening": {
         pcf_in_add: LightIO.pcfIn,
         pcf_in: LightIO.chinmeySolved,
-        pcf_out_add: [LightIO.pcfOut, FuseIo.pcfOut],
-        pcf_out: [LightIO.chimneyOverride, FuseIo.mcOpened],
+        pcf_out_add: [LightIO.pcfOut, FuseIo.pcfOut, PowerIO.pcfOut],
+        pcf_out: [LightIO.chimneyOverride, FuseIo.mcOpened, PowerIO.chimneyOpening],
     },
 
     "water_solved": {

@@ -88,6 +88,7 @@ class WaterIO(IntEnum):
 class BreakoutIO(IntEnum):
     pcfIn = 5   # 0x3D
     solved = 1
+
     pcfOut = 2  # 0x3A
     roomReset = 1
     mcBoot = 2
@@ -105,6 +106,7 @@ class PowerIO(IntEnum):
     raum2Off = 7
     serviceOn = 8
     serviceOff = 9
+    chimneyOpening = 10
 
 
 binary_pcfs = [FuseIo.pcfIn, FuseIo.pcfIn]
@@ -116,6 +118,7 @@ class GameStatus:
         self.hasStarted = False
         self.gameLive = False   # suppress in case of other light effects? only for the green solved
         self.appartmentEntered = False
+
 
 game_states = GameStatus()
 
@@ -213,17 +216,12 @@ event_map = {
         pcf_out: [LightIO.hallwayOn]
     },
 
-    "hallway_dimmed": {
-        pcf_out_add: [LightIO.pcfOut],
-        pcf_out: [LightIO.hallwayDimmed],
-    },
-
     # opening of the chinmey, fades in and out to set its fokus
     "chimney_opening": {
         pcf_in_add: LightIO.pcfIn,
         pcf_in: LightIO.chinmeySolved,
-        pcf_out_add: [LightIO.pcfIn, FuseIo.pcfOut],
-        pcf_out: [LightIO.chimneyOverride, FuseIo.mcOpened],
+        pcf_out_add: [LightIO.pcfOut, FuseIo.pcfOut, PowerIO.pcfOut],
+        pcf_out: [LightIO.chimneyOverride, FuseIo.mcOpened, PowerIO.chimneyOpening],
     },
 
     "water_solved": {
@@ -309,7 +307,7 @@ inverted_events = {
         pcf_in_add: ArbiterIO.pcfIn,
         pcf_in: ArbiterIO.entrance,
         pcf_out_add: [LightIO.pcfOut, FuseIo.pcfOut],
-        pcf_out: [LightIO.gameStart, FuseIo.startGame],
+        pcf_out: [LightIO.hallwayStart, FuseIo.startGame],
         event_condition: start_game_condition,
     },
 

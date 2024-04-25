@@ -144,12 +144,13 @@ void stageActions() {
             delay(200);
             LED_CMDS::fade2color(Mother, brains::ledStrip, LED_CMDS::clrWhite, 50, LED_CMDS::clrWhite, 10, 2000, strips::stripLiving);
             LED_CMDS::fade2color(Mother, brains::ledDot, LED_CMDS::clrWhite, 50, LED_CMDS::clrWhite, 10, 2000, ledsIndex::empore);
+            LED_CMDS::setStripToClr(Mother, brains::ledDot, LED_CMDS::clrRed, 30, ledsIndex::zwinger);
             MotherIO.outputReset();
             delay(2000);
             Mother.motherRelay.digitalWrite(relays::chinmey, open);
             delay(2000);
-            LED_CMDS::fade2color(Mother, brains::ledStrip, LED_CMDS::clrWhite, 50, LED_CMDS::clrWhite, 50, 5000, strips::stripLiving);
-            LED_CMDS::fade2color(Mother, brains::ledDot, LED_CMDS::clrWhite, 50, LED_CMDS::clrWhite, 50, 5000, ledsIndex::empore);
+            LED_CMDS::fade2color(Mother, brains::ledStrip, LED_CMDS::clrWhite, 10, LED_CMDS::clrWhite, 50, 5000, strips::stripLiving);
+            LED_CMDS::fade2color(Mother, brains::ledDot, LED_CMDS::clrWhite, 10, LED_CMDS::clrWhite, 50, 5000, ledsIndex::empore);
             wdt_enable(WDTO_8S);
         break;
         case stages::idle: 
@@ -215,7 +216,7 @@ void handleInputs() {
         case IOValues::gameEndTrigger: 
             LED_CMDS::setAllStripsToClr(Mother, brains::ledDot, LED_CMDS::clrGreen, 50);
             LED_CMDS::setAllStripsToClr(Mother, brains::ledStrip, LED_CMDS::clrGreen, 50);
-            Mother.motherRelay.digitalWrite(relays::mcAlarm, open);
+            Mother.motherRelay.digitalWrite(relays::mcAlarm, closed);
         break;
         case IOValues::hallwayOff: LED_CMDS::setStripToClr(Mother, brains::ledDot, LED_CMDS::clrBlack, 0, ledsIndex::hallway); break;
         case IOValues::hallwayOn: LED_CMDS::setStripToClr(Mother, brains::ledDot, LED_CMDS::clrWhite, 50, ledsIndex::hallway); break;
@@ -230,7 +231,7 @@ void handleInputs() {
         break;
         case IOValues::chimneyOverride: stage=stages::chimneyOpening; break;
         case IOValues::mcBoot: 
-            LED_CMDS::fade2color(Mother, brains::ledStrip, LED_CMDS::clrWhite, 0, LED_CMDS::clrWhite, 50, 60000, strips::missionControl);
+            LED_CMDS::fade2color(Mother, brains::ledStrip, LED_CMDS::clrWhite, 0, LED_CMDS::clrBlue, 30, 60000, strips::missionControl);
         break;
         case IOValues::waterUV:
             Mother.motherRelay.digitalWrite(relays::mcAlarm, open);
@@ -242,9 +243,10 @@ void handleInputs() {
             gameReset();
         break;
         case IOValues::gameOver:
-
             LED_CMDS::setAllStripsToClr(Mother, brains::ledDot, LED_CMDS::clrRed, 50);
             LED_CMDS::setAllStripsToClr(Mother, brains::ledStrip, LED_CMDS::clrRed, 50);
+            Mother.motherRelay.digitalWrite(relays::mcAlarm, closed);
+            Mother.motherRelay.digitalWrite(relays::chinmey, open);
         break;
     }
 

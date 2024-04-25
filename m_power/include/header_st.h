@@ -23,7 +23,8 @@ enum inputValues {
     room2On,
     room2Off,           
     serviceOn,           
-    serviceOff,                      
+    serviceOff,  
+    chimneyOpening,                 
 };
 
 enum outputValues {};

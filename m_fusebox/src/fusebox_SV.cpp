@@ -48,8 +48,11 @@ void toggleHallwayLight(bool state) {
 
 
 void handleAlarm(int result) {
-    if (stage > hallway || alarmOn) { return; } 
-    if (result & lid_reed) {
+    if (stage != stages::hallway) { return; } 
+
+    if ((result & lid_reed) == 0 && !alarmOn) {
+        Serial.println("lid open");
+        alarmOn = true;
         Mother.motherRelay.digitalWrite(relais::alarm, open);
     }
 }
@@ -58,12 +61,8 @@ void handleAlarm(int result) {
 void handleInputs() {
 
     int result = MotherIO.getInputs();
-    Serial.println(result);
-    delay(300);
-
-    if (lastState == result) {
-        return;
-    }
+    if (lastState == result) { return; }
+    lastState = result;
 
     handleAlarm(result);
     if (result & mc_opened) {
@@ -81,7 +80,6 @@ void handleInputs() {
 
     // @todo is this always active?
     toggleHallwayLight(result & fuse_1);
-
 
     switch (stage) {
         case hallway: 
@@ -101,8 +99,6 @@ void handleInputs() {
             }
         break;
     }
-
-    lastState = result;
 }
 
 
@@ -153,6 +149,7 @@ void loop() {
     handleInputs();    
     stageUpdate(); 
     wdt_reset();
+    delay(5);
 }
 
 

@@ -71,12 +71,12 @@ enum IOpins {
 
 enum IOValues {
     service_enable = 1,
-    gameStart, 
+    gameStart,          // actually not used, left in here to not shift the order 
     gameEndTrigger,     // triggered by breakout riddle everything goes green
     hallwayStart,
     hallwayOff,
     hallwayOn,
-    hallwayDimmed,
+    hallwayDimmed,      // actually not used, left in here to not shift the order -> just using hallwayStart
     apartmentEnter,
     chimneyOverride,    // manual override trigger
     mcBoot,          // fusebox powering up MC via fuses

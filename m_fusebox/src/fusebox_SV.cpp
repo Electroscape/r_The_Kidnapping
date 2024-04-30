@@ -61,6 +61,9 @@ void handleAlarm(int result) {
 void handleInputs() {
 
     int result = MotherIO.getInputs();
+
+    toggleHallwayLight(result & fuse_1);
+
     if (lastState == result) { return; }
     lastState = result;
 
@@ -78,15 +81,12 @@ void handleInputs() {
     result -= result & inputs::mc_opened;
     result -= result & inputs::start_game;
 
-    // @todo is this always active?
-    toggleHallwayLight(result & fuse_1);
-
     switch (stage) {
         case hallway: 
             if (result == (fuse_1 + fuse_2 + fuse_3)) {
-                Mother.motherRelay.digitalWrite(relais::door, open);
+                Mother.motherRelay.digitalWrite(relais::door, closed);  // since this is 90% of the game its closed -> open door
                 Mother.motherRelay.digitalWrite(relais::doorOutput, open);
-                Mother.motherRelay.digitalWrite(relais::alarm, closed);
+                Mother.motherRelay.digitalWrite(relais::alarm, alarm_init);
                 delay(200);
                 Mother.motherRelay.digitalWrite(relais::doorOutput, closed);
                 alarmOn = false;
@@ -121,10 +121,11 @@ void stageActions() {
     switch (stage) {
         case stages::prestage: break;
         case stages::hallway: 
-            Mother.motherRelay.digitalWrite(relais::door, closed);
-            Mother.motherRelay.digitalWrite(relais::alarm, open);
+            Mother.motherRelay.digitalWrite(relais::door, open);
         break;
-        case stages::missionControlUnlock: break;
+        case stages::missionControlUnlock: 
+            Mother.motherRelay.digitalWrite(relais::alarm, closed);
+        break;
         case stages::completed: 
             Mother.motherRelay.digitalWrite(relais::mcBoot, open);
             delay(200);

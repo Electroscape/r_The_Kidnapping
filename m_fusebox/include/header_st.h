@@ -14,11 +14,11 @@ enum relais {
     mcBoot,
     toggleOff,
     toggleOn,
-    doorOutput,
+    doorOutput,     // sends the signal of the opened door to the arbiter
 };
 
 enum relayInits {
-    door_init = open,
+    door_init = closed,
     alarm_init = closed,
     mcBoot_init = closed,
     toggleOff_init = closed,

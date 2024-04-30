@@ -74,7 +74,7 @@ void handleInputs() {
         return;
     }
 
-    result -= result & lid_reed;
+    result -= result & inputs::lid_reed;
     result -= result & inputs::mc_opened;
     result -= result & inputs::start_game;
 
@@ -122,7 +122,7 @@ void stageActions() {
         case stages::prestage: break;
         case stages::hallway: 
             Mother.motherRelay.digitalWrite(relais::door, closed);
-            Mother.motherRelay.digitalWrite(relais::alarm, closed);
+            Mother.motherRelay.digitalWrite(relais::alarm, open);
         break;
         case stages::missionControlUnlock: break;
         case stages::completed: 

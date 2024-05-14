@@ -51,6 +51,11 @@ void handleAlarm(int result) {
     if (stage != stages::hallway) { return; } 
 
     if ((result & lid_reed) == 0 && !alarmOn) {
+
+        // getting some false positives, waiting and checking again
+        delay(200);
+        if ((MotherIO.getInputs() & lid_reed) > 0) { return; } 
+
         Serial.println("lid open");
         alarmOn = true;
         Mother.motherRelay.digitalWrite(relais::alarm, open);

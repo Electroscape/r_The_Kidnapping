@@ -12,7 +12,7 @@ from ArbiterIO import ArbiterIO, CooldownHandler
 # standard Python would be python-socketIo
 from time import sleep, thread_time
 from subprocess import Popen
-from communication.TESocketServer import TESocketServer
+from communication.Simple_Socket import TESocketServer
 from pathlib import Path
 from datetime import datetime as dt, timedelta
 

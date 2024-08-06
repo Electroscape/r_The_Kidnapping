@@ -5,14 +5,14 @@ import time
 import json
 import socketio
 # not a fan of * impports ... amybe we can make classes
+
 from event_mapping import *
-import os
 import logging
 from ArbiterIO import ArbiterIO, CooldownHandler
 # standard Python would be python-socketIo
 from time import sleep, thread_time
-from subprocess import Popen
-from communication.TESocketServer import TESocketServer
+
+from communication.Simple_Socket import TESocketServer
 from pathlib import Path
 from datetime import datetime as dt, timedelta
 

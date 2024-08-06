@@ -30,9 +30,13 @@ bool hallwayLit = false;
 bool alarmOn = false;
 
 
+bool getLightBool(int result=MotherIO.getInputs()) {
+    return ((result & fuse_1) > 0);
+}
+
 // setup function too?
 void toggleHallwayLight(bool state) {
-    if (state == hallwayLit) { return; }
+    if (state == hallwayLit || state != getLightBool()) { return; }
     if (state) {
         Mother.motherRelay.digitalWrite(relais::toggleOn, open);
     } else {
@@ -66,8 +70,7 @@ void handleAlarm(int result) {
 void handleInputs() {
 
     int result = MotherIO.getInputs();
-
-    toggleHallwayLight(result & fuse_1);
+    toggleHallwayLight(result);
 
     if (lastState == result) { return; }
     lastState = result;

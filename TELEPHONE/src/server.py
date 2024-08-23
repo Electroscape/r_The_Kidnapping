@@ -1,6 +1,6 @@
 import logging
 import socket
-from telephone import Number
+from telephone import number
 
 host = ""
 port = 5560
@@ -13,7 +13,7 @@ logging.basicConfig(
     style='{'
 )
 
-def setupServer():
+def setup_server():
     sc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     
     # To avoid the error "Address already in use", 
@@ -23,28 +23,27 @@ def setupServer():
     logging.info("The Socket is created")
     
     try:
-        sc.bind((host,port)) #binds the socket with the address
+        sc.bind((host,port))
     except socket.error as msg:
         logging.error(msg)
    
-    sc.listen(1) #enable a server to accept connections
+    sc.listen(1)
     logging.info("Socket bind complete. \n")
     return sc
 
-def germanLanguage():
+def german_language():
     reply = "GERMAN"
     return reply
 
-def englishLanguage():
+def english_language():
     reply = "ENGLISH"
     return reply
-def restartPi():
+def restart_pi():
     reply = "RESTART"
     return reply
 
 
-def dataTransfer():
-    #Accepts a connection. The socket must be bound to an address and listening for connections.
+def data_transfer():
 
     connection, address = s.accept() 
     
@@ -57,18 +56,16 @@ def dataTransfer():
         data = connection.recv(1024)
        
         data = data.decode('utf-8')
-        #Split the data by a space
-        dataMessage = data.split(' ', 1)
-        #Take first part of the data
-        command = dataMessage[0]
+        # Split the data by a space
+        # Take first part of the data
+        command = data.split(' ', 1)[0]
             
         if command == "GERMAN":
-            reply = germanLanguage()
-            
+            reply = german_language()
         elif command == "ENGLISH":
-            reply = englishLanguage()
+            reply = english_language()
         elif command == "RESTART":
-            reply = restartPi()
+            reply = restart_pi()
         else:
             reply = "Wrong command"
         try :
@@ -79,7 +76,7 @@ def dataTransfer():
             logging.error("error in sending data !")
             logging.warning("client is closed")
             break
-    
+
     return reply
     
-s = setupServer()
+s = setup_server()

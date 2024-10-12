@@ -109,7 +109,7 @@ class PowerIO(IntEnum):
     chimneyOpening = 10
 
 
-binary_pcfs = [FuseIo.pcfIn, FuseIo.pcfIn]
+binary_pcfs = [FuseIo.pcfIn, ArbiterIO.pcfIn]
 
 
 class GameStatus:

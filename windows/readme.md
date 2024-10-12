@@ -1,5 +1,8 @@
 setup ubuntu 22.04 with automatic user login
 
+install mplayer (if needed)
+`sudo apt install mplayer`
+
 put the files into
 
 KDN-Videos/viewL_long.mp4

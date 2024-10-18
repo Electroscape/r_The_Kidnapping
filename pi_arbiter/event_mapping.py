@@ -126,6 +126,7 @@ game_states = GameStatus()
 def reset_states(*args):
     game_states.gameLive = False
     game_states.hasStarted = False
+    game_states.appartmentEntered = False
 
 
 def set_live(*args):

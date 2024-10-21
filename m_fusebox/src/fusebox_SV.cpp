@@ -44,6 +44,7 @@ void toggleHallwayLight(bool state) {
     }
     delay(100);
     Mother.motherRelay.digitalWrite(relais::toggleOn, closed);
+    delay(100);
     Mother.motherRelay.digitalWrite(relais::toggleOff, closed);
     hallwayLit = state;
 
@@ -102,7 +103,7 @@ void handleInputs() {
             }
         break;
         case missionControlBoot: 
-            if (result == (fuse_1 + fuse_2 + fuse_3 + fuse_4)) {
+            if (result == (fuse_1 + fuse_2 + fuse_3 + fuse_4 + fuse_5)) {
                 stage = stages::completed;
             }
         break;

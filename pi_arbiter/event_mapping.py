@@ -2,6 +2,7 @@ import requests
 import subprocess
 from enum import IntEnum
 import re
+import time
 
 '''
 @TODO: 
@@ -127,6 +128,14 @@ def reset_states(*args):
     game_states.gameLive = False
     game_states.hasStarted = False
 
+    
+def wait_for_lightEffekt(*args):
+    time.sleep(20)
+def wait_for_lightEffekt2(*args):
+    time.sleep(15)
+def wait_for_chimney(*args):
+    time.sleep(13)
+
 
 def set_live(*args):
     game_states.gameLive = True
@@ -221,7 +230,8 @@ event_map = {
         pcf_in_add: LightIO.pcfIn,
         pcf_in: LightIO.chinmeySolved,
         pcf_out_add: [LightIO.pcfOut, FuseIo.pcfOut, PowerIO.pcfOut],
-        pcf_out: [LightIO.chimneyOverride, FuseIo.mcOpened, PowerIO.chimneyOpening],
+        pcf_out: [LightIO.chimneyOverride, FuseIo.mcOpened, PowerIO.emporeOff],
+        event_next_qeued: "livingPower_offChimnneyOpend"
     },
 
     "water_solved": {
@@ -229,6 +239,7 @@ event_map = {
         pcf_in: WaterIO.uvActive,
         pcf_out_add: [LightIO.pcfOut],
         pcf_out: [LightIO.waterUV],
+        event_next_qeued: "emporePower_off",
     },
 
     "fusebox_doorOpened": {
@@ -240,48 +251,85 @@ event_map = {
     "fusebox_bootMC": {
         pcf_in_add: FuseIo.pcfIn,
         pcf_in: FuseIo.mcBoot,
-        pcf_out_add: [BreakoutIO.pcfOut, LightIO.pcfOut],
-        pcf_out: [BreakoutIO.mcBoot, LightIO.mcBoot],
+        pcf_out_add: [BreakoutIO.pcfOut, LightIO.pcfOut, PowerIO.pcfOut],
+        pcf_out: [BreakoutIO.mcBoot, LightIO.mcBoot, PowerIO.raum2On],
+        event_next_qeued: "livingPower_offMCBoot"
+
     },
 
     "breakout_solved": {
         pcf_in_add: BreakoutIO.pcfIn,
         pcf_in: BreakoutIO.solved,
-        pcf_out_add: [BreakoutIO.pcfOut, LightIO.pcfOut],
-        pcf_out: [BreakoutIO.setSolved, LightIO.gameSolved],
+        pcf_out_add: [BreakoutIO.pcfOut, LightIO.pcfOut, PowerIO.pcfOut],
+        pcf_out: [BreakoutIO.setSolved, LightIO.gameSolved, PowerIO.livingOff],
     },
 
     "emporePower_on": {
-        pcf_out_add: PowerIO.pcfOut,
-        pcf_out: PowerIO.emporeOn,
+        pcf_out_add: [PowerIO.pcfOut],
+        pcf_out: [PowerIO.emporeOn],
     },
     "emporePower_off": {
-        pcf_out_add: PowerIO.pcfOut,
-        pcf_out: PowerIO.emporeOff,
+        pcf_out_add: [PowerIO.pcfOut],
+        pcf_out: [PowerIO.emporeOff],
     },
+    "emporePower_offMCBoot": {
+        pcf_out_add: [PowerIO.pcfOut],
+        pcf_out: [PowerIO.emporeOff],
+        event_next_qeued: "livingPower_onMCBoot"
+    },
+    "livingPower_onChimnneyOpend":{
+        pcf_out_add: [PowerIO.pcfOut],
+        pcf_out: [PowerIO.livingOn],
+        event_script: wait_for_chimney,
+        event_next_qeued: "emporePower_on"
+    },
+    "livingPower_offChimnneyOpend":{
+        pcf_out_add: [PowerIO.pcfOut],
+        pcf_out: [PowerIO.livingOff],
+        event_next_qeued: "livingPower_onChimnneyOpend"
+    },
+    
     "livingPower_on": {
-        pcf_out_add: PowerIO.pcfOut,
-        pcf_out: PowerIO.livingOn,
+        pcf_out_add: [PowerIO.pcfOut],
+        pcf_out: [PowerIO.livingOn],
     },
+    "livingPower_onAppartmentEnter": {
+        pcf_out_add: [PowerIO.pcfOut],
+        pcf_out: [PowerIO.livingOn],
+        event_script: wait_for_lightEffekt,
+        event_next_qeued: "emporePower_on"
+    },
+    "livingPower_onMCBoot": {
+        pcf_out_add: [PowerIO.pcfOut],
+        pcf_out: [PowerIO.livingOn],
+        event_script: wait_for_lightEffekt2,
+        event_next_qeued: "emporePower_on"
+    },
+    "livingPower_offMCBoot": {
+        pcf_out_add: [PowerIO.pcfOut],
+        pcf_out: [PowerIO.livingOff],
+        event_next_qeued: "emporePower_offMCBoot"
+    },
+    
     "livingPower_off": {
-        pcf_out_add: PowerIO.pcfOut,
-        pcf_out: PowerIO.livingOff,
+        pcf_out_add: [PowerIO.pcfOut],
+        pcf_out: [PowerIO.livingOff],
     },
     "room2Power_on": {
-        pcf_out_add: PowerIO.pcfOut,
-        pcf_out: PowerIO.raum2On,
+        pcf_out_add: [PowerIO.pcfOut],
+        pcf_out: [PowerIO.raum2On],
     },
     "room2Power_off": {
-        pcf_out_add: PowerIO.pcfOut,
-        pcf_out: PowerIO.raum2Off,
+        pcf_out_add: [PowerIO.pcfOut],
+        pcf_out: [PowerIO.raum2Off],
     },
     "servicePower_on": {
-        pcf_out_add: PowerIO.pcfOut,
-        pcf_out: PowerIO.serviceOn,
+        pcf_out_add: [PowerIO.pcfOut],
+        pcf_out: [PowerIO.serviceOn],
     },
     "servicePower_off": {
-        pcf_out_add: PowerIO.pcfOut,
-        pcf_out: PowerIO.serviceOff,
+        pcf_out_add: [PowerIO.pcfOut],
+        pcf_out: [PowerIO.serviceOff],
     },
 }
 
@@ -317,6 +365,7 @@ inverted_events = {
         pcf_out_add: [LightIO.pcfOut],
         pcf_out: [LightIO.apartmentEnter],
         event_condition: can_enter_appartment,
+        event_next_qeued: "livingPower_onAppartmentEnter"
     },
 }
 
@@ -327,3 +376,4 @@ setup_default_callbacks(inverted_events)
 
 
 
+PowerIO

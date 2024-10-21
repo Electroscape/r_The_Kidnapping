@@ -61,13 +61,13 @@ void handleInputs() {
             Mother.motherRelay.digitalWrite(relays::room2, closed);
         break;
         case inputValues::chimneyOpening:
-            Mother.motherRelay.digitalWrite(relays::empore, open);
-            Mother.motherRelay.digitalWrite(relays::living, open);
+            Mother.motherRelay.digitalWrite(relays::empore, closed);
+            Mother.motherRelay.digitalWrite(relays::living, closed);
             wdt_disable();
             delay(10000);
             enableWdt();
-            Mother.motherRelay.digitalWrite(relays::empore, closed);
-            Mother.motherRelay.digitalWrite(relays::living, closed);
+            Mother.motherRelay.digitalWrite(relays::empore, open);
+            Mother.motherRelay.digitalWrite(relays::living, open);
         break;
     }
 

@@ -91,7 +91,7 @@ void handleInputs() {
 
     switch (stage) {
         case hallway: 
-            if (result == (fuse_1 + fuse_2 + fuse_3)) {
+            if (result == (fuse_1 + fuse_2 + fuse_4)) {
                 Mother.motherRelay.digitalWrite(relais::door, closed);  // since this is 90% of the game its closed -> open door
                 Mother.motherRelay.digitalWrite(relais::doorOutput, open);
                 Mother.motherRelay.digitalWrite(relais::alarm, alarm_init);
@@ -102,7 +102,7 @@ void handleInputs() {
             }
         break;
         case missionControlBoot: 
-            if (result == (fuse_1 + fuse_2 + fuse_3 + fuse_4)) {
+            if (result == (fuse_2 + fuse_5)) {
                 stage = stages::completed;
             }
         break;

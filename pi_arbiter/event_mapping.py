@@ -109,7 +109,8 @@ class PowerIO(IntEnum):
     chimneyOpening = 10
 
 
-binary_pcfs = [FuseIo.pcfIn, FuseIo.pcfIn]
+# binary_pcfs = [FuseIo.pcfIn, ArbiterIO.pcfIn]
+binary_pcfs = []
 
 
 class GameStatus:
@@ -117,23 +118,32 @@ class GameStatus:
         self.example = False
         self.hasStarted = False
         self.gameLive = False   # suppress in case of other light effects? only for the green solved
+        self.hallway_started = False
         self.appartmentEntered = False
 
 
 game_states = GameStatus()
 
 
-def reset_states(*args):
-    game_states.gameLive = False
-    game_states.hasStarted = False
-
-
 def set_live(*args):
     game_states.gameLive = True
+    game_states.hasStarted = False
+    game_states.appartementEntered = False
+    game_states.hallway_started = False
 
 
 def is_game_started(*args):
     return game_states.hasStarted
+
+def can_start_hallway(*args):
+    if not game_states.hasStarted:
+        return False
+    if not game_states.hallway_started:
+        game_states.hallway_started = True
+        return game_states.hallway_started
+    else:
+        return False
+
 
 
 def can_enter_appartment(*args):
@@ -176,8 +186,8 @@ event_map = {
     },
 
     "game_live": {
-        pcf_out_add: [LightIO.pcfOut, BreakoutIO.pcfOut],
-        pcf_out: [LightIO.gameReset, BreakoutIO.roomReset],
+        pcf_out_add: [LightIO.pcfOut, BreakoutIO.pcfOut, PowerIO.pcfOut],
+        pcf_out: [LightIO.gameReset, BreakoutIO.roomReset, PowerIO.roomReset],
         event_script: set_live,
     },
 
@@ -186,20 +196,27 @@ event_map = {
         pcf_out: [LightIO.service_enable],
     },
 
-    "game_reset": {
-        pcf_out_add: [BreakoutIO.pcfOut, PowerIO.pcfOut],
-        pcf_out: [BreakoutIO.roomReset, PowerIO.roomReset],
-        event_script: reset_states,
-    },
-
     "game_over": {
         pcf_out_add: [LightIO.pcfOut],
         pcf_out: [LightIO.gameOver],
     },
 
-    "hallway_start": {
+    "hallway_preStage": {
         pcf_out_add: [LightIO.pcfOut],
         pcf_out: [LightIO.hallwayStart],
+    },
+    "hallway_start": {
+        pcf_in_add: ArbiterIO.pcfIn,
+        pcf_in: ArbiterIO.entrance,
+        pcf_out_add: [LightIO.pcfOut],
+        pcf_out: [LightIO.hallwayOn],
+        event_condition: can_start_hallway
+    },
+    "hallway_on": {
+        pcf_in_add: FuseIo.pcfIn,
+        pcf_in: FuseIo.lightOn,
+        pcf_out_add: [LightIO.pcfOut],
+        pcf_out: [LightIO.hallwayOn]
     },
 
     "hallway_off": {
@@ -207,13 +224,6 @@ event_map = {
         pcf_in: FuseIo.lightOff,
         pcf_out_add: [LightIO.pcfOut],
         pcf_out: [LightIO.hallwayOff],
-    },
-
-    "hallway_on": {
-        pcf_in_add: FuseIo.pcfIn,
-        pcf_in: FuseIo.lightOn,
-        pcf_out_add: [LightIO.pcfOut],
-        pcf_out: [LightIO.hallwayOn]
     },
 
     # opening of the chinmey, fades in and out to set its fokus

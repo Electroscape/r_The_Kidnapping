@@ -127,10 +127,9 @@ def handle_event(event_key, event_value=None, frontend_override=False):
         return
 
     try:
-        if not frontend_override:
-            if not event_value.get(event_condition, lambda: True)():
-                # print(f"conditions not fullfilled {event_key}")
-                return
+        if not event_value.get(event_condition, lambda: True)() and not frontend_override:
+            # print(f"conditions not fullfilled {event_key}")
+            return
         event_value.get(event_script, lambda *args: 'Invalid')(event_key, nw_sock)
     except TypeError as err:
         print(f"Error with event fnc/condition {err}")

@@ -4,3 +4,5 @@
 **/.idea/
 **/.gitignore
 **.DS_*
+**.wav
+**.log

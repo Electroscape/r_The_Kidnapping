@@ -3,3 +3,4 @@
 **/.pio/
 **/.idea/
 **/.gitignore
+**.DS_*

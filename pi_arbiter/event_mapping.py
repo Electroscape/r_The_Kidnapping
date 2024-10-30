@@ -125,12 +125,6 @@ class GameStatus:
 
 game_states = GameStatus()
 
-
-def reset_states(*args):
-    game_states.gameLive = False
-    game_states.hasStarted = False
-
-    
 def wait_for_lightEffekt(*args):
     time.sleep(20)
 def wait_for_lightEffekt2(*args):
@@ -157,7 +151,6 @@ def can_start_hallway(*args):
         return game_states.hallway_started
     else:
         return False
-
 
 
 def can_enter_appartment(*args):

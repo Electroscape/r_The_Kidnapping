@@ -44,6 +44,7 @@ void toggleHallwayLight(bool state) {
     }
     delay(100);
     Mother.motherRelay.digitalWrite(relais::toggleOn, closed);
+    delay(100);
     Mother.motherRelay.digitalWrite(relais::toggleOff, closed);
     hallwayLit = state;
 

@@ -95,14 +95,14 @@ pygame.mixer.music.pause()
 Initialize size of code digits, language and entered number
 =========================================================================================================
 '''
-maxNumberOfDigits = 4
+maxNumberOfDigits = 12
 language = "deu/"
 Number = ""
 
 contacts = {
-     "1234": "Accomplice",
-     "4567": "Albrecht",
-     "7890": "TaxiGerst"
+     "90011123": "Accomplice",
+     "071101232267": "Albrecht",
+     "86753489": "TaxiGerst"
 }
 
 def restartRaspberryPi():

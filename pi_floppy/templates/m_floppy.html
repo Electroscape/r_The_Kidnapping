@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta charset="UTF-8">
+    <title>floppy</title>
+
+    <!-- socketio -->
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"
+            integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+"
+            crossorigin="anonymous"></script>
+    <!-- JQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.1.js"
+            integrity="sha256-3zlB5s2uwoUzrXK3BT7AX3FyvojsraNFxCc2vC/7pNI=" crossorigin="anonymous"></script>
+
+    <style>
+        /* Set height of body and the document to 100% to enable "full page tabs" */
+        body, html {
+            height: 100%;
+            margin: 0;
+            cursor: none;
+        }
+
+        /* Style tab links */
+        .btns {
+            display: none;
+        }
+
+        /* Style the tab content (and add height:100% for full page content) */
+        .tab-content {
+            display: none;
+            height: 100%;
+            max-height: 100vh;
+            text-align: center;
+        }
+
+        #id-off-tab {
+            display: block;
+            background-color: black;
+        }
+
+        .container {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .img-container {
+            max-width: 100vh;
+            max-height: 100vh;
+            margin: auto;
+            text-align: center;
+        }
+
+        .fit-width {
+            max-width: 100vh;
+            margin: auto;
+        }
+        
+    </style>
+<script type="text/javascript">
+    const socket = io.connect('http://' + document.domain + ':' + location.port);
+
+    socket.on('connect', function () {
+        console.log("connected to backend")
+        socket.emit('msg_to_backend', {
+            update: `'floppy' is connected to backend`
+        })
+    })
+
+    function displayContent(path, key) {
+        let disContent = document.getElementById("id-" + key)
+        let txt = "";
+        if (path.endsWith(".webm")) {
+            txt = `<div class="video">
+                    <video id="vid" autoplay="" muted="" loop="" width="100%" height="100%">
+                        <source id="mp4"
+                                src="${path}"
+                                type="video/webm">
+                    </video>
+                </div>`;
+            disContent.innerHTML = txt;
+        } else if (path.endsWith(".png")) {
+            txt = `<div class="img-container">
+                            <img
+                            src="${path}"
+                            class="img-fluid"
+                            alt="${path}"
+                            width="100%" height="100%"
+                            />
+                        </div>`
+            disContent.innerHTML = txt;
+        } else {
+            console.log("no content");
+        }
+
+    }
+
+    socket.on('floppy_fe', function (data) {
+        console.log(data);
+        if (data.status === "off" && document.getElementById("btn-off")) {
+            document.getElementById("btn-off").click();
+        } else if (document.getElementById("btn-" + data.data)) {
+            document.getElementById("btn-" + data.data).click();
+        }
+    })
+
+    function openPage(pageName) {
+        // Hide all elements with class="tab-content" by default */
+        let tabContent;
+        tabContent = document.getElementsByClassName("tab-content");
+        for (let i = 0; i < tabContent.length; i++) {
+            tabContent[i].style.display = "none";
+        }
+
+        // Show the specific tab content
+        document.getElementById("id-" + pageName).style.display = "block";
+    }
+</script>
+</head>
+<body>
+<div class="container">
+    <div class="btns">
+        {% for key in cards.keys() %}
+            <button class="tab-link" id="btn-{{ key }}" onclick="openPage('{{ key }}')">{{ key }}</button>
+        {% endfor %}
+        <button class="tab-link"  id="btn-off" onclick="openPage('off-tab')">off</button>
+    </div>
+
+    {% for k, v in cards.items() %}
+        <div id="id-{{ k }}" class="tab-content fit-width">
+            <h3>{{ k }}</h3>
+            <p>{{ v }}</p>
+        </div>
+    {% endfor %}
+
+    <div id="id-off-tab" class="tab-content">
+    </div>
+</div>
+<script type="text/javascript">
+    $("#id-0").removeClass("fit-width");
+    displayContent("{{ cards['0'] }}", "0");
+    openPage("0");
+    $("document").ready(()=>{
+        let cards = JSON.parse('{{ cards | tojson }}');
+        for (const [key, value] of Object.entries(cards)) {
+            displayContent(value, key);
+        }
+    })
+</script>
+</body>
+</html>

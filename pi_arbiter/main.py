@@ -40,6 +40,7 @@ reset_gpios_dicts = {}
 reset_delta = timedelta(seconds=3)
 # used for delayed events
 event_shedule = {}
+cooldown_time = 0.5
 
 now = dt.now()
 log_name = now.strftime("eventlogs/Arbiter events %m_%d_%Y  %H_%M_%S.log")
@@ -212,14 +213,14 @@ def handle_pcf_input(input_pcf, value):
                 if event_pcf_value == value:
                     # @TODO: consider simply using the eventkeys
                     if not cooldowns.is_input_on_cooldown(input_pcf, event_pcf_value):
-                        temporary_cooldowns.add((input_pcf, event_pcf_value, thread_time() + 3))
+                        temporary_cooldowns.add((input_pcf, event_pcf_value, thread_time() + cooldown_time))
                         handle_event(event_key)
                         rejected = False
             else:
                 if event_pcf_value & value == event_pcf_value:
                     # @TODO: consider simply using the eventkeys
                     if not cooldowns.is_input_on_cooldown(input_pcf, event_pcf_value):
-                        temporary_cooldowns.add((input_pcf, event_pcf_value, thread_time() + 3))
+                        temporary_cooldowns.add((input_pcf, event_pcf_value, thread_time() + cooldown_time))
                         handle_event(event_key)
                         rejected = False
 

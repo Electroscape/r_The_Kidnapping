@@ -91,9 +91,9 @@ class BreakoutIO(IntEnum):
     solved = 1
 
     pcfOut = 2  # 0x3A
-    roomReset = 1
-    mcBoot = 2
-    setSolved = 3
+    roomReset = 1 << 5
+    mcBoot = 1 << 6
+    setSolved = 1 << 7
 
 
 class PowerIO(IntEnum):
@@ -151,6 +151,7 @@ def can_start_hallway(*args):
         return game_states.hallway_started
     else:
         return False
+
 
 
 def can_enter_appartment(*args):

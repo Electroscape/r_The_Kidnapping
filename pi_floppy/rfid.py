@@ -80,27 +80,23 @@ def rfid_read(uid, pn532) -> str:
 
 
 class RFID:
-    # Check door status
-    def __init__(self, server_ip, cards=None, **config):
+    def __init__(self, cards=None, **config):
         if cards is None:
             cards = [0]
+            
         self.name = config.get("name", "rfid")
         self.cards = cards
-        # self.ip = server_ip
+        
+        # Needed only for background_tasks
         self.sio = socketio.Client()
-        # self.setup_sio()
 
+        # Requirment: default value is last in the list 
         self.data = {
-            "data": str(cards[-1]),
-            "status": config.get("init", "on")
+            "data": str(cards[-1])
         }
         self.pn532 = None
         self.rfid_task = self.sio.start_background_task(self.init_rfid)
         self.rfid_task = self.sio.start_background_task(self.check_loop)
-
-    def set_rfid_status(self, status):
-        print(f"change status to: {status}")
-        self.data["status"] = status
 
     def set_rfid_data(self, msg):
         print(f"override data to: {msg}")
@@ -108,14 +104,6 @@ class RFID:
 
     def get_data(self):
         return self.data
-
-    '''
-    def emit(self, channel, message):
-    if self.connected:
-        self.sio.emit(channel, message)
-    else:
-        print("not connected to server!")
-    '''
 
     def init_rfid(self):
         # I2C connection:
@@ -145,27 +133,24 @@ class RFID:
                 print(f"Card found uid: {card_uid}")
 
                 card_read = rfid_read(card_uid, self.pn532)
+
+                # Remove prefix "P" <- POD related 
                 if card_read.startswith("P"):
                     card_read = card_read[1:]
+
                 print(f"Data on card: {card_read}")
                 if card_read in self.cards:
                     self.data["data"] = card_read
                     print(f"chosen card: {card_read}")
-                    # self.emit(f'{self.name}_update', self.data)
-                elif card_read in ["off", "on"]:
-                    self.data["status"] = card_read
-                    print(f"update status to: {card_read}")
                 else:
                     print(f'Wrong data: {card_read}')
-                    # self.emit(f'{self.name}_extra', card_read)
 
                 # wait here until card is removed
                 # if wrong card should it stuck?!
                 current_card = rfid_present(self.pn532)
                 while current_card and current_card == rfid_present(self.pn532):
                     continue
-
+                
+                # Return to default value
                 self.data["data"] = str(self.cards[-1])
-                # self.emit(f'{self.name}_update', self.data)
                 print("card removed")
-                #print(f"sio.emit('{self.name}_update', '{self.data}')")

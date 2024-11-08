@@ -1,3 +1,6 @@
 {
       "terminal_server_add": "http://sv-arbiter:5500/"
+      "socket_server": {
+            "port": 12345
+      }
 }

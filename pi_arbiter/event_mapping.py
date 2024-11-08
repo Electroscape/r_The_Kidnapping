@@ -4,6 +4,7 @@ from enum import IntEnum
 import re
 import time
 
+
 '''
 @TODO: 
     * 🔲 test
@@ -176,6 +177,17 @@ def  start_game_condition(*args):
 
 def call_video(event_key, nw_sock):
     nw_sock.transmit(event_key)
+
+    
+def mc_boot(event_key, nw_sock):
+    nw_sock.transmit(event_key)
+
+    '''
+    ssh = paramiko.SSHClient()
+    ssh.connect(server, username=username, password=password)
+    ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(cmd_to_execute)
+    '''
+
 
 
 event_map = {

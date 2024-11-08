@@ -12,7 +12,7 @@ from ArbiterIO import ArbiterIO, CooldownHandler
 # standard Python would be python-socketIo
 from time import sleep, thread_time
 
-from communication.Simple_Socket import TESocketServer
+from communication.Simple_Socket import TESocketServer, SocketClient
 from pathlib import Path
 from datetime import datetime as dt, timedelta
 
@@ -48,21 +48,15 @@ logging.basicConfig(filename=log_name, level=logging.INFO,
                     format=f'%(asctime)s %(levelname)s : %(message)s')
 
 
-class Settings:
-    def __init__(self, server_add):
-        self.server_add = server_add
 
-
-def load_settings():
+def get_cfg():
     try:
         with open('config.json') as json_file:
-            cfg = json.loads(json_file.read())
-            terminal_server_add = cfg["terminal_server_add"]
+            return json.loads(json_file.read())
     except ValueError as e:
         print('failure to read config.json')
         print(e)
         exit()
-    return Settings(terminal_server_add)
 
 
 @sio.event
@@ -285,9 +279,12 @@ def handle_event_shedule():
 
 
 def connect():
+    server_add = cfg.get("terminal_server_add", 0)
+    if not server_add:
+        exit("missing socketio server")
     while True:
         try:
-            sio.connect(settings.server_add)
+            sio.connect(server_add)
             return True
         except socketio.exceptions.ConnectionError as exc:
             print(f'Caught exception socket.error : {exc}')
@@ -303,12 +300,30 @@ def main():
         handle_event_shedule()
 
 
+def init_socket(settings):
+    global nw_sock
+    try:
+        client_cfg = settings["socket_client"]
+        server_add = client_cfg["server_add"]
+        port = client_cfg["port"]
+        nw_sock = SocketClient(server_add, port)
+        print(f"starting socketclient with {server_add} as server")
+        return
+    except KeyError:
+        pass
+    try:
+        client_cfg = settings["socket_server"]
+        port = client_cfg["port"]
+        nw_sock = TESocketServer(port)
+        print(f"starting socketServer on port {port}")
+        return
+    except KeyError:
+        pass
+
 if __name__ == '__main__':
-    settings = load_settings()
+    cfg = get_cfg()
+    init_socket(cfg)
     connected = connect()
-    # otherwise calling an already running atmo does not work
-    # used to trigger rpis via regular network for videos
-    # nw_sock = TESocketServer(12345)
 
     print("\n\n=== Arbiter setup complete! ===\n\n")
 

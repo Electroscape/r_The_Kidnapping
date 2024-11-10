@@ -38,6 +38,17 @@
             line-height: 1;
         }
 
+        img {
+            width: 100px;
+            height: 100px;
+            margin: 10px;
+        }
+
+        .img-container {
+            width: 100%;
+            text-align: center;
+        }
+
         .btns {
             display: inline-block;
         }
@@ -138,6 +149,7 @@
         // Data detected Page
         function updateLoadingInfo(key) {
             const loadingInfo = $("#id-" + key).find('.loading-info');
+            const imgSrc = $("#id-" + key).find("h2").text();
 
             const messages = [
                 'Connecting to server...',
@@ -146,13 +158,17 @@
                 'Decrypting files...',
                 'Compiling results...',
                 'Bypassing security...',
-                'Results are ready!'
+                '<span style="color: yellow">Results are ready!</span>'
             ];
 
             function appendMessagesWithDelay(messages, index = 0) {
                 // Base case: if all messages are appended, stop the recursion
                 if (index >= messages.length) {
-                    
+                    loadingInfo.append(`
+                    <div class="img-container">
+                        <img src="${imgSrc}" alt="${imgSrc}"></img>
+                        <p style="font-size: initial;">thumbnail</p>
+                    </div>`)
                     return;
                 }
 
@@ -160,7 +176,7 @@
                 loadingInfo.html(`<p>${messages[index]}</p>`);
 
                 // Generate a random delay between 1 and 3 seconds
-                const randomDelay = Math.floor(Math.random() * 1500) + 500;
+                const randomDelay = Math.floor(Math.random() * 1000) + 100;
 
                 // Call the function recursively with a delay
                 setTimeout(() => appendMessagesWithDelay(messages, index + 1), randomDelay);
@@ -193,7 +209,7 @@
         {% for k, v in cards.items() %}
         <div id="id-{{ k }}" class="tab-content fit-width">
             <div class="loading-screen">
-                <h1>{{ v }}</h1>
+                <h2>{{ v }}</h2>
                 <div class="loading-text"><h1>Data detected</h1></div>
                 <div class="loading-dots"></div>
                 <div class="loading-info"></div>
@@ -205,7 +221,7 @@
     <!-- Scanning page -->
     <script type="text/javascript">
         let defaultTab = document.getElementById("id-0");
-        defaultTab.innerHTML = '<div class="msg">insert media</div><div id="console"></div>'
+        defaultTab.innerHTML = '<div class="msg">no data</div><div id="console"></div>'
         let scanConsole = document.getElementById("console");
 
         let txt = [

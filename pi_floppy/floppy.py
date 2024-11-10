@@ -1,4 +1,4 @@
-from flask import Flask, render_template, send_from_directory, request, abort
+from flask import Flask, render_template, send_from_directory
 from flask_socketio import SocketIO
 import socket
 import socketio
@@ -12,7 +12,9 @@ import json
 with open('config.json', 'r') as json_file:
     cfg = json.loads(json_file.read())
     PORT = cfg["port"]
-    DISPLAY_IPS = {key: value for key, value in cfg["ip"].items() if key.startswith('lcd')}
+    DISPLAY_IPS = {
+        key: value for key, value in cfg["ip"].items() if key.startswith('lcd')
+    }
     FLOPPY_PI = cfg["ip"]["floppy"]
 
 
@@ -29,13 +31,6 @@ sio = socketio.Client()
 # Flask socket to communicate between backend and frontend
 self_sio = SocketIO(app, cors_allowed_origins="*")
 
-# Global dictionary to hold content for each display
-display_content = {
-    "lcd-1": "default_image1.jpg",
-    "lcd-2": "default_image2.jpg",
-    "lcd-3": "default_image3.jpg"
-}
-
 cards = {
     "1": "1.png",
     "2": "2.png",
@@ -45,13 +40,13 @@ cards = {
 
 valid_cards = list(cards.keys())
 for c in valid_cards:
-    cards[c] = f"static/media/blueprints/plan_{cards[c]}"
-    
+    cards[c] = f"static/blueprints/plan_{cards[c]}"
+
 
 # Function to send command to a specific display RPi
 def send_command(rpi_name, command):
+    rpi_ip = DISPLAY_IPS[rpi_name]
     try:
-        rpi_ip = DISPLAY_IPS[rpi_name]
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
             client_socket.connect((rpi_ip, PORT))
             client_socket.sendall(command.encode('utf-8'))
@@ -59,35 +54,11 @@ def send_command(rpi_name, command):
     except Exception as e:
         print(f"Failed to send command to {rpi_name} ({rpi_ip}): {e}")
 
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     content = json.dumps(nfc_reader.get_data())
     return render_template("m_floppy.html", cards=cards, floppy=content)
-
-@app.route('/lcd-<int:number>')
-def lcd(number):
-    if number < 1 or number > 3:
-        abort(404)  # Return a 404 error for invalid display numbers
-
-    lcd_key = f'lcd-{number}'
-    content = display_content[lcd_key]
-    return render_template('display.html', content=content)
-
-@app.route('/update', methods=['POST'])
-def update_content():
-    res_dict = nfc_reader.get_data()
-
-    data = request.json
-    for lcd, content in data.items():
-        if lcd in display_content:
-            display_content[lcd] = content
-
-    send_data = {
-        "status": "success", 
-        "show": cards[res_dict["data"]],
-        "updated": display_content}
-    print(send_data)
-    return send_data
 
 
 @app.route('/favicon.ico')
@@ -152,7 +123,12 @@ def check_for_updates():
 
             # Update displays
             # TODO: choose display here
-            send_command(DISPLAY_IPS.get("lcd-1"), "play_solution")
+            lcd = prev_data.get("data")
+            if lcd and lcd == "0":
+                for dispaly in DISPLAY_IPS:
+                    send_command(dispaly, "play_idle")
+            else:
+                send_command(f"lcd-{lcd}", "play_solution")
 
             logging.debug(f"emitting update {prev_data}")
             logging.info(f"sent: {prev_data}")

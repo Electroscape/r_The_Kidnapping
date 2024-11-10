@@ -1,5 +1,9 @@
 export DISPLAY=:0.0
 pkill vlc
 
-cvlc --no-embedded-video --fullscreen --no-video-title --video-wallpaper --quiet --loop black_screen.jpg &
+# cd to this script dir
+# fixes activate venv from crontab 
+cd "${0%/*}"
+
+cvlc --no-embedded-video --fullscreen --no-video-title --video-wallpaper --quiet  static/blackscreen.png &
 echo "show blank screen, bye"

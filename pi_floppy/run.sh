@@ -13,9 +13,9 @@ source venv/bin/activate
 sleep 5 &
 
 # comment or uncomment to run floppy
-FLASK_APP=floppy:app flask run --host 0.0.0.0 --port 5555  --no-debugger --no-reload  &
+FLASK_APP=floppy:app flask run --host 0.0.0.0 --port 5666  --no-debugger --no-reload  &
 sleep 15 &
 
 # modify the IP address you want to display
 # comment or uncomment to run the browser on the webpage you choose
-DISPLAY=:0 /usr/bin/chromium-browser --noerrdialogs --disable-infobars --kiosk 0.0.0.0:5555 &
+DISPLAY=:0 /usr/bin/chromium-browser --noerrdialogs --disable-infobars --kiosk 0.0.0.0:5666 &

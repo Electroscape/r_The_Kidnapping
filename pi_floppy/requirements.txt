@@ -1,9 +1,9 @@
-Werkzeug==2.2.2
-Flask==2.2.3
-flask-socketio==5.3.2
-python-socketio==5.7.2
+Werkzeug
+Flask
+flask-socketio
+python-socketio
 requests
-gevent==22.10.2
+gevent
 gevent-websocket
 RPi.GPIO
 adafruit-blinka

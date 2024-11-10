@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -8,80 +9,99 @@
 
     <!-- socketio -->
     <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"
-            integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+"
-            crossorigin="anonymous"></script>
+        integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+"
+        crossorigin="anonymous"></script>
     <!-- JQuery -->
     <script src="https://code.jquery.com/jquery-3.6.1.js"
-            integrity="sha256-3zlB5s2uwoUzrXK3BT7AX3FyvojsraNFxCc2vC/7pNI=" crossorigin="anonymous"></script>
+        integrity="sha256-3zlB5s2uwoUzrXK3BT7AX3FyvojsraNFxCc2vC/7pNI=" crossorigin="anonymous"></script>
 
     <style>
-        /* Set height of body and the document to 100% to enable "full page tabs" */
-        body, html {
-            height: 100%;
+        body {
             margin: 0;
-            cursor: none;
-        }
-
-        /* Style tab links */
-        .btns {
-            display: none;
-        }
-
-        /* Style the tab content (and add height:100% for full page content) */
-        .tab-content {
-            display: none;
-            height: 100%;
-            max-height: 100vh;
-            text-align: center;
-        }
-
-        #id-off-tab {
-            display: block;
-            background-color: black;
-        }
-
-        .container {
-            height: 100%;
+            padding: 5vh 5vw;
+            background: black;
             overflow: hidden;
         }
 
-        .img-container {
-            max-width: 100vh;
-            max-height: 100vh;
-            margin: auto;
+        * {
+            box-sizing: border-box;
+        }
+
+        p {
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 4.1vh;
+            margin: 0;
+            padding: 0;
+            line-height: 1;
+            color: limegreen;
+            text-shadow: 0px 0px 10px limegreen;
+        }
+
+        .btns {
+            display: inline-block;
+        }
+
+        .msg {
+            font-family: monospace;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 5vh;
+            padding-top: 5vh;
+            background: red;
+            box-shadow: 0 0 30px red;
+            text-shadow: 0 0 20px white;
+            color: white;
+            width: 20vw;
+            height: 15vh;
+            position: absolute;
+            left: 50%;
+            margin-left: -10vw;
+            top: 50%;
+            margin-top: -5vh;
             text-align: center;
+            min-width: 200px;
+            animation-name: blink;
+            animation-duration: 0.6s;
+            animation-iteration-count: infinite;
+            animation-direction: alternate;
+            animation-timing-function: linear;
         }
 
-        .fit-width {
-            max-width: 100vh;
-            margin: auto;
+        @keyframes blink {
+            0% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+            }
         }
-        
     </style>
-<script type="text/javascript">
-    const socket = io.connect('http://' + document.domain + ':' + location.port);
+    <script type="text/javascript">
+        const socket = io.connect('http://' + document.domain + ':' + location.port);
 
-    socket.on('connect', function () {
-        console.log("connected to backend")
-        socket.emit('msg_to_backend', {
-            update: `'floppy' is connected to backend`
+        socket.on('connect', function () {
+            console.log("connected to backend")
+            socket.emit('msg_to_backend', {
+                update: `floppy' is connected to backend`
+            })
         })
-    })
 
-    function displayContent(path, key) {
-        let disContent = document.getElementById("id-" + key)
-        let txt = "";
-        if (path.endsWith(".webm")) {
-            txt = `<div class="video">
+        function displayContent(path, key) {
+            let disContent = document.getElementById("id-" + key)
+            let txt = "";
+            if (path.endsWith(".webm")) {
+                txt = `<div class="video">
                     <video id="vid" autoplay="" muted="" loop="" width="100%" height="100%">
                         <source id="mp4"
                                 src="${path}"
                                 type="video/webm">
                     </video>
                 </div>`;
-            disContent.innerHTML = txt;
-        } else if (path.endsWith(".png")) {
-            txt = `<div class="img-container">
+                disContent.innerHTML = txt;
+            } else if (path.endsWith(".png")) {
+                txt = `<div class="img-container">
                             <img
                             src="${path}"
                             class="img-fluid"
@@ -89,64 +109,100 @@
                             width="100%" height="100%"
                             />
                         </div>`
-            disContent.innerHTML = txt;
-        } else {
-            console.log("no content");
+                disContent.innerHTML = txt;
+            } else {
+                // Open default
+                openPage("scan");
+                console.log("no content");
+            }
+
         }
 
-    }
+        socket.on('floppy_fe', function (data) {
+            console.log(data);
+            if (document.getElementById("btn-" + data.data)) {
+                document.getElementById("btn-" + data.data).click();
+            }
+        })
 
-    socket.on('floppy_fe', function (data) {
-        console.log(data);
-        if (data.status === "off" && document.getElementById("btn-off")) {
-            document.getElementById("btn-off").click();
-        } else if (document.getElementById("btn-" + data.data)) {
-            document.getElementById("btn-" + data.data).click();
+        function openPage(pageName) {
+            // Hide all elements with class="tab-content" by default */
+            let tabContent;
+            tabContent = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < tabContent.length; i++) {
+                tabContent[i].style.display = "none";
+            }
+
+            // Show the specific tab content
+            document.getElementById("id-" + pageName).style.display = "block";
         }
-    })
-
-    function openPage(pageName) {
-        // Hide all elements with class="tab-content" by default */
-        let tabContent;
-        tabContent = document.getElementsByClassName("tab-content");
-        for (let i = 0; i < tabContent.length; i++) {
-            tabContent[i].style.display = "none";
-        }
-
-        // Show the specific tab content
-        document.getElementById("id-" + pageName).style.display = "block";
-    }
-</script>
+    </script>
 </head>
+
 <body>
-<div class="container">
-    <div class="btns">
-        {% for key in cards.keys() %}
-            <button class="tab-link" id="btn-{{ key }}" onclick="openPage('{{ key }}')">{{ key }}</button>
-        {% endfor %}
-        <button class="tab-link"  id="btn-off" onclick="openPage('off-tab')">off</button>
-    </div>
-
-    {% for k, v in cards.items() %}
-        <div id="id-{{ k }}" class="tab-content fit-width">
-            <h3>{{ k }}</h3>
-            <p>{{ v }}</p>
+    <div class="container">
+        <div class="btns">
+            {% for key in cards.keys() %}
+                <button class="tab-link" id="btn-{{ key }}" onclick="openPage('{{ key }}')">{{ key }}</button>
+            {% endfor %}
         </div>
-    {% endfor %}
-
-    <div id="id-off-tab" class="tab-content">
+        {% for k, v in cards.items() %}
+            <div id="id-{{ k }}" class="tab-content fit-width">
+                <h3>{{ k }}</h3>
+                <p>{{ v }}</p>
+            </div>
+        {% endfor %}
     </div>
-</div>
-<script type="text/javascript">
-    $("#id-0").removeClass("fit-width");
-    displayContent("{{ cards['0'] }}", "0");
-    openPage("0");
-    $("document").ready(()=>{
-        let cards = JSON.parse('{{ cards | tojson }}');
-        for (const [key, value] of Object.entries(cards)) {
-            displayContent(value, key);
-        }
-    })
-</script>
+        <script type="text/javascript">
+            let defaultTab = document.getElementById("id-0");
+            defaultTab.innerHTML = '<div class="msg">insert media</div><div id="console"></div>'
+            let scanConsole = document.getElementById("console");
+
+            let txt = [
+                "FORCE: XX0022. ENCYPT://000.222.2345",
+                "TRYPASS: ********* AUTH CODE: ALPHA GAMMA: 1___ PRIORITY 1",
+                "RETRY: REINDEER FLOTILLA",
+                "Z:> /FALKEN/GAMES/TICTACTOE/ EXECUTE -PLAYERS 0",
+                "================================================",
+                "Priority 1 // local / scanning...",
+                "scanning ports...",
+                "BACKDOOR FOUND (23.45.23.12.00000000)",
+                "BACKDOOR FOUND (13.66.23.12.00110000)",
+                "BACKDOOR FOUND (13.66.23.12.00110044)",
+                "...",
+                "...",
+                "BRUTE.EXE -r -z",
+                "...locating vulnerabilities...",
+                "...vulnerabilities found...",
+                "MCP/> DEPLOY CLU",
+                "SCAN: __ 0100.0000.0554.0080",
+                "SCAN: __ 0020.0000.0553.0080",
+                "SCAN: __ 0001.0000.0554.0550",
+                "SCAN: __ 0012.0000.0553.0030",
+                "SCAN: __ 0100.0000.0554.0080",
+                "SCAN: __ 0020.0000.0553.0080",
+            ]
+
+            let docfrag = document.createDocumentFragment();
+
+            function updateScreen() {
+                //Shuffle the "txt" array
+                txt.push(txt.shift());
+                //Rebuild document fragment
+                txt.forEach(function (e) {
+                    var p = document.createElement("p");
+                    p.textContent = e;
+                    docfrag.appendChild(p);
+                });
+                //Clear DOM body
+                while (scanConsole.firstChild) {
+                    scanConsole.removeChild(scanConsole.firstChild);
+                }
+                scanConsole.appendChild(docfrag);
+            }
+            let intervalID = window.setInterval(updateScreen, 200);
+            openPage("0");
+        </script>
 </body>
+
 </html>

@@ -17,9 +17,13 @@
 
     <style>
         body {
+            font-family: monospace;
+            font-weight: bold;
             margin: 0;
             padding: 5vh 5vw;
             background: black;
+            color: limegreen;
+            text-shadow: 0px 0px 10px limegreen;
             overflow: hidden;
         }
 
@@ -28,14 +32,10 @@
         }
 
         p {
-            font-family: monospace;
-            font-weight: bold;
             font-size: 4.1vh;
             margin: 0;
             padding: 0;
             line-height: 1;
-            color: limegreen;
-            text-shadow: 0px 0px 10px limegreen;
         }
 
         .btns {
@@ -68,6 +68,45 @@
             animation-timing-function: linear;
         }
 
+        .loading-text {
+            font-size: 2em;
+        }
+
+        .loading-dots::after {
+            content: '.';
+            font-size: 3rem;
+            display: inline-block;
+            width: 1ch;
+            text-align: left;
+            animation: dots 1s steps(5, end) infinite;
+        }
+
+        @keyframes dots {
+
+            0%,
+            20% {
+                content: '.';
+            }
+
+            40% {
+                content: '..';
+            }
+
+            60% {
+                content: '...';
+            }
+
+            80%,
+            100% {
+                content: '....';
+            }
+        }
+
+        .loading-info {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+
         @keyframes blink {
             0% {
                 opacity: 0;
@@ -88,42 +127,46 @@
             })
         })
 
-        function displayContent(path, key) {
-            let disContent = document.getElementById("id-" + key)
-            let txt = "";
-            if (path.endsWith(".webm")) {
-                txt = `<div class="video">
-                    <video id="vid" autoplay="" muted="" loop="" width="100%" height="100%">
-                        <source id="mp4"
-                                src="${path}"
-                                type="video/webm">
-                    </video>
-                </div>`;
-                disContent.innerHTML = txt;
-            } else if (path.endsWith(".png")) {
-                txt = `<div class="img-container">
-                            <img
-                            src="${path}"
-                            class="img-fluid"
-                            alt="${path}"
-                            width="100%" height="100%"
-                            />
-                        </div>`
-                disContent.innerHTML = txt;
-            } else {
-                // Open default
-                openPage("scan");
-                console.log("no content");
-            }
-
-        }
-
         socket.on('floppy_fe', function (data) {
             console.log(data);
             if (document.getElementById("btn-" + data.data)) {
                 document.getElementById("btn-" + data.data).click();
             }
         })
+
+
+        // Data detected Page
+        function updateLoadingInfo(key) {
+            const loadingInfo = $("#id-" + key).find('.loading-info');
+
+            const messages = [
+                'Connecting to server...',
+                'Initializing protocols...',
+                'Fetching data...',
+                'Decrypting files...',
+                'Compiling results...',
+                'Bypassing security...',
+                'Results are ready!'
+            ];
+
+            function appendMessagesWithDelay(messages, index = 0) {
+                // Base case: if all messages are appended, stop the recursion
+                if (index >= messages.length) {
+                    
+                    return;
+                }
+
+                // Append the current message
+                loadingInfo.html(`<p>${messages[index]}</p>`);
+
+                // Generate a random delay between 1 and 3 seconds
+                const randomDelay = Math.floor(Math.random() * 1500) + 500;
+
+                // Call the function recursively with a delay
+                setTimeout(() => appendMessagesWithDelay(messages, index + 1), randomDelay);
+            }
+            appendMessagesWithDelay(messages);
+        }
 
         function openPage(pageName) {
             // Hide all elements with class="tab-content" by default */
@@ -135,6 +178,7 @@
 
             // Show the specific tab content
             document.getElementById("id-" + pageName).style.display = "block";
+            updateLoadingInfo(pageName);
         }
     </script>
 </head>
@@ -143,66 +187,72 @@
     <div class="container">
         <div class="btns">
             {% for key in cards.keys() %}
-                <button class="tab-link" id="btn-{{ key }}" onclick="openPage('{{ key }}')">{{ key }}</button>
+            <button class="tab-link" id="btn-{{ key }}" onclick="openPage('{{ key }}')">{{ key }}</button>
             {% endfor %}
         </div>
         {% for k, v in cards.items() %}
-            <div id="id-{{ k }}" class="tab-content fit-width">
-                <h3>{{ k }}</h3>
-                <p>{{ v }}</p>
+        <div id="id-{{ k }}" class="tab-content fit-width">
+            <div class="loading-screen">
+                <h1>{{ v }}</h1>
+                <div class="loading-text"><h1>Data detected</h1></div>
+                <div class="loading-dots"></div>
+                <div class="loading-info"></div>
             </div>
+        </div>
         {% endfor %}
     </div>
-        <script type="text/javascript">
-            let defaultTab = document.getElementById("id-0");
-            defaultTab.innerHTML = '<div class="msg">insert media</div><div id="console"></div>'
-            let scanConsole = document.getElementById("console");
+    
+    <!-- Scanning page -->
+    <script type="text/javascript">
+        let defaultTab = document.getElementById("id-0");
+        defaultTab.innerHTML = '<div class="msg">insert media</div><div id="console"></div>'
+        let scanConsole = document.getElementById("console");
 
-            let txt = [
-                "FORCE: XX0022. ENCYPT://000.222.2345",
-                "TRYPASS: ********* AUTH CODE: ALPHA GAMMA: 1___ PRIORITY 1",
-                "RETRY: REINDEER FLOTILLA",
-                "Z:> /FALKEN/GAMES/TICTACTOE/ EXECUTE -PLAYERS 0",
-                "================================================",
-                "Priority 1 // local / scanning...",
-                "scanning ports...",
-                "BACKDOOR FOUND (23.45.23.12.00000000)",
-                "BACKDOOR FOUND (13.66.23.12.00110000)",
-                "BACKDOOR FOUND (13.66.23.12.00110044)",
-                "...",
-                "...",
-                "BRUTE.EXE -r -z",
-                "...locating vulnerabilities...",
-                "...vulnerabilities found...",
-                "MCP/> DEPLOY CLU",
-                "SCAN: __ 0100.0000.0554.0080",
-                "SCAN: __ 0020.0000.0553.0080",
-                "SCAN: __ 0001.0000.0554.0550",
-                "SCAN: __ 0012.0000.0553.0030",
-                "SCAN: __ 0100.0000.0554.0080",
-                "SCAN: __ 0020.0000.0553.0080",
-            ]
+        let txt = [
+            "FORCE: XX0022. ENCYPT://000.222.2345",
+            "TRYPASS: ********* AUTH CODE: ALPHA GAMMA: 1___ PRIORITY 1",
+            "RETRY: REINDEER FLOTILLA",
+            "Z:> /FALKEN/GAMES/TICTACTOE/ EXECUTE -PLAYERS 0",
+            "================================================",
+            "Priority 1 // local / scanning...",
+            "scanning ports...",
+            "BACKDOOR FOUND (23.45.23.12.00000000)",
+            "BACKDOOR FOUND (13.66.23.12.00110000)",
+            "BACKDOOR FOUND (13.66.23.12.00110044)",
+            "...",
+            "...",
+            "BRUTE.EXE -r -z",
+            "...locating vulnerabilities...",
+            "...vulnerabilities found...",
+            "MCP/> DEPLOY CLU",
+            "SCAN: __ 0100.0000.0554.0080",
+            "SCAN: __ 0020.0000.0553.0080",
+            "SCAN: __ 0001.0000.0554.0550",
+            "SCAN: __ 0012.0000.0553.0030",
+            "SCAN: __ 0100.0000.0554.0080",
+            "SCAN: __ 0020.0000.0553.0080",
+        ]
 
-            let docfrag = document.createDocumentFragment();
+        let docfrag = document.createDocumentFragment();
 
-            function updateScreen() {
-                //Shuffle the "txt" array
-                txt.push(txt.shift());
-                //Rebuild document fragment
-                txt.forEach(function (e) {
-                    var p = document.createElement("p");
-                    p.textContent = e;
-                    docfrag.appendChild(p);
-                });
-                //Clear DOM body
-                while (scanConsole.firstChild) {
-                    scanConsole.removeChild(scanConsole.firstChild);
-                }
-                scanConsole.appendChild(docfrag);
+        function updateScreen() {
+            //Shuffle the "txt" array
+            txt.push(txt.shift());
+            //Rebuild document fragment
+            txt.forEach(function (e) {
+                var p = document.createElement("p");
+                p.textContent = e;
+                docfrag.appendChild(p);
+            });
+            //Clear DOM body
+            while (scanConsole.firstChild) {
+                scanConsole.removeChild(scanConsole.firstChild);
             }
-            let intervalID = window.setInterval(updateScreen, 200);
-            openPage("0");
-        </script>
+            scanConsole.appendChild(docfrag);
+        }
+        let intervalID = window.setInterval(updateScreen, 200);
+        openPage("0");
+    </script>
 </body>
 
 </html>

@@ -34,17 +34,15 @@ display_content = {
 }
 
 cards = {
-    "1": "Triangle.webm",
-    "2": "Circle.webm",
-    "3": "Hexagon.webm",
-    "4": "Dot.webm",
-    "5": "Killswitch.webm",
+    "1": "1.png",
+    "2": "2.png",
+    "3": "3.png",
     "0": "scan"
 }
 
 valid_cards = list(cards.keys())
 for c in valid_cards:
-    cards[c] = f"static/media/floppy/PD_{cards[c]}"
+    cards[c] = f"static/media/blueprints/plan_{cards[c]}"
 
 @app.route("/", methods=["GET", "POST"])
 def index():

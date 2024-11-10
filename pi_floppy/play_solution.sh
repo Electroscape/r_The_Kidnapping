@@ -5,5 +5,5 @@ pkill vlc
 # fixes activate venv from crontab 
 cd "${0%/*}"
 
-cvlc --fullscreen --no-video-title --video-on-top --gain=1.0 --quiet static/blueprints/plan_1.png &
+cvlc --fullscreen --no-video-title --video-on-top --gain=1.0 --quiet --loop static/blueprints/plan_1.png &
 echo "solution played, bye"

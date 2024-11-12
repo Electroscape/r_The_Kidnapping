@@ -179,15 +179,8 @@ def call_video(event_key, nw_sock):
     nw_sock.transmit(event_key)
 
     
-def mc_boot(event_key, nw_sock):
-    nw_sock.transmit(event_key)
-
-    '''
-    ssh = paramiko.SSHClient()
-    ssh.connect(server, username=username, password=password)
-    ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(cmd_to_execute)
-    '''
-
+def mc_boot(_, nw_sock):
+    nw_sock.transmit("idle")
 
 
 event_map = {
@@ -274,8 +267,8 @@ event_map = {
         pcf_in: FuseIo.mcBoot,
         pcf_out_add: [BreakoutIO.pcfOut, LightIO.pcfOut, PowerIO.pcfOut],
         pcf_out: [BreakoutIO.mcBoot, LightIO.mcBoot, PowerIO.raum2On],
-        event_next_qeued: "livingPower_offMCBoot"
-
+        event_next_qeued: "livingPower_offMCBoot",
+        event_script: mc_boot
     },
 
     "breakout_solved": {

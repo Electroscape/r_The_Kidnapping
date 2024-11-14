@@ -5,5 +5,5 @@ pkill vlc
 # fixes activate venv from crontab 
 cd "${0%/*}"
 
-cvlc --no-embedded-video --fullscreen --no-video-title --video-wallpaper --quiet --loop static/blackscreen.jpg &
+cvlc --fullscreen --no-video-title --video-on-top --gain=1.0 --quiet --loop static/vids/blackscreen.mp4 &
 echo "show blank screen, bye"

@@ -195,6 +195,11 @@
             // Show the specific tab content
             document.getElementById("id-" + pageName).style.display = "block";
             updateLoadingInfo(pageName);
+            socket.emit('msg_to_backend', pageName);
+        }
+
+        function sendToAllDisplays(msg) {
+            socket.emit('msg_to_backend', msg);
         }
     </script>
 </head>
@@ -202,6 +207,8 @@
 <body>
     <div class="container">
         <div class="btns">
+            <button class="tab-link" id="btn-reset" onclick="sendToAllDisplays('reset')">all off</button>
+            <button class="tab-link" id="btn-reset" onclick="sendToAllDisplays('idle')">all idle</button>
             {% for key in cards.keys() %}
             <button class="tab-link" id="btn-{{ key }}" onclick="openPage('{{ key }}')">{{ key }}</button>
             {% endfor %}

@@ -101,6 +101,25 @@ def connect():
 def on_msg(data):
     logging.info(f"from frontend: {data} -> forward to server")
     # TODO: here I emit to arbiter
+    # Manual override
+    # Check if data is a not string
+    if not isinstance(data, str):
+        print(f"data not str: {data}")
+        return
+    
+    if data == "0":
+        print(f"frontend on scan tab")
+    elif data == "reset":
+        for display in DISPLAY_IPS:
+            send_command(display, "play_blackscreen")
+    elif data == "idle":
+        for display in DISPLAY_IPS:   
+           send_command(display, "play_idle")
+    else:
+        print(f"data is {data}")
+        # for display in DISPLAY_IPS:
+        #     send_command(display, "play_idle")
+        send_command(f"lcd-{data}", "play_solution")
     # sio.emit("msg_to_server", data)
 
 
@@ -122,11 +141,10 @@ def check_for_updates():
             self_sio.emit("floppy_fe", prev_data)
 
             # Update displays
-            # TODO: choose display here
             lcd = prev_data.get("data")
             if lcd and lcd == "0":
-                for dispaly in DISPLAY_IPS:
-                    send_command(dispaly, "play_idle")
+                for display in DISPLAY_IPS:
+                    send_command(display, "play_idle")
             else:
                 send_command(f"lcd-{lcd}", "play_solution")
 

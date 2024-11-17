@@ -1,4 +1,4 @@
-from flask import Flask, render_template, send_from_directory
+from flask import Flask, redirect, render_template, send_from_directory
 from flask_socketio import SocketIO
 import socket
 import eventlet
@@ -39,6 +39,11 @@ valid_cards = list(cards.keys())
 for c in valid_cards:
     cards[c] = f"static/blueprints/plan_{cards[c]}"
 
+# Start with mc not booted
+mc_boot = False
+
+print("creating RFID instance")
+nfc_reader = RFID(cards=valid_cards)
 
 # Function to send command to a specific display RPi
 def send_command(rpi_name, command):
@@ -54,9 +59,16 @@ def send_command(rpi_name, command):
 
 @app.route("/", methods=["GET", "POST"])
 def index():
+    if not mc_boot:
+        return redirect("/boot")
+
     content = json.dumps(nfc_reader.get_data())
     return render_template("m_floppy.html", cards=cards, floppy=content)
 
+
+@app.route('/boot', methods=['GET', 'POST'])
+def pre_entry_point():
+    return render_template("no_boot.html")
 
 @app.route('/favicon.ico')
 def favicon():
@@ -79,10 +91,6 @@ def on_msg(data):
         return
     
     process_command(data)
-
-
-print("creating RFID instance")
-nfc_reader = RFID(cards=valid_cards)
 
 
 def check_for_updates():
@@ -111,12 +119,18 @@ def check_for_updates():
 
 
 def process_command(data: str) -> None:
+    global mc_boot
+
     data = data.strip()
     if data == "0":
         print(f"frontend on scan tab")
     elif data == 'idle':
         for display in DISPLAY_IPS:
             send_command(display, "play_idle")
+        
+        mc_boot = True
+        redirect('/')
+
     elif data == 'reset':
         for display in DISPLAY_IPS:
             send_command(display, "play_blackscreen")
@@ -129,7 +143,7 @@ def process_command(data: str) -> None:
 
 # Function to run the Flask Socket.IO server
 def run_flask():
-    app.run(debug=False, host="0.0.0.0", port=5666)
+    self_sio.run(app, debug=False, host="0.0.0.0", port=5666)
 
 # Create the Eventlet TCP server
 def handle_client(client_socket, client_address):

@@ -95,17 +95,17 @@ def check_for_updates():
         if prev_data != nfc_reader.get_data():
             prev_data = nfc_reader.get_data().copy()
             logging.info("updates to frontend from polling")
-            # Update frontend
-            self_sio.emit("floppy_fe", prev_data)
-
             # Update displays
             lcd = prev_data.get("data")
+            print(f"Card changed, updating LCDs: {lcd}")
             if lcd and lcd == "0":
                 for display in DISPLAY_IPS:
                     send_command(display, "play_idle")
             else:
                 send_command(f"lcd-{lcd}", "play_solution")
 
+            # Update frontend
+            self_sio.emit("floppy_fe", prev_data)
             logging.debug(f"emitting update {prev_data}")
             logging.info(f"sent: {prev_data}")
 
@@ -126,9 +126,6 @@ def process_command(data: str) -> None:
         #     send_command(display, "play_idle")
         send_command(f"lcd-{data}", "play_solution")
     # sio.emit("msg_to_server", data)
-
-# polling updates if server is offline
-self_sio.start_background_task(check_for_updates)
 
 # Function to run the Flask Socket.IO server
 def run_flask():
@@ -173,14 +170,17 @@ def start_server():
 
 # Main entry point
 if __name__ == "__main__":
-    # Create threads for both servers
+    # Create threads for servers
     eventlet_thread = threading.Thread(target=start_server)
+    rfid_thread = threading.Thread(target=check_for_updates)
     flask_thread = threading.Thread(target=run_flask)
 
-    # Start both threads
+    # Start threads
     eventlet_thread.start()
     flask_thread.start()
+    rfid_thread.start()
 
-    # Wait for both threads to finish
+    # Wait for threads to finish
     flask_thread.join()
     eventlet_thread.join()
+    rfid_thread.join()

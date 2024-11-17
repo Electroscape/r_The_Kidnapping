@@ -1,7 +1,7 @@
 {
-      "terminal_server_add": "http://sv-arbiter:5500/"
+      "terminal_server_add": "http://sv-arbiter:5500/",
       "socket_client": {
-            "server_add": "192.168.87.216",
+            "server_add": "pi-sv-floppy",
             "port": 4444
       }
 }

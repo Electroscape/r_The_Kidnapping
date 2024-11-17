@@ -1,5 +1,5 @@
 #!/bin/bash
-pkill python3
+# pkill python3  <= will kill m_terminal py script
 pkill vlc
 
 # cd to this script dir

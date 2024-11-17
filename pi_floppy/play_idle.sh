@@ -1,5 +1,5 @@
 export DISPLAY=:0.0
-pkill vlc
+sudo pkill vlc
 
 # cd to this script dir
 # fixes activate venv from crontab 

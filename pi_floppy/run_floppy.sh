@@ -1,7 +1,7 @@
 #!/bin/bash
-pkill python
-pkill flask
-pkill chromium
+sudo pkill python
+sudo pkill flask
+sudo pkill chromium
 
 # cd to this script dir
 # fixes activate venv from crontab 

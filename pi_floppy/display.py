@@ -5,7 +5,7 @@ import json
 # Open and read the JSON file
 with open('config.json', 'r') as json_file:
     cfg = json.loads(json_file.read())
-    PORT = cfg["port"]  # You can set any port here, but it should be the same on all display RPis
+    PORT = cfg["lcds_port"]  # You can set any port here, but it should be the same on all display RPis
     
 
 # Define the IP and port for the display

@@ -8,3 +8,4 @@ gevent-websocket
 RPi.GPIO
 adafruit-blinka
 adafruit-circuitpython-pn532
+eventlet

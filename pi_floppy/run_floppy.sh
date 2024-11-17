@@ -12,8 +12,7 @@ source venv/bin/activate
 
 sleep 5 &
 
-# comment or uncomment to run floppy
-FLASK_APP=floppy:app flask run --host 0.0.0.0 --port 5666  --no-debugger --no-reload  &
+python floppy.py &
 sleep 15 &
 
 # modify the IP address you want to display

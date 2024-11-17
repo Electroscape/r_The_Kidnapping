@@ -144,8 +144,9 @@ def handle_client(client_socket, client_address):
             if not data:
                 break  # If no data, close the connection
             # Print received data (decoded from bytes to string)
-            print(f"Received data: {data.decode('utf-8')}")
-            process_command(data)
+            data_str = data.decode('utf-8')
+            print(f"Received data: {data_str}")
+            process_command(data_str)
 
     except Exception as e:
         print(f"Error with client {client_address}: {e}")

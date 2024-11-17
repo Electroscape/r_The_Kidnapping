@@ -12,7 +12,8 @@ import json
 # Open and read the JSON file
 with open('config.json', 'r') as json_file:
     cfg = json.loads(json_file.read())
-    PORT = cfg["port"]
+    LCD_PORT = cfg["lcds_port"]
+    SERVER_PORT = cfg["server_port"]
     DISPLAY_IPS = {
         key: value for key, value in cfg["ip"].items() if key.startswith('lcd')
     }
@@ -44,7 +45,7 @@ def send_command(rpi_name, command):
     rpi_ip = DISPLAY_IPS[rpi_name]
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
-            client_socket.connect((rpi_ip, PORT))
+            client_socket.connect((rpi_ip, LCD_PORT))
             client_socket.sendall(command.encode('utf-8'))
             print(f"Sent command to {rpi_name} ({rpi_ip}): {command}")
     except Exception as e:
@@ -110,6 +111,7 @@ def check_for_updates():
 
 
 def process_command(data: str) -> None:
+    data = data.strip()
     if data == "0":
         print(f"frontend on scan tab")
     elif data == 'idle':
@@ -157,9 +159,9 @@ def handle_client(client_socket, client_address):
 # Main server function
 def start_server():
     # Create the listener socket using eventlet.listen
-    server_socket = eventlet.listen(('0.0.0.0', PORT))
+    server_socket = eventlet.listen(('0.0.0.0', SERVER_PORT))
 
-    print(f"Server listening on port {PORT}...")
+    print(f"Server listening on port {SERVER_PORT}...")
     
     # Use eventlet's green socket for concurrency
     while True:

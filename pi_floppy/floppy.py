@@ -1,4 +1,4 @@
-from flask import Flask, redirect, render_template, send_from_directory
+from flask import Flask, jsonify, redirect, render_template, send_from_directory
 from flask_socketio import SocketIO
 import socket
 import eventlet
@@ -41,6 +41,8 @@ for c in valid_cards:
 
 # Start with mc not booted
 mc_boot = False
+# Global rfid data value
+rfid_data = {"data": "0"}
 
 print("creating RFID instance")
 nfc_reader = RFID(cards=valid_cards)
@@ -70,6 +72,18 @@ def index():
 def pre_entry_point():
     return render_template("no_boot.html")
 
+# API route to check if the mc_boot is activated
+@app.route('/check_boot_trigger', methods=['GET'])
+def check_boot_trigger():
+    return jsonify({'mc_boot': mc_boot})
+
+
+# API route to check if the rfid data is activated
+@app.route('/check_rfid_data', methods=['GET'])
+def check_rfid_trigger():
+    return jsonify(rfid_data)
+
+
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory("static", 'favicon.ico',
@@ -94,6 +108,7 @@ def on_msg(data):
 
 
 def check_for_updates():
+    global rfid_data
     prev_data = nfc_reader.get_data().copy()
     while True:
         # self_sio.sleep(2)
@@ -114,22 +129,24 @@ def check_for_updates():
 
             # Update frontend
             self_sio.emit("floppy_fe", prev_data)
+            rfid_data = prev_data
             logging.debug(f"emitting update {prev_data}")
             logging.info(f"sent: {prev_data}")
 
 
 def process_command(data: str) -> None:
     global mc_boot
+    global rfid_data
 
     data = data.strip()
+    rfid_data = {"data": data}
+
     if data == "0":
         print(f"frontend on scan tab")
     elif data == 'idle':
         for display in DISPLAY_IPS:
             send_command(display, "play_idle")
-        
         mc_boot = True
-        redirect('/')
 
     elif data == 'reset':
         for display in DISPLAY_IPS:

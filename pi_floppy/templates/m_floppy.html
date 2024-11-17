@@ -144,7 +144,25 @@
                 document.getElementById("btn-" + data.data).click();
             }
         })
+        var prev_rfid_data = "";
+        // Function to check the backend if a redirect is needed
+        function checkTrigger() {
+            fetch('/check_rfid_data')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.data !== prev_rfid_data) {
+                        prev_rfid_data = data.data;
+                        console.log(data.data);
+                        if (document.getElementById("btn-" + data.data)) {
+                            document.getElementById("btn-" + data.data).click();
+                        }
+                    }
+                })
+                .catch(error => console.error('Error checking trigger:', error));
+        }
 
+        // Poll the backend every second to check for the trigger
+        setInterval(checkTrigger, 1000);  // Check every second
 
         // Data detected Page
         function updateLoadingInfo(key) {

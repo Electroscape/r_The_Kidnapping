@@ -137,7 +137,7 @@ def wait_for_chimney(*args):
 def set_live(*args):
     game_states.gameLive = True
     game_states.hasStarted = False
-    game_states.appartementEntered = False
+    game_states.appartmentEntered = False
     game_states.hallway_started = False
 
 

@@ -1,6 +1,7 @@
 Werkzeug
 Flask
 flask-socketio
+flask_cors
 python-socketio
 requests
 gevent

@@ -146,11 +146,13 @@ class RFID:
                     print(f'Wrong data: {card_read}')
 
                 # wait here until card is removed
-                # if wrong card should it stuck?!
                 current_card = rfid_present(self.pn532)
-                while current_card and current_card == rfid_present(self.pn532):
-                    continue
+                if card_read != "x":
+                    while current_card and current_card == rfid_present(self.pn532):
+                        continue
                 
-                # Return to default value
-                self.data["data"] = str(self.cards[-1])
-                print("card removed")
+                    # Return to default value
+                    self.data["data"] = str(self.cards[-1])
+                    print("card removed")
+                else:
+                    print(f"data is: {card_read} , repeat checking..")

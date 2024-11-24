@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, redirect, render_template, send_from_directory
 from flask_socketio import SocketIO
+from flask_cors import CORS
 import socket
 import eventlet
 import threading
@@ -25,6 +26,7 @@ logging.basicConfig(filename='floppy.log', level=logging.INFO,
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'EscapeTerminal#'
+CORS(app)  # Enable CORS for all routes
 # Flask socket to communicate between backend and frontend
 self_sio = SocketIO(app, cors_allowed_origins="*")
 
@@ -151,8 +153,8 @@ def process_command(data: str) -> None:
     elif data == 'reset':
         for display in DISPLAY_IPS:
             send_command(display, "play_blackscreen")
-    else:
-        print(f"data is {data}")
+    elif data in valid_cards:
+        print(f"data is valid card: {data}")
         # for display in DISPLAY_IPS:
         #     send_command(display, "play_idle")
         send_command(f"lcd-{data}", "play_solution")

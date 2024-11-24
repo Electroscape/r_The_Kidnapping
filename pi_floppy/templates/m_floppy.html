@@ -29,6 +29,7 @@
 
         * {
             box-sizing: border-box;
+            text-align: center;
         }
 
         p {
@@ -44,13 +45,17 @@
             margin: 10px;
         }
 
+        .tab-content {
+            display: none;
+        }
+
         .img-container {
             width: 100%;
             text-align: center;
         }
 
         .btns {
-            display: inline-block;
+            display: none;
         }
 
         .msg {
@@ -139,22 +144,36 @@
         })
 
         socket.on('floppy_fe', function (data) {
-            console.log(data);
-            if (document.getElementById("btn-" + data.data)) {
-                document.getElementById("btn-" + data.data).click();
+            console.log("received data: " + data);
+            if (data.data !== "0") {
+                playVideo('card');
+            } else {
+                playVideo('idle');
             }
         })
-        var prev_rfid_data = "";
+
+        var prev_rfid_data = "0";
         // Function to check the backend if a redirect is needed
         function checkTrigger() {
             fetch('/check_rfid_data')
                 .then(response => response.json())
                 .then(data => {
+                    if (!data.data) {
+                        console.log("No data in " + data);
+                        return;
+                    }
+                    if (data.data === "card" || data.data === "idle") {
+                        return;
+                    }
+
                     if (data.data !== prev_rfid_data) {
                         prev_rfid_data = data.data;
-                        console.log(data.data);
-                        if (document.getElementById("btn-" + data.data)) {
-                            document.getElementById("btn-" + data.data).click();
+                        console.log("polled data: " + data.data);
+                        
+                        if (data.data !== "0") {
+                            playVideo('card');
+                        } else {
+                            playVideo('idle');
                         }
                     }
                 })
@@ -162,58 +181,23 @@
         }
 
         // Poll the backend every second to check for the trigger
-        setInterval(checkTrigger, 1000);  // Check every second
+        setInterval(checkTrigger, 100);  // Check every second
+        
+        function playVideo(vidName) {
+            let vidPaths = {
+                    "idle": "{{ url_for('static', filename='vids/floppy_idle.mp4') }}",
+                    "card":  "{{ url_for('static', filename='vids/floppy_card_detected.mp4') }}"
+                };
+                
+            console.log("playing video: " + vidName);
+            console.log("video path is: " +  vidPaths[vidName]);
+            // Change video function
+            const videoElement = $('#fullscreen-video')[0]; // Get video DOM element
+            const sourceElement = $('#video-source'); // Get source DOM element
 
-        // Data detected Page
-        function updateLoadingInfo(key) {
-            const loadingInfo = $("#id-" + key).find('.loading-info');
-            const imgSrc = $("#id-" + key).find("h2").text();
-
-            const messages = [
-                'Connecting to server...',
-                'Initializing protocols...',
-                'Fetching data...',
-                'Decrypting files...',
-                'Compiling results...',
-                'Bypassing security...',
-                '<span style="color: yellow">Results are ready!</span>'
-            ];
-
-            function appendMessagesWithDelay(messages, index = 0) {
-                // Base case: if all messages are appended, stop the recursion
-                if (index >= messages.length) {
-                    loadingInfo.append(`
-                    <div class="img-container">
-                        <img src="${imgSrc}" alt="${imgSrc}"></img>
-                        <p style="font-size: initial;">thumbnail</p>
-                    </div>`)
-                    return;
-                }
-
-                // Append the current message
-                loadingInfo.html(`<p>${messages[index]}</p>`);
-
-                // Generate a random delay between 1 and 3 seconds
-                const randomDelay = Math.floor(Math.random() * 1000) + 100;
-
-                // Call the function recursively with a delay
-                setTimeout(() => appendMessagesWithDelay(messages, index + 1), randomDelay);
-            }
-            appendMessagesWithDelay(messages);
-        }
-
-        function openPage(pageName) {
-            // Hide all elements with class="tab-content" by default */
-            let tabContent;
-            tabContent = document.getElementsByClassName("tab-content");
-            for (let i = 0; i < tabContent.length; i++) {
-                tabContent[i].style.display = "none";
-            }
-
-            // Show the specific tab content
-            document.getElementById("id-" + pageName).style.display = "block";
-            updateLoadingInfo(pageName);
-            socket.emit('msg_to_backend', pageName);
+            // Change source and reload video
+            sourceElement.attr('src', vidPaths[vidName]);
+            videoElement.load(); // Reload the video with the new source
         }
 
         function sendToAllDisplays(msg) {
@@ -224,75 +208,22 @@
 
 <body>
     <div class="container">
+
         <div class="btns">
             <button class="tab-link" id="btn-reset" onclick="sendToAllDisplays('reset')">all off</button>
             <button class="tab-link" id="btn-reset" onclick="sendToAllDisplays('idle')">all idle</button>
-            {% for key in cards.keys() %}
-            <button class="tab-link" id="btn-{{ key }}" onclick="openPage('{{ key }}')">{{ key }}</button>
-            {% endfor %}
+            <button class="tab-link" id="btn-floppy-idle" onclick="playVideo('idle')">floppy idle</button>
+            <button class="tab-link" id="btn-floppy-card" onclick="playVideo('card')">floppy card present</button>
         </div>
-        {% for k, v in cards.items() %}
-        <div id="id-{{ k }}" class="tab-content fit-width">
-            <div class="loading-screen">
-                <h2>{{ v }}</h2>
-                <div class="loading-text"><h1>Data detected</h1></div>
-                <div class="loading-dots"></div>
-                <div class="loading-info"></div>
-            </div>
+        <div id="id-floppy" class="container">
+            <video id="fullscreen-video" autoplay loop muted>
+                <source id="video-source" src="{{ url_for('static', filename='vids/floppy_idle.mp4') }}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
         </div>
-        {% endfor %}
     </div>
-    
-    <!-- Scanning page -->
     <script type="text/javascript">
-        let defaultTab = document.getElementById("id-0");
-        defaultTab.innerHTML = '<div class="msg">no data</div><div id="console"></div>'
-        let scanConsole = document.getElementById("console");
-
-        let txt = [
-            "FORCE: XX0022. ENCYPT://000.222.2345",
-            "TRYPASS: ********* AUTH CODE: ALPHA GAMMA: 1___ PRIORITY 1",
-            "RETRY: REINDEER FLOTILLA",
-            "Z:> /FALKEN/GAMES/TICTACTOE/ EXECUTE -PLAYERS 0",
-            "================================================",
-            "Priority 1 // local / scanning...",
-            "scanning ports...",
-            "BACKDOOR FOUND (23.45.23.12.00000000)",
-            "BACKDOOR FOUND (13.66.23.12.00110000)",
-            "BACKDOOR FOUND (13.66.23.12.00110044)",
-            "...",
-            "...",
-            "BRUTE.EXE -r -z",
-            "...locating vulnerabilities...",
-            "...vulnerabilities found...",
-            "MCP/> DEPLOY CLU",
-            "SCAN: __ 0100.0000.0554.0080",
-            "SCAN: __ 0020.0000.0553.0080",
-            "SCAN: __ 0001.0000.0554.0550",
-            "SCAN: __ 0012.0000.0553.0030",
-            "SCAN: __ 0100.0000.0554.0080",
-            "SCAN: __ 0020.0000.0553.0080",
-        ]
-
-        let docfrag = document.createDocumentFragment();
-
-        function updateScreen() {
-            //Shuffle the "txt" array
-            txt.push(txt.shift());
-            //Rebuild document fragment
-            txt.forEach(function (e) {
-                var p = document.createElement("p");
-                p.textContent = e;
-                docfrag.appendChild(p);
-            });
-            //Clear DOM body
-            while (scanConsole.firstChild) {
-                scanConsole.removeChild(scanConsole.firstChild);
-            }
-            scanConsole.appendChild(docfrag);
-        }
-        let intervalID = window.setInterval(updateScreen, 200);
-        openPage("0");
+        playVideo('idle');
     </script>
 </body>
 

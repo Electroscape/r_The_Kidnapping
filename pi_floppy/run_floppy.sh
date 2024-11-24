@@ -13,7 +13,7 @@ source venv/bin/activate
 sleep 5 
 
 python floppy.py &
-sleep 15 
+sleep 5 
 
 # modify the IP address you want to display
 # comment or uncomment to run the browser on the webpage you choose

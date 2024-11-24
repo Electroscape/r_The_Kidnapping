@@ -10,11 +10,11 @@ cd "${0%/*}"
 # shellcheck disable=SC2164
 source venv/bin/activate
 
-sleep 5 &
+sleep 5 
 
 python floppy.py &
-sleep 15 &
+sleep 15 
 
 # modify the IP address you want to display
 # comment or uncomment to run the browser on the webpage you choose
-DISPLAY=:0 /usr/bin/chromium-browser --noerrdialogs --disable-infobars --kiosk 0.0.0.0:5666 &
+DISPLAY=:0.0 /usr/bin/chromium-browser --noerrdialogs --disable-infobars --kiosk 0.0.0.0:5666 &

@@ -150,9 +150,9 @@ def process_command(data: str) -> None:
     if data == "0":
         print(f"frontend on scan tab")
     elif data == 'idle':
+        mc_boot = True
         for display in DISPLAY_IPS:
             send_command(display, "play_idle")
-        mc_boot = True
 
     elif data == 'reset':
         for display in DISPLAY_IPS:

@@ -15,6 +15,8 @@ prev_command = ""
 
 # Function to execute the received command
 def execute_command(command: str) -> None:
+    global prev_command
+    
     if command == prev_command:
         # for same command, no execution
         return None

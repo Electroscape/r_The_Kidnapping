@@ -11,8 +11,23 @@ with open('config.json', 'r') as json_file:
 # Define the IP and port for the display
 HOST = '0.0.0.0'   # Listen on all interfaces
 
+prev_command = ""
+
 # Function to execute the received command
-def execute_command(command):
+def execute_command(command: str) -> None:
+    if command == prev_command:
+        # for same command, no execution
+        return None
+    elif prev_command == "play_solution":
+            subprocess.Popen(["sudo", "pkill", "feh"])
+            # make copy of previous command
+            prev_command = (command + '.')[:-1]
+            return None
+    else:
+        # make copy of previous command
+        prev_command = (command + '.')[:-1]
+
+    
     try:
         if command.startswith("play_"):
             # Run script

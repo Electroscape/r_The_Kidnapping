@@ -51,6 +51,10 @@ nfc_reader = RFID(cards=valid_cards)
 
 # Function to send command to a specific display RPi
 def send_command(rpi_name, command):
+    # If not booted,, no commands
+    if not mc_boot:
+        return False
+    
     rpi_ip = DISPLAY_IPS[rpi_name]
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:

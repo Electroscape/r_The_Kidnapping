@@ -182,8 +182,23 @@
         }
 
         // Poll the backend every second to check for the trigger
-        setInterval(checkTrigger, 100);  // Check every second
-        
+        setInterval(checkTrigger, 100);  // Check every 100 ms
+
+        // Function to check the backend if a redirect is needed
+        function checkBootReset() {
+            fetch('/check_boot_trigger')
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.mc_boot) {
+                        window.location.href = '/';
+                    }
+                })
+                .catch(error => console.error('Error checking trigger:', error));
+        }
+
+        // Poll the backend every 3 seconds to check for the trigger
+        setInterval(checkBootReset, 3000);  // Check every 3 seconds
+
         function playVideo(vidName) {
             let vidPaths = {
                     "idle": "{{ url_for('static', filename='vids/floppy_idle.mp4') }}",

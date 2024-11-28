@@ -157,6 +157,8 @@ def process_command(data: str) -> None:
     elif data == 'reset':
         for display in DISPLAY_IPS:
             send_command(display, "play_blackscreen")
+        mc_boot = False
+
     elif data in valid_cards:
         print(f"data is valid card: {data}")
         # for display in DISPLAY_IPS:

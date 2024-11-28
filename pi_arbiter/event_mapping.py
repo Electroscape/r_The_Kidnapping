@@ -134,11 +134,12 @@ def wait_for_chimney(*args):
     time.sleep(13)
 
 
-def set_live(*args):
+def set_live(_, nw_sock):
     game_states.gameLive = True
     game_states.hasStarted = False
     game_states.appartmentEntered = False
     game_states.hallway_started = False
+    nw_sock.transmit("reset")
 
 
 def is_game_started(*args):
@@ -385,9 +386,3 @@ inverted_events = {
 
 
 setup_default_callbacks(inverted_events)
-
-
-
-
-
-PowerIO

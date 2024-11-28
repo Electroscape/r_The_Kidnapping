@@ -200,9 +200,16 @@ event_map = {
     },
 
     "game_live": {
-        pcf_out_add: [LightIO.pcfOut, BreakoutIO.pcfOut, PowerIO.pcfOut],
-        pcf_out: [LightIO.gameReset, BreakoutIO.roomReset, PowerIO.roomReset],
+        pcf_out_add: [LightIO.pcfOut, BreakoutIO.pcfOut],
+        pcf_out: [LightIO.gameReset, BreakoutIO.roomReset],
         event_script: set_live,
+        event_next_qeued: game_livePower
+    },
+
+    "game_livePower": {
+        pcf_out_add: [PowerIO.pcfOut],
+        pcf_out: [PowerIO.roomReset],
+        event_delay: 0.5
     },
 
     "service_enable": {

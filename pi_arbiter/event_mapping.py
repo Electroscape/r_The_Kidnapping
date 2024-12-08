@@ -203,7 +203,7 @@ event_map = {
         pcf_out_add: [LightIO.pcfOut, BreakoutIO.pcfOut],
         pcf_out: [LightIO.gameReset, BreakoutIO.roomReset],
         event_script: set_live,
-        event_next_qeued: game_livePower
+        event_next_qeued: "game_livePower"
     },
 
     "game_livePower": {

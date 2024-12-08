@@ -4,6 +4,7 @@ from flask_cors import CORS
 import socket
 import eventlet
 import threading
+import subprocess
 
 from rfid import RFID
 
@@ -112,6 +113,16 @@ def on_msg(data):
     
     process_command(data)
 
+# Function to execute the received command
+def execute_command(command: str) -> None:
+    try:
+        if command == "zwinger":
+            # Run script
+            subprocess.Popen(["bash", f"play_{command}.sh"])
+
+    except Exception as e:
+        print(f"Error executing command: {e}")
+
 
 def check_for_updates():
     global rfid_data
@@ -158,6 +169,9 @@ def process_command(data: str) -> None:
         for display in DISPLAY_IPS:
             send_command(display, "play_blackscreen")
         mc_boot = False
+
+    elif data == 'zwinger':
+        execute_command(data)
 
     elif data in valid_cards:
         print(f"data is valid card: {data}")

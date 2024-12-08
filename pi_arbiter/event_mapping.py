@@ -184,6 +184,10 @@ def mc_boot(_, nw_sock):
     nw_sock.transmit("idle")
 
 
+def zwinger_open(_, nw_sock):
+    nw_sock.transmit("zwinger")
+
+
 event_map = {
     "self_check": {
         trigger_cmd: "self",
@@ -262,6 +266,7 @@ event_map = {
         pcf_out_add: [LightIO.pcfOut],
         pcf_out: [LightIO.waterUV],
         event_next_qeued: "emporePower_off",
+        event_script: zwinger_open
     },
 
     "fusebox_doorOpened": {

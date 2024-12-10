@@ -278,8 +278,8 @@ event_map = {
     "fusebox_bootMC": {
         pcf_in_add: FuseIo.pcfIn,
         pcf_in: FuseIo.mcBoot,
-        pcf_out_add: [BreakoutIO.pcfOut, LightIO.pcfOut, PowerIO.pcfOut],
-        pcf_out: [BreakoutIO.mcBoot, LightIO.mcBoot, PowerIO.raum2On],
+        pcf_out_add: [BreakoutIO.pcfOut, LightIO.pcfOut],
+        pcf_out: [BreakoutIO.mcBoot + PowerIO.raum2On, LightIO.mcBoot],
         event_next_qeued: "livingPower_offMCBoot",
         event_script: mc_boot
     },

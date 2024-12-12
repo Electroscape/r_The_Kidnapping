@@ -171,7 +171,11 @@
                         prev_rfid_data = data.data;
                         console.log("polled data: " + data.data);
                         
-                        if (data.data !== "0") {
+                        const cards = JSON.parse('{{ cards|tojson|safe }}');
+                        // Extract the keys from the dictionary
+                        const listOfCards = Object.keys(cards);
+                        
+                        if (data.data !== "0" && listOfCards.includes(data.data)) {
                             playVideo('card');
                         } else {
                             playVideo('idle');

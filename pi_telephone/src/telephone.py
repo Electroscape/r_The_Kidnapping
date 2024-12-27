@@ -9,9 +9,12 @@ from time import sleep
 from server import *
 import subprocess
 from threading import Thread
+from Pathlib import Path
 
 
 print(f"Current working directory of the script: {os.path.realpath(os.path.dirname(__file__))}")
+root_path = Path(os.cwd())
+sound_path = root_path.joinpah("sounds")
 
 
 logging.basicConfig(
@@ -47,7 +50,7 @@ size = width, height = 300, 200
 screen = pygame.display.set_mode(size, 32)
 
 
-pygame.mixer.music.load(config['PATH']['sounds'] + "013_freizeichen_30min.wav")
+pygame.mixer.music.load(sound_path.joinpath("013_freizeichen_30min.wav"))
 pygame.mixer.music.play(-1, 0.0)
 pygame.mixer.music.set_volume(2.0)
 pygame.mixer.music.pause()

@@ -31,7 +31,6 @@ argparser.add_argument(
 city = argparser.parse_args().city
 
 with open('src/config.json', 'r') as config_file:
-
     config = json.load(config_file)
     logging.info("the config file is read correctly")
 
@@ -113,11 +112,16 @@ def checkingNumberSound(path):
 
 
 def checkNumber(Number):
+     print("checkNumber")
+
      sleep(0.5)
      if Number in contacts:
           checkingNumberSound(config['PATH']['sounds'] + language + contacts[Number] + ".wav")
      else:
           checkingNumberSound(config['PATH']['sounds'] + "dialedWrongNumber.wav")
+
+
+
 
 
 def checkCorrectDigit(event):
@@ -127,36 +131,12 @@ def checkCorrectDigit(event):
      pauseCurrentSound()
      empty_channel = pygame.mixer.Channel(1)
 
-     if event.key == 48:
-          effect = pygame.mixer.Sound(config['PATH']['sounds'] + "ZERO.wav")
-          Number = Number + "0"
-     elif event.key == 49:
-          effect = pygame.mixer.Sound(config['PATH']['sounds'] + "ONE.wav")
-          Number = Number + "1"
-     elif event.key == 50:
-          effect = pygame.mixer.Sound(config['PATH']['sounds'] + "TWO.wav")
-          Number = Number + "2"
-     elif event.key == 51:
-          effect = pygame.mixer.Sound(config['PATH']['sounds'] + "THREE.wav")
-          Number = Number + "3"
-     elif event.key == 52:
-          effect = pygame.mixer.Sound(config['PATH']['sounds'] + "FOUR.wav")
-          Number = Number + "4"
-     elif event.key == 53:
-          effect = pygame.mixer.Sound(config['PATH']['sounds'] + "FIVE.wav")
-          Number = Number + "5"
-     elif event.key == 54:
-          effect = pygame.mixer.Sound(config['PATH']['sounds'] + "SIX.wav")
-          Number = Number + "6"
-     elif event.key == 55:
-          effect = pygame.mixer.Sound(config['PATH']['sounds'] + "SEVEN.wav")
-          Number = Number + "7"
-     elif event.key == 56:
-          effect = pygame.mixer.Sound(config['PATH']['sounds'] + "EIGHT.wav")
-          Number = Number + "8"
-     elif event.key == 57:
-          effect = pygame.mixer.Sound(config['PATH']['sounds'] + "NINE.wav")
-          Number = Number + "9"
+     # key 48 is 0, 49 and so on, so ....
+     digit = event.key - 48
+     if 9 > digit > 0:
+          Number.ap
+          try;
+          effect = pygame.mixer.Sound(config['PATH']['sounds'] + f"{digit}.wav")
      else:
           # @todo: maybe remove the checkNumber depending on the wanted use of the #/OK key but return has to stay
           # checkNumber(Number)

@@ -1,3 +1,4 @@
+cd "${0%/*}" || exit
 export DISPLAY=:0.0
 xhost +
-bash ~/TELEPHONE/start.sh 
+bash start.sh

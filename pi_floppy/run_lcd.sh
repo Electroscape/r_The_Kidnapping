@@ -11,7 +11,7 @@ cd "${0%/*}"
 source venv/bin/activate
 
 sleep 5 
-
+export DISPLAY=:"0.0" 
 unclutter -idle 0 &
 
 python3 display.py &

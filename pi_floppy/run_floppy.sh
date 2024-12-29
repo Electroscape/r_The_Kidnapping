@@ -14,7 +14,7 @@ sleep 5
 
 python floppy.py &
 sleep 5 
-
+export DISPLAY=:"0.0" 
 unclutter -idle 0 &
 
 # modify the IP address you want to display

@@ -12,4 +12,6 @@ source venv/bin/activate
 
 sleep 5 
 
+unclutter -idle 0 &
+
 python3 display.py &

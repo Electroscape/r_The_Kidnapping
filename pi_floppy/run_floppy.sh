@@ -15,6 +15,8 @@ sleep 5
 python floppy.py &
 sleep 5 
 
+unclutter -idle 0 &
+
 # modify the IP address you want to display
 # comment or uncomment to run the browser on the webpage you choose
 DISPLAY=:0.0 /usr/bin/chromium-browser --start-fullscreen --noerrdialogs --disable-infobars --disable-session-crashed-bubble --disable-component-update --disable-background-networking --disable-default-apps --kiosk --no-first-run --autoplay-policy=no-user-gesture-required 0.0.0.0:5666 &

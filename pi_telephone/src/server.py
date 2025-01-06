@@ -7,12 +7,6 @@ port = 5560
 languageChoice = "The language now is german"
 
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="{asctime} {levelname:<8} {message}",
-    style='{'
-)
-
 def setupServer():
     sc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     

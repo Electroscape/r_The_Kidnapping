@@ -2,6 +2,10 @@
 
 Telephone module
 
+python3 -m pip install -U pygame --user
+sudo apt-get install libsdl2-mixer-2.0-0 
+
+
 ## **Libraries Used**
 
 ### Pygame

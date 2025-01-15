@@ -2,6 +2,8 @@ import requests
 import subprocess
 from enum import IntEnum
 import re
+import time
+
 
 '''
 @TODO: 
@@ -90,9 +92,9 @@ class BreakoutIO(IntEnum):
     solved = 1
 
     pcfOut = 2  # 0x3A
-    roomReset = 1
-    mcBoot = 2
-    setSolved = 3
+    roomReset = 1 << 5
+    mcBoot = 1 << 6
+    setSolved = 1 << 7
 
 
 class PowerIO(IntEnum):
@@ -109,7 +111,8 @@ class PowerIO(IntEnum):
     chimneyOpening = 10
 
 
-binary_pcfs = [FuseIo.pcfIn, ArbiterIO.pcfIn]
+# binary_pcfs = [FuseIo.pcfIn, ArbiterIO.pcfIn]
+binary_pcfs = []
 
 
 class GameStatus:
@@ -117,24 +120,40 @@ class GameStatus:
         self.example = False
         self.hasStarted = False
         self.gameLive = False   # suppress in case of other light effects? only for the green solved
+        self.hallway_started = False
         self.appartmentEntered = False
 
 
 game_states = GameStatus()
 
+def wait_for_lightEffekt(*args):
+    time.sleep(20)
+def wait_for_lightEffekt2(*args):
+    time.sleep(15)
+def wait_for_chimney(*args):
+    time.sleep(13)
 
-def reset_states(*args):
-    game_states.gameLive = False
+
+def set_live(_, nw_sock):
+    game_states.gameLive = True
     game_states.hasStarted = False
     game_states.appartmentEntered = False
-
-
-def set_live(*args):
-    game_states.gameLive = True
+    game_states.hallway_started = False
+    nw_sock.transmit("reset")
 
 
 def is_game_started(*args):
     return game_states.hasStarted
+
+def can_start_hallway(*args):
+    if not game_states.hasStarted:
+        return False
+    if not game_states.hallway_started:
+        game_states.hallway_started = True
+        return game_states.hallway_started
+    else:
+        return False
+
 
 
 def can_enter_appartment(*args):
@@ -160,6 +179,14 @@ def  start_game_condition(*args):
 def call_video(event_key, nw_sock):
     nw_sock.transmit(event_key)
 
+    
+def mc_boot(_, nw_sock):
+    nw_sock.transmit("idle")
+
+
+def zwinger_open(_, nw_sock):
+    nw_sock.transmit("zwinger")
+
 
 event_map = {
     "self_check": {
@@ -180,6 +207,13 @@ event_map = {
         pcf_out_add: [LightIO.pcfOut, BreakoutIO.pcfOut],
         pcf_out: [LightIO.gameReset, BreakoutIO.roomReset],
         event_script: set_live,
+        event_next_qeued: "game_livePower"
+    },
+
+    "game_livePower": {
+        pcf_out_add: [PowerIO.pcfOut],
+        pcf_out: [PowerIO.roomReset],
+        event_delay: 0.5
     },
 
     "service_enable": {
@@ -187,20 +221,27 @@ event_map = {
         pcf_out: [LightIO.service_enable],
     },
 
-    "game_reset": {
-        pcf_out_add: [BreakoutIO.pcfOut, PowerIO.pcfOut],
-        pcf_out: [BreakoutIO.roomReset, PowerIO.roomReset],
-        event_script: reset_states,
-    },
-
     "game_over": {
         pcf_out_add: [LightIO.pcfOut],
         pcf_out: [LightIO.gameOver],
     },
 
-    "hallway_start": {
+    "hallway_preStage": {
         pcf_out_add: [LightIO.pcfOut],
         pcf_out: [LightIO.hallwayStart],
+    },
+    "hallway_start": {
+        pcf_in_add: ArbiterIO.pcfIn,
+        pcf_in: ArbiterIO.entrance,
+        pcf_out_add: [LightIO.pcfOut],
+        pcf_out: [LightIO.hallwayOn],
+        event_condition: can_start_hallway
+    },
+    "hallway_on": {
+        pcf_in_add: FuseIo.pcfIn,
+        pcf_in: FuseIo.lightOn,
+        pcf_out_add: [LightIO.pcfOut],
+        pcf_out: [LightIO.hallwayOn]
     },
 
     "hallway_off": {
@@ -210,19 +251,13 @@ event_map = {
         pcf_out: [LightIO.hallwayOff],
     },
 
-    "hallway_on": {
-        pcf_in_add: FuseIo.pcfIn,
-        pcf_in: FuseIo.lightOn,
-        pcf_out_add: [LightIO.pcfOut],
-        pcf_out: [LightIO.hallwayOn]
-    },
-
     # opening of the chinmey, fades in and out to set its fokus
     "chimney_opening": {
         pcf_in_add: LightIO.pcfIn,
         pcf_in: LightIO.chinmeySolved,
         pcf_out_add: [LightIO.pcfOut, FuseIo.pcfOut, PowerIO.pcfOut],
-        pcf_out: [LightIO.chimneyOverride, FuseIo.mcOpened, PowerIO.chimneyOpening],
+        pcf_out: [LightIO.chimneyOverride, FuseIo.mcOpened, PowerIO.emporeOff],
+        event_next_qeued: "livingPower_offChimnneyOpend"
     },
 
     "water_solved": {
@@ -230,6 +265,8 @@ event_map = {
         pcf_in: WaterIO.uvActive,
         pcf_out_add: [LightIO.pcfOut],
         pcf_out: [LightIO.waterUV],
+        event_next_qeued: "emporePower_off",
+        event_script: zwinger_open
     },
 
     "fusebox_doorOpened": {
@@ -243,46 +280,88 @@ event_map = {
         pcf_in: FuseIo.mcBoot,
         pcf_out_add: [BreakoutIO.pcfOut, LightIO.pcfOut],
         pcf_out: [BreakoutIO.mcBoot, LightIO.mcBoot],
+        event_next_qeued: "livingPower_offMCBoot",
+        event_script: mc_boot
     },
 
     "breakout_solved": {
         pcf_in_add: BreakoutIO.pcfIn,
         pcf_in: BreakoutIO.solved,
-        pcf_out_add: [BreakoutIO.pcfOut, LightIO.pcfOut],
-        pcf_out: [BreakoutIO.setSolved, LightIO.gameSolved],
+        pcf_out_add: [BreakoutIO.pcfOut, LightIO.pcfOut, PowerIO.pcfOut],
+        pcf_out: [BreakoutIO.setSolved, LightIO.gameSolved, PowerIO.livingOff],
     },
 
     "emporePower_on": {
-        pcf_out_add: PowerIO.pcfOut,
-        pcf_out: PowerIO.emporeOn,
+        pcf_out_add: [PowerIO.pcfOut],
+        pcf_out: [PowerIO.emporeOn],
     },
     "emporePower_off": {
-        pcf_out_add: PowerIO.pcfOut,
-        pcf_out: PowerIO.emporeOff,
+        pcf_out_add: [PowerIO.pcfOut],
+        pcf_out: [PowerIO.emporeOff],
     },
+    "emporePower_offMCBoot": {
+        pcf_out_add: [PowerIO.pcfOut],
+        pcf_out: [PowerIO.emporeOff],
+        event_next_qeued: "livingPower_onMCBoot"
+    },
+    "livingPower_onChimnneyOpend":{
+        pcf_out_add: [PowerIO.pcfOut],
+        pcf_out: [PowerIO.livingOn],
+        event_script: wait_for_chimney,
+        event_next_qeued: "emporePower_on"
+    },
+    "livingPower_offChimnneyOpend":{
+        pcf_out_add: [PowerIO.pcfOut],
+        pcf_out: [PowerIO.livingOff],
+        event_next_qeued: "livingPower_onChimnneyOpend"
+    },
+    
     "livingPower_on": {
-        pcf_out_add: PowerIO.pcfOut,
-        pcf_out: PowerIO.livingOn,
+        pcf_out_add: [PowerIO.pcfOut],
+        pcf_out: [PowerIO.livingOn],
     },
+    "livingPower_onAppartmentEnter": {
+        pcf_out_add: [PowerIO.pcfOut],
+        pcf_out: [PowerIO.livingOn],
+        event_script: wait_for_lightEffekt,
+        event_next_qeued: "emporePower_on"
+    },
+    "livingPower_onMCBoot": {
+        pcf_out_add: [PowerIO.pcfOut],
+        pcf_out: [PowerIO.livingOn],
+        event_script: wait_for_lightEffekt2,
+        event_next_qeued: "emporePower_on"
+    },
+    "livingPower_offMCBoot": {
+        pcf_out_add: [PowerIO.pcfOut],
+        pcf_out: [PowerIO.livingOff],
+        event_next_qeued: "power_room2_on",
+    },
+    "power_room2_on": {
+        pcf_out_add: [PowerIO.pcfOut],
+        pcf_out: [PowerIO.raum2On],
+        event_next_qeued: "emporePower_offMCBoot"
+    },
+    
     "livingPower_off": {
-        pcf_out_add: PowerIO.pcfOut,
-        pcf_out: PowerIO.livingOff,
+        pcf_out_add: [PowerIO.pcfOut],
+        pcf_out: [PowerIO.livingOff],
     },
     "room2Power_on": {
-        pcf_out_add: PowerIO.pcfOut,
-        pcf_out: PowerIO.raum2On,
+        pcf_out_add: [PowerIO.pcfOut],
+        pcf_out: [PowerIO.raum2On],
     },
     "room2Power_off": {
-        pcf_out_add: PowerIO.pcfOut,
-        pcf_out: PowerIO.raum2Off,
+        pcf_out_add: [PowerIO.pcfOut],
+        pcf_out: [PowerIO.raum2Off],
     },
     "servicePower_on": {
-        pcf_out_add: PowerIO.pcfOut,
-        pcf_out: PowerIO.serviceOn,
+        pcf_out_add: [PowerIO.pcfOut],
+        pcf_out: [PowerIO.serviceOn],
     },
     "servicePower_off": {
-        pcf_out_add: PowerIO.pcfOut,
-        pcf_out: PowerIO.serviceOff,
+        pcf_out_add: [PowerIO.pcfOut],
+        pcf_out: [PowerIO.serviceOff],
     },
 }
 
@@ -318,13 +397,9 @@ inverted_events = {
         pcf_out_add: [LightIO.pcfOut],
         pcf_out: [LightIO.apartmentEnter],
         event_condition: can_enter_appartment,
+        event_next_qeued: "livingPower_onAppartmentEnter"
     },
 }
 
 
 setup_default_callbacks(inverted_events)
-
-
-
-
-

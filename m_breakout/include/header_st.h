@@ -39,9 +39,9 @@ enum IOpins {
 };
 
 enum inputValues {  
-    roomReset = 1,
-    mcBoot,
-    setSolved           
+    roomReset = 1 << 0,
+    mcBoot = 1 << 1,
+    setSolved = 1 << 2    
 };
 
 enum outputValues {
@@ -49,15 +49,16 @@ enum outputValues {
 };
 
 #define outputCnt 1
-#define inputCnt 2
+#define inputCnt 3
 
 int intputArray[inputCnt] = {
     IO_1,
     IO_2,
+    IO_3
 };
 
 int outputArray[outputCnt] = {
-    IO_3                      
+    IO_4                      
 };
 
 

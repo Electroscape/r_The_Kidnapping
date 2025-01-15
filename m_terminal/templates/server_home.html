@@ -182,27 +182,24 @@
 
     <h3>Appartment</h3>
     <div>
+        <button class="btn btn-outline-light" name="appartment_enter" onclick="onClickTrigger(name)">Manual appartment_enter</button>
         <button class="btn btn-outline-light" name="chimney_opening" onclick="onClickTrigger(name)">Chimney</button>
     </div>
 
     <h3>Mission Control</h3>
     <div>
         <button class="btn btn-outline-light" name="water_solved" onclick="onClickTrigger(name)">Waterriddle solved</button>
-    </div>
-    <div>
         <button class="btn btn-outline-light" name="breakout_solved" onclick="onClickTrigger(name)">Exit solved</button>
     </div>
 
     <h3>Game status</h3>
     <div>
-        <button class="btn btn-outline-light" name="game_live" onclick="onClickTrigger(name)">Reset</button>
-        <button class="btn btn-outline-light" name="game_start" onclick="onClickTrigger(name)">Manual start</button>
+        <button class="btn btn-outline-light" name="game_live" onclick="onClickTrigger(name)">Game Live</button>
         <button class="btn btn-outline-light" name="game_over" onclick="onClickTrigger(name)">Game Over</button>
-        <br>
         <button class="btn btn-outline-light" name="service_enable" onclick="onClickTrigger(name)">Service Enable</button>
     </div>
     <br>
-
+    
     <label class="label-txt" for="msg_holder">Chat Messages</label>
     <div class="message_holder" id="msg_holder"></div>
 

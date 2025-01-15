@@ -56,7 +56,7 @@ enum inputs {
 
 
 enum outputs {
-    solved = 1
+    solved = 1 << 4
 };
 
 

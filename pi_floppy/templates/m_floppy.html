@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta charset="UTF-8">
+    <title>floppy</title>
+
+    <!-- socketio -->
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"
+        integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+"
+        crossorigin="anonymous"></script>
+    <!-- JQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.1.js"
+        integrity="sha256-3zlB5s2uwoUzrXK3BT7AX3FyvojsraNFxCc2vC/7pNI=" crossorigin="anonymous"></script>
+
+    <style>
+        body {
+            font-family: monospace;
+            font-weight: bold;
+            margin: 0;
+            padding: 5vh 5vw;
+            background: black;
+            color: limegreen;
+            text-shadow: 0px 0px 10px limegreen;
+            overflow: hidden;
+        }
+
+        * {
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        p {
+            font-size: 4.1vh;
+            margin: 0;
+            padding: 0;
+            line-height: 1;
+        }
+
+        img {
+            width: 100px;
+            height: 100px;
+            margin: 10px;
+        }
+
+        video {
+            width: 100%;
+            max-height: 100vh;
+        }
+
+        .img-container {
+            width: 100%;
+            text-align: center;
+        }
+
+        .btns {
+            display: none;
+        }
+
+        .msg {
+            font-family: monospace;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 5vh;
+            padding-top: 5vh;
+            background: red;
+            box-shadow: 0 0 30px red;
+            text-shadow: 0 0 20px white;
+            color: white;
+            width: 20vw;
+            height: 15vh;
+            position: absolute;
+            left: 50%;
+            margin-left: -10vw;
+            top: 50%;
+            margin-top: -5vh;
+            text-align: center;
+            min-width: 200px;
+            animation-name: blink;
+            animation-duration: 0.6s;
+            animation-iteration-count: infinite;
+            animation-direction: alternate;
+            animation-timing-function: linear;
+        }
+
+        .loading-text {
+            font-size: 2em;
+        }
+
+        .loading-dots::after {
+            content: '.';
+            font-size: 3rem;
+            display: inline-block;
+            width: 1ch;
+            text-align: left;
+            animation: dots 1s steps(5, end) infinite;
+        }
+
+        @keyframes dots {
+
+            0%,
+            20% {
+                content: '.';
+            }
+
+            40% {
+                content: '..';
+            }
+
+            60% {
+                content: '...';
+            }
+
+            80%,
+            100% {
+                content: '....';
+            }
+        }
+
+        .loading-info {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+
+        @keyframes blink {
+            0% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+    </style>
+    <script type="text/javascript">
+        const socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        socket.on('connect', function () {
+            console.log("connected to backend")
+            socket.emit('msg_to_backend', {
+                update: `floppy' is connected to backend`
+            })
+        })
+
+        socket.on('floppy_fe', function (data) {
+            console.log("received data: " + data);
+            if (data.data !== "0") {
+                playVideo('card');
+            } else {
+                playVideo('idle');
+            }
+        })
+
+        var prev_rfid_data = "0";
+        // Function to check the backend if a redirect is needed
+        function checkTrigger() {
+            fetch('/check_rfid_data')
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.data) {
+                        console.log("No data in " + data);
+                        return;
+                    }
+                    if (data.data === "card" || data.data === "idle") {
+                        return;
+                    }
+
+                    if (data.data !== prev_rfid_data) {
+                        prev_rfid_data = data.data;
+                        console.log("polled data: " + data.data);
+                        
+                        const cards = JSON.parse('{{ cards|tojson|safe }}');
+                        // Extract the keys from the dictionary
+                        const listOfCards = Object.keys(cards);
+                        
+                        if (data.data !== "0" && listOfCards.includes(data.data)) {
+                            playVideo('card');
+                        } else {
+                            playVideo('idle');
+                        }
+                    }
+                })
+                .catch(error => console.error('Error checking trigger:', error));
+        }
+
+        // Poll the backend every second to check for the trigger
+        setInterval(checkTrigger, 100);  // Check every 100 ms
+
+        // Function to check the backend if a redirect is needed
+        function checkBootReset() {
+            fetch('/check_boot_trigger')
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.mc_boot) {
+                        window.location.href = '/';
+                    }
+                })
+                .catch(error => console.error('Error checking trigger:', error));
+        }
+
+        // Poll the backend every 3 seconds to check for the trigger
+        setInterval(checkBootReset, 3000);  // Check every 3 seconds
+
+        function playVideo(vidName) {
+            let vidPaths = {
+                    "idle": "{{ url_for('static', filename='vids/floppy_idle.mp4') }}",
+                    "card":  "{{ url_for('static', filename='vids/floppy_card_detected.mp4') }}"
+                };
+                
+            console.log("playing video: " + vidName);
+            console.log("video path is: " +  vidPaths[vidName]);
+            // Change video function
+            const videoElement = $('#fullscreen-video')[0]; // Get video DOM element
+            const sourceElement = $('#video-source'); // Get source DOM element
+
+            // Change source and reload video
+            sourceElement.attr('src', vidPaths[vidName]);
+            videoElement.load(); // Reload the video with the new source
+        }
+
+        function sendToAllDisplays(msg) {
+            socket.emit('msg_to_backend', msg);
+        }
+    </script>
+</head>
+
+<body>
+    <div class="container">
+
+        <div class="btns">
+            <button class="tab-link" id="btn-reset" onclick="sendToAllDisplays('reset')">all off</button>
+            <button class="tab-link" id="btn-reset" onclick="sendToAllDisplays('idle')">all idle</button>
+            <button class="tab-link" id="btn-floppy-idle" onclick="playVideo('idle')">floppy idle</button>
+            <button class="tab-link" id="btn-floppy-card" onclick="playVideo('card')">floppy card present</button>
+        </div>
+        <div id="id-floppy" class="container">
+            <video id="fullscreen-video" autoplay loop muted>
+                <source id="video-source" src="{{ url_for('static', filename='vids/floppy_idle.mp4') }}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+    </div>
+    <script type="text/javascript">
+        playVideo('idle');
+    </script>
+</body>
+
+</html>

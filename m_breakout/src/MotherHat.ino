@@ -90,7 +90,7 @@ void stageActions() {
         case idle:
             Serial.println("idle");
             Mother.motherRelay.digitalWrite(relays::door, doorClosed);
-            LED_CMDS::setStripToClr(Mother, ledBrain, LED_CMDS::clrRed, 50, 1);
+            LED_CMDS::setStripToClr(Mother, ledBrain, LED_CMDS::clrBlue, 50, 1);
             MotherIO.outputReset();
         break;
     }

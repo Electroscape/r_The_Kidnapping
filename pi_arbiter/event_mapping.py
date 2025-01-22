@@ -217,8 +217,13 @@ event_map = {
     },
 
     "service_enable": {
-        pcf_out_add: [LightIO.pcfOut],
-        pcf_out: [LightIO.service_enable],
+        pcf_out_add: [LightIO.pcfOut, PowerIO.pcfOut],
+        pcf_out: [LightIO.service_enable, PowerIO.serviceOn],
+    },
+
+    "service_disable": {
+        pcf_out_add: [LightIO.pcfOut, PowerIO.pcfOut],
+        pcf_out: [LightIO.gameReset, PowerIO.serviceOff],
     },
 
     "game_over": {

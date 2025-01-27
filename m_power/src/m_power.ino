@@ -69,6 +69,12 @@ void handleInputs() {
             Mother.motherRelay.digitalWrite(relays::empore, open);
             Mother.motherRelay.digitalWrite(relays::living, open);
         break;
+        case inputValues::serviceOn:
+            Mother.motherRelay.digitalWrite(relays::service, open);
+        break;
+        case inputValues::serviceOff:
+            Mother.motherRelay.digitalWrite(relays::service, closed);
+        break;
     }
 
     lastState = result;

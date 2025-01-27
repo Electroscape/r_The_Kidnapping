@@ -220,7 +220,11 @@ void handleInputs() {
 
     lastInput = inputVal;
     switch (inputVal) {
-        case IOValues::service_enable: stage = 0; break;
+        case IOValues::service_enable: 
+            stage = 0; 
+            LED_CMDS::setAllStripsToClr(Mother, brains::ledDot, LED_CMDS::clrWhite, 50);
+            LED_CMDS::setAllStripsToClr(Mother, brains::ledStrip, LED_CMDS::clrWhite, 50);
+        break;
         case IOValues::gameEndTrigger: 
             LED_CMDS::setAllStripsToClr(Mother, brains::ledDot, LED_CMDS::clrGreen, 100);
             LED_CMDS::setAllStripsToClr(Mother, brains::ledStrip, LED_CMDS::clrGreen, 100);

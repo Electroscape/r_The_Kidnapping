@@ -78,21 +78,6 @@ def trigger_event(event_key, event_value=None):
     if event_value is None:
         return
 
-    '''
-    if event_key == "airlock_begin_atmo":
-        global time_start
-        time_start = dt.now()
-    
-    elapsed_time_str = ""
-    if time_start is not None:
-        event_dt = dt.now() - time_start
-        elapsed_time_str = str(event_dt)
-    log_msg = f"{elapsed_time_str} {event_key}"
-    logging.info(log_msg)
-    
-    '''
-
-
     print(f"triggered event {event_key}")
 
     # IO pins
@@ -101,9 +86,15 @@ def trigger_event(event_key, event_value=None):
         pcf_no = event_value[pcf_out_add]
         values = event_value[pcf_out]
         print(f"setting outputs: PCF={pcf_no} Value={values}")
+
+        pcf_value_dict = {}
+        # edit here
         for index in range(min(len(values), len(pcf_no))):
-            IO.write_pcf(pcf_no[index], values[index])
+            pcf = pcf_no[index]
+            pcf_value_dict[pcf] = pcf_value_dict.get(pcf, 0) + values[index]
             reset_gpios_dicts.update({pcf_no[index]: dt.now() + reset_delta})
+        for pcf, value in pcf_value_dict:
+            IO.write_pcf(pcf, value)
     except KeyError as err:
         print(err)
         pass

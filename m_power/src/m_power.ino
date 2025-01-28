@@ -71,6 +71,9 @@ void handleInputs() {
         break;
         case inputValues::serviceOn:
             Mother.motherRelay.digitalWrite(relays::service, open);
+            Mother.motherRelay.digitalWrite(relays::empore, open);
+            Mother.motherRelay.digitalWrite(relays::living, open);
+            Mother.motherRelay.digitalWrite(relays::room2, open);
         break;
         case inputValues::serviceOff:
             Mother.motherRelay.digitalWrite(relays::service, closed);

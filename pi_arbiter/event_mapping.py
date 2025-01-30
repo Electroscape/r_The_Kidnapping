@@ -121,15 +121,20 @@ class GameStatus:
         self.hasStarted = False
         self.gameLive = False   # suppress in case of other light effects? only for the green solved
         self.hallway_started = False
-        self.appartmentEntered = False
+        self.apartmentEntered = False
 
 
 game_states = GameStatus()
 
+
 def wait_for_lightEffekt(*args):
     time.sleep(20)
+    
+
 def wait_for_lightEffekt2(*args):
     time.sleep(15)
+
+
 def wait_for_chimney(*args):
     time.sleep(13)
 
@@ -137,7 +142,7 @@ def wait_for_chimney(*args):
 def set_live(_, nw_sock):
     game_states.gameLive = True
     game_states.hasStarted = False
-    game_states.appartmentEntered = False
+    game_states.apartmentEntered = False
     game_states.hallway_started = False
     nw_sock.transmit("reset")
 
@@ -156,11 +161,11 @@ def can_start_hallway(*args):
 
 
 
-def can_enter_appartment(*args):
+def can_enter_apartment(*args):
     if game_states.hasStarted:
-        if not game_states.appartmentEntered:
-            game_states.appartmentEntered = True
-            return game_states.appartmentEntered
+        if not game_states.apartmentEntered:
+            game_states.apartmentEntered = True
+            return game_states.apartmentEntered
     return False
 
 
@@ -189,6 +194,9 @@ def zwinger_open(_, nw_sock):
 
 
 event_map = {
+    '''
+    just as a template
+
     "self_check": {
         trigger_cmd: "self",
         trigger_msg: "check",
@@ -202,6 +210,7 @@ event_map = {
         event_script: call_video,
         event_next_qeued: "self_check_q1",
     },
+    '''
 
     "game_live": {
         pcf_out_add: [LightIO.pcfOut, BreakoutIO.pcfOut],
@@ -262,7 +271,7 @@ event_map = {
         pcf_in: LightIO.chinmeySolved,
         pcf_out_add: [LightIO.pcfOut, FuseIo.pcfOut, PowerIO.pcfOut],
         pcf_out: [LightIO.chimneyOverride, FuseIo.mcOpened, PowerIO.emporeOff],
-        event_next_qeued: "livingPower_offChimnneyOpend"
+        event_next_qeued: "livingPower_offChimneyOpened"
     },
 
     "water_solved": {
@@ -309,23 +318,23 @@ event_map = {
         pcf_out: [PowerIO.emporeOff],
         event_next_qeued: "livingPower_onMCBoot"
     },
-    "livingPower_onChimnneyOpend":{
+    "livingPower_onChimneyOpened": {
         pcf_out_add: [PowerIO.pcfOut],
         pcf_out: [PowerIO.livingOn],
         event_script: wait_for_chimney,
         event_next_qeued: "emporePower_on"
     },
-    "livingPower_offChimnneyOpend":{
+    "livingPower_offChimneyOpened": {
         pcf_out_add: [PowerIO.pcfOut],
         pcf_out: [PowerIO.livingOff],
-        event_next_qeued: "livingPower_onChimnneyOpend"
+        event_next_qeued: "livingPower_onChimneyOpened"
     },
     
     "livingPower_on": {
         pcf_out_add: [PowerIO.pcfOut],
         pcf_out: [PowerIO.livingOn],
     },
-    "livingPower_onAppartmentEnter": {
+    "livingPower_onApartmentEnter": {
         pcf_out_add: [PowerIO.pcfOut],
         pcf_out: [PowerIO.livingOn],
         event_script: wait_for_lightEffekt,
@@ -396,13 +405,13 @@ inverted_events = {
         event_condition: start_game_condition,
     },
 
-    "appartment_enter": {
+    "apartment_enter": {
         pcf_in_add: ArbiterIO.pcfIn,
         pcf_in: ArbiterIO.apartmentDoor,
         pcf_out_add: [LightIO.pcfOut],
         pcf_out: [LightIO.apartmentEnter],
-        event_condition: can_enter_appartment,
-        event_next_qeued: "livingPower_onAppartmentEnter"
+        event_condition: can_enter_apartment,
+        event_next_qeued: "livingPower_onapartmentEnter"
     },
 }
 

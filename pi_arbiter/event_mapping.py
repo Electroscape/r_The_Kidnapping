@@ -150,6 +150,7 @@ def set_live(_, nw_sock):
 def is_game_started(*args):
     return game_states.hasStarted
 
+
 def can_start_hallway(*args):
     if not game_states.hasStarted:
         return False
@@ -158,7 +159,6 @@ def can_start_hallway(*args):
         return game_states.hallway_started
     else:
         return False
-
 
 
 def can_enter_apartment(*args):
@@ -213,17 +213,11 @@ event_map = {
     '''
 
     "game_live": {
-        pcf_out_add: [LightIO.pcfOut, BreakoutIO.pcfOut],
-        pcf_out: [LightIO.gameReset, BreakoutIO.roomReset],
-        event_script: set_live,
-        event_next_qeued: "game_livePower"
+        pcf_out_add: [LightIO.pcfOut, BreakoutIO.pcfOut, PowerIO.pcfOut],
+        pcf_out: [LightIO.gameReset, BreakoutIO.roomReset, PowerIO.roomReset],
+        event_script: set_live
     },
 
-    "game_livePower": {
-        pcf_out_add: [PowerIO.pcfOut],
-        pcf_out: [PowerIO.roomReset],
-        event_delay: 0.5
-    },
 
     "service_enable": {
         pcf_out_add: [LightIO.pcfOut, PowerIO.pcfOut],
@@ -269,17 +263,16 @@ event_map = {
     "chimney_opening": {
         pcf_in_add: LightIO.pcfIn,
         pcf_in: LightIO.chinmeySolved,
-        pcf_out_add: [LightIO.pcfOut, FuseIo.pcfOut, PowerIO.pcfOut],
-        pcf_out: [LightIO.chimneyOverride, FuseIo.mcOpened, PowerIO.emporeOff],
-        event_next_qeued: "livingPower_offChimneyOpened"
+        pcf_out_add: [LightIO.pcfOut, FuseIo.pcfOut, PowerIO.pcfOut, PowerIO.pcfOut],
+        pcf_out: [LightIO.chimneyOverride, FuseIo.mcOpened, PowerIO.emporeOff, PowerIO.livingOff],
+        event_next_qeued: "livingPower_onChimneyOpened"
     },
 
     "water_solved": {
         pcf_in_add: WaterIO.pcfIn,
         pcf_in: WaterIO.uvActive,
-        pcf_out_add: [LightIO.pcfOut],
-        pcf_out: [LightIO.waterUV],
-        event_next_qeued: "emporePower_off",
+        pcf_out_add: [LightIO.pcfOut, PowerIO.pcfOut],
+        pcf_out: [LightIO.waterUV, PowerIO.emporeOff],
         event_script: zwinger_open
     },
 
@@ -292,10 +285,10 @@ event_map = {
     "fusebox_bootMC": {
         pcf_in_add: FuseIo.pcfIn,
         pcf_in: FuseIo.mcBoot,
-        pcf_out_add: [BreakoutIO.pcfOut, LightIO.pcfOut],
-        pcf_out: [BreakoutIO.mcBoot, LightIO.mcBoot],
-        event_next_qeued: "livingPower_offMCBoot",
-        event_script: mc_boot
+        pcf_out_add: [BreakoutIO.pcfOut, LightIO.pcfOut, PowerIO.pcfOut, PowerIO.pcfOut, PowerIO.pcfOut],
+        pcf_out: [BreakoutIO.mcBoot, LightIO.mcBoot, PowerIO.livingOff, PowerIO.raum2On, PowerIO.emporeOff],
+        event_script: mc_boot,
+        event_next_qeued: "livingPower_onMCBoot",
     },
 
     "breakout_solved": {
@@ -305,29 +298,11 @@ event_map = {
         pcf_out: [BreakoutIO.setSolved, LightIO.gameSolved, PowerIO.livingOff],
     },
 
-    "emporePower_on": {
-        pcf_out_add: [PowerIO.pcfOut],
-        pcf_out: [PowerIO.emporeOn],
-    },
-    "emporePower_off": {
-        pcf_out_add: [PowerIO.pcfOut],
-        pcf_out: [PowerIO.emporeOff],
-    },
-    "emporePower_offMCBoot": {
-        pcf_out_add: [PowerIO.pcfOut],
-        pcf_out: [PowerIO.emporeOff],
-        event_next_qeued: "livingPower_onMCBoot"
-    },
     "livingPower_onChimneyOpened": {
         pcf_out_add: [PowerIO.pcfOut],
         pcf_out: [PowerIO.livingOn],
         event_script: wait_for_chimney,
         event_next_qeued: "emporePower_on"
-    },
-    "livingPower_offChimneyOpened": {
-        pcf_out_add: [PowerIO.pcfOut],
-        pcf_out: [PowerIO.livingOff],
-        event_next_qeued: "livingPower_onChimneyOpened"
     },
     
     "livingPower_on": {
@@ -341,22 +316,11 @@ event_map = {
         event_next_qeued: "emporePower_on"
     },
     "livingPower_onMCBoot": {
-        pcf_out_add: [PowerIO.pcfOut],
-        pcf_out: [PowerIO.livingOn],
+        pcf_out_add: [PowerIO.pcfOut, PowerIO.pcfOut],
+        pcf_out: [PowerIO.livingOn, PowerIO.livingOn],
         event_script: wait_for_lightEffekt2,
         event_next_qeued: "emporePower_on"
     },
-    "livingPower_offMCBoot": {
-        pcf_out_add: [PowerIO.pcfOut],
-        pcf_out: [PowerIO.livingOff],
-        event_next_qeued: "power_room2_on",
-    },
-    "power_room2_on": {
-        pcf_out_add: [PowerIO.pcfOut],
-        pcf_out: [PowerIO.raum2On],
-        event_next_qeued: "emporePower_offMCBoot"
-    },
-    
     "livingPower_off": {
         pcf_out_add: [PowerIO.pcfOut],
         pcf_out: [PowerIO.livingOff],
@@ -380,15 +344,15 @@ event_map = {
 }
 
 
-def setup_default_callbacks(list):
-    for event_key in list.keys():
-        event_data = list[event_key]
+def setup_default_callbacks(_list):
+    for event_key in _list.keys():
+        event_data = _list[event_key]
 
         if not (event_data.get(trigger_msg, False) and event_data.get(trigger_cmd, False)):
             triggers = re.split("_", event_key)
             if len(triggers) == 2:
-                list[event_key][trigger_cmd] = triggers[0]
-                list[event_key][trigger_msg] = triggers[1]
+                _list[event_key][trigger_cmd] = triggers[0]
+                _list[event_key][trigger_msg] = triggers[1]
 
 
 setup_default_callbacks(event_map)

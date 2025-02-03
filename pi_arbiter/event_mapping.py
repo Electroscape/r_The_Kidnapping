@@ -127,17 +127,6 @@ class GameStatus:
 game_states = GameStatus()
 
 
-def wait_for_lightEffekt(*args):
-    time.sleep(20)
-    
-
-def wait_for_lightEffekt2(*args):
-    time.sleep(15)
-
-
-def wait_for_chimney(*args):
-    time.sleep(13)
-
 
 def set_live(_, nw_sock):
     game_states.gameLive = True
@@ -299,10 +288,9 @@ event_map = {
     },
 
     "livingPower_onChimneyOpened": {
-        pcf_out_add: [PowerIO.pcfOut],
-        pcf_out: [PowerIO.livingOn],
-        event_script: wait_for_chimney,
-        event_next_qeued: "emporePower_on"
+        pcf_out_add: [PowerIO.pcfOut, PowerIO.pcfOut],
+        pcf_out: [PowerIO.livingOn, PowerIO.emporeOn],
+        event_delay: 13
     },
     
     "livingPower_on": {
@@ -310,16 +298,14 @@ event_map = {
         pcf_out: [PowerIO.livingOn],
     },
     "livingPower_onApartmentEnter": {
-        pcf_out_add: [PowerIO.pcfOut],
-        pcf_out: [PowerIO.livingOn],
-        event_script: wait_for_lightEffekt,
-        event_next_qeued: "emporePower_on"
+        pcf_out_add: [PowerIO.pcfOut, PowerIO.pcfOut],
+        pcf_out: [PowerIO.livingOn, PowerIO.emporeOn],
+        event_delay: 20
     },
     "livingPower_onMCBoot": {
         pcf_out_add: [PowerIO.pcfOut, PowerIO.pcfOut],
-        pcf_out: [PowerIO.livingOn, PowerIO.livingOn],
-        event_script: wait_for_lightEffekt2,
-        event_next_qeued: "emporePower_on"
+        pcf_out: [PowerIO.livingOn, PowerIO.emporeOn],
+        event_delay: 15
     },
     "livingPower_off": {
         pcf_out_add: [PowerIO.pcfOut],

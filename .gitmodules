@@ -1,3 +1,6 @@
 [submodule "pi_arbiter/communication"]
 	path = pi_arbiter/communication
 	url = https://github.com/MartinPek/Simple-Socket
+[submodule "pi_windows/communication"]
+	path = pi_windows/communication
+	url = https://github.com/MartinPek/Simple-Socket

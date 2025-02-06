@@ -30,6 +30,7 @@ IO = ArbiterIO()
 sio = socketio.Client()
 cooldowns = CooldownHandler()
 nw_sock = None
+tv_sock_server = None
 
 gpio_thread = None
 # used to prevent multiple boots
@@ -46,7 +47,6 @@ now = dt.now()
 log_name = now.strftime("eventlogs/Arbiter events %m_%d_%Y  %H_%M_%S.log")
 logging.basicConfig(filename=log_name, level=logging.INFO,
                     format=f'%(asctime)s %(levelname)s : %(message)s')
-
 
 
 def get_cfg():
@@ -310,6 +310,14 @@ def init_socket(settings):
         return
     except KeyError:
         pass
+
+    global tv_sock_server
+    try:
+        tv_port = settings["tv_server"]["port"]
+        tv_sock_server = TESocketServer(tv_port)
+    except KeyError:
+        pass
+
 
 if __name__ == '__main__':
     cfg = get_cfg()

@@ -7,8 +7,6 @@ from arbiter_config import arbiter_address_config
 
 # @TODO: make input vs output pcf list/defenition, just a variable now
 
-# @TODO: make input vs output pcf list/defenition, just a variable now
-
 
 class ArbiterIO:
     def __init__(self):

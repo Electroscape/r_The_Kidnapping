@@ -93,7 +93,7 @@ def trigger_event(event_key, event_value=None):
             pcf = pcf_no[index]
             pcf_value_dict[pcf] = pcf_value_dict.get(pcf, 0) + values[index]
             reset_gpios_dicts.update({pcf_no[index]: dt.now() + reset_delta})
-        for pcf, value in pcf_value_dict:
+        for pcf, value in pcf_value_dict.items():
             IO.write_pcf(pcf, value)
     except KeyError as err:
         print(err)

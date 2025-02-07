@@ -361,7 +361,7 @@ inverted_events = {
         pcf_out_add: [LightIO.pcfOut],
         pcf_out: [LightIO.apartmentEnter],
         event_condition: can_enter_apartment,
-        event_next_qeued: "livingPower_onapartmentEnter"
+        event_next_qeued: "livingPower_onApartmentEnter"
     },
 }
 

@@ -6,7 +6,6 @@ import pygame
 from pygame.locals import *
 import RPi.GPIO as GPIO
 from time import sleep
-# from server import *
 import subprocess
 from threading import Thread
 from pathlib import Path
@@ -18,6 +17,7 @@ print(f"root path of the script: {root_path}")
 sound_path = root_path.joinpath("sounds")
 
 os.environ["SDL_VIDEODRIVER"] = "dummy"
+GPIO.setmode(GPIO.BOARD)
 
 
 logging.basicConfig(
@@ -26,6 +26,21 @@ logging.basicConfig(
     format="{asctime} {levelname:<8} {message}",
     style='{'
 )
+
+config = None
+
+
+class Settings:
+    def __init__(self, cfg, location):
+        try:
+            numbers = cfg["numbers"]
+            path = cfg["PATH"]
+            language = "deu/"
+            GPIO.setup(cfg["PIN"][location]["PHONE_switch_pin"], GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+        except KeyError as er:
+            exit(er)
+
 
 logging.info("This is a test log.")
 argparser = argparse.ArgumentParser(
@@ -37,17 +52,6 @@ argparser.add_argument(
     default='st',
     help='name of the city: [hh / st]'
 )
-
-city = argparser.parse_args().city
-
-with open('src/config.json', 'r') as config_file:
-    config = json.load(config_file)
-    logging.info("the config file is read correctly")
-
-
-
-GPIO.setmode(GPIO.BOARD)
-GPIO.setup(config["PIN"][city]["PHONE_switch_pin"], GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 
 def init_pygame():
@@ -113,7 +117,7 @@ def play_sound(path, do_exit=False):
 def checkNumber(Number):
      print("checkNumber")
      sleep(0.5)
-     if Number in contacts:
+     if Number in cfg.contacts:
           play_sound(config['PATH']['sounds'] + language + contacts[Number] + ".wav")
      else:
           play_sound(config['PATH']['sounds'] + "dialedWrongNumber.wav", True)
@@ -153,7 +157,13 @@ def reset_dialing():
     return
 
 
-def runSystem():
+def get_cfg():
+    location = argparser.parse_args().city
+    with open('src/config.json', 'r') as config_file:
+        return Settings(json.load(config_file), location)
+
+
+def run_system():
 
     language = "deu/"
     global Number
@@ -216,13 +226,16 @@ def runSystem():
              
 def main():
     try:
+        global config
+        config = get_cfg()
         init_pygame()
-        runSystem()
+        run_system()
     except Exception as exp:
         logging.error(f"Pygame initialization error: {exp}")
         print(f"Pygame initialization error: {exp}")
         print(exp)
     sleep(5)
-     
+
+
 if __name__ == '__main__':  
      main()

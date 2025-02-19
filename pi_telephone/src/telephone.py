@@ -30,16 +30,100 @@ logging.basicConfig(
 config = None
 
 
-class Settings:
+class Telephone:
     def __init__(self, cfg, location):
+        self.__init_pygame()
         try:
-            numbers = cfg["numbers"]
-            path = cfg["PATH"]
-            language = "deu/"
-            GPIO.setup(cfg["PIN"][location]["PHONE_switch_pin"], GPIO.IN, pull_up_down=GPIO.PUD_UP)
+            self.contacts = cfg["contacts"]
+            self.sound_path = cfg["PATH"]["sounds"]
+            self.language = "deu/"
+            # self.location = location
+            self.phone_pin = cfg["PIN"][location]["PHONE_switch_pin"]
+            GPIO.setup(self.phone_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
         except KeyError as er:
             exit(er)
+        self.number_dialed = ""
+        self.max_digits = 12
+
+    @staticmethod
+    def __init_pygame():
+        pygame.init()
+        screen = pygame.display.set_mode((800, 600))  # Virtual screen
+        pygame.mixer.set_num_channels(8)
+
+        pygame.mixer.music.load(sound_path.joinpath("013_freizeichen_30min.wav"))
+        pygame.mixer.music.play(-1, 0.0)
+        # number must be smaller than 1
+        pygame.mixer.music.set_volume(1.0)
+        pygame.mixer.music.pause()
+
+    def set_sound(self):
+        effect = pygame.mixer.Sound(self.sound_path)
+        empty_channel = pygame.mixer.Channel(1)
+        empty_channel.play(effect)
+        return effect.get_length()
+
+    def play_sound(self, do_exit=False):
+        self.pause_current_sound()
+        logging.info(f"Playing voice record {self.sound_path}")
+        duration = self.set_sound()
+        start_time = dt.now()
+        while pygame.mixer.music.get_busy() and (start_time - dt.now()).seconds < duration:
+            if GPIO.input() == GPIO.HIGH:
+                self.pause_current_sound()
+                return
+            else:
+                continue
+
+    @staticmethod
+    def pause_current_sound():
+        logging.info("Pausing current sound")
+        pygame.mixer.music.pause()
+        empty_channel = pygame.mixer.Channel(1)
+        empty_channel.stop()
+
+    def check_number(self):
+        print("checkNumber")
+        sleep(0.5)
+
+        sound_file = self.contacts.get(self.number_dialed, False)
+        if sound_file:
+
+            self.play_sound(self.sound_path.joinpath(self.language + sound_file))
+
+        else:
+            self.play_sound(self.sound_path.joinpath("dialedWrongNumber.wav"), do_exit=True)
+
+    def reset_dialing(self):
+        self.number_dialed = ""
+
+    def digit_dialed(self, event):
+        print(f"keyevent: {event} with eventkey {event.key}")
+        self.pause_current_sound()
+        empty_channel = pygame.mixer.Channel(1)
+
+        # key 48 is 0, 49 and so on, so ....
+        digit = event.key - 48
+        if digit > 9 or digit < 0:
+            print(f"unkown eventkey received: {event.key}")
+            return
+
+        self.number_dialed += f"{digit}"
+
+        try:
+            effect = pygame.mixer.Sound(sound_path.joinpath(f"{digit}.wav"))
+        except Exception as exp:
+            print(exp)
+            return
+        # @todo: maybe remove the checkNumber depending on the wanted use of the #/OK key but return has to stay
+
+        print("number dialed is " + Number)
+
+        # @Todo: send number update on socket/website
+        empty_channel.play(effect)
+        pygame.time.delay(100)
+
 
 
 logging.info("This is a test log.")
@@ -54,109 +138,6 @@ argparser.add_argument(
 )
 
 
-def init_pygame():
-    pygame.init()
-    screen = pygame.display.set_mode((800, 600))  # Virtual screen
-    pygame.mixer.set_num_channels(8)
-
-    pygame.mixer.music.load(sound_path.joinpath("013_freizeichen_30min.wav"))
-    pygame.mixer.music.play(-1, 0.0)
-    # number must be smaller than 1
-    pygame.mixer.music.set_volume(1.0)
-    pygame.mixer.music.pause()
-
-
-maxNumberOfDigits = 12
-Number = ""
-
-contacts = {
-     "90011123": "Accomplice",
-     "071101232267": "Albrecht",
-     "86753489": "TaxiGerst"
-}
-
-
-def restartRaspberryPi():
-    command = "sudo reboot"
-    process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
-    process.communicate()[0]
-
-
-
-def set_sound(path):
-    """
-    :param path:
-    :return duration:
-    """
-    effect = pygame.mixer.Sound(path)
-    empty_channel = pygame.mixer.Channel(1)
-    empty_channel.play(effect)
-    return effect.get_length()
-
-
-def pauseCurrentSound():
-     logging.info("Pausing current sound")
-     pygame.mixer.music.pause()
-     empty_channel = pygame.mixer.Channel(1)
-     empty_channel.stop()
-
-
-def play_sound(path, do_exit=False):
-     pauseCurrentSound()
-     logging.info(f"Playing voice record {path}")
-     duration = playSound(path)
-     start_time = dt.now()
-     while pygame.mixer.music.get_busy() and (start_time - dt.now).seconds < duration :
-          if GPIO.input(config["PIN"][city]["PHONE_switch_pin"]) == GPIO.HIGH:
-               pauseCurrentSound()
-               return
-          else:
-               continue
-
-
-def checkNumber(Number):
-     print("checkNumber")
-     sleep(0.5)
-     if Number in cfg.contacts:
-          play_sound(config['PATH']['sounds'] + language + contacts[Number] + ".wav")
-     else:
-          play_sound(config['PATH']['sounds'] + "dialedWrongNumber.wav", True)
-
-
-def checkCorrectDigit(event):
-     print("in")
-     s = Initialize_socket()
-     global Number
-     pauseCurrentSound()
-     empty_channel = pygame.mixer.Channel(1)
-
-     # key 48 is 0, 49 and so on, so ....
-     digit = event.key - 48
-     if 9 > digit > 0:
-        try:
-            effect = pygame.mixer.Sound(config['PATH']['sounds'] + f"{digit}.wav")
-        except:
-            pass
-     else:
-          # @todo: maybe remove the checkNumber depending on the wanted use of the #/OK key but return has to stay
-          # checkNumber(Number)
-          return
-     
-     logging.info("number dialed is " + Number)
-
-     try:
-          s.send(str.encode(Number))
-     except Exception as exp:
-          logging.info("No. is dialed without opening the GM option")
-
-     empty_channel.play(effect)
-     pygame.time.delay(100)
-
-
-def reset_dialing():
-    return
-
-
 def get_cfg():
     location = argparser.parse_args().city
     with open('src/config.json', 'r') as config_file:
@@ -165,7 +146,6 @@ def get_cfg():
 
 def run_system():
 
-    language = "deu/"
     global Number
 
     logging.info("Telephone now is running")
@@ -187,7 +167,7 @@ def run_system():
                     lastKeypress = 0
                     keyPressedAtleastOnce = False
                     logging.info("Player didn't press a button for 5s nor completed 12 digits")
-                    pauseCurrentSound()
+                    pause_current_sound()
                     play_sound(config['PATH']['sounds'] + "dialedWrongNumber.wav")
                     pygame.event.clear()  # clear any button pressed after 12 digits
 
@@ -195,7 +175,7 @@ def run_system():
                     lastKeypress = 0
                     keyPressedAtleastOnce = False
                     logging.info("Player reached maximum digits")
-                    pauseCurrentSound()
+                    pause_current_sound()
                     play_sound(config['PATH']['sounds'] + "dialedWrongNumber.wav")
                     pygame.event.clear()
 

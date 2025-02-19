@@ -1,8 +1,8 @@
 {
-    "numbers": {
-        "90011123": "Accomplice",
-        "071101232267": "Albrecht",
-        "86753489": "TaxiGerst"
+    "contacts": {
+        "90011123": "Accomplice.wav",
+        "071101232267": "Albrecht.wav",
+        "86753489": "TaxiGerst.wa"
     },
     "PATH": {
         "sounds": "sounds/"

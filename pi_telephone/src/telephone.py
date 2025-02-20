@@ -9,7 +9,7 @@ from time import sleep
 import subprocess
 from threading import Thread
 from pathlib import Path
-from datetime import datetime as dt
+from datetime import datetime as dt, timedelta
 
 print(f"Current working directory of the script: {os.path.realpath(os.path.dirname(__file__))}")
 root_path = Path(os.getcwd())
@@ -29,22 +29,47 @@ logging.basicConfig(
 
 config = None
 
+logging.info("This is a test log.")
+argparser = argparse.ArgumentParser(
+    description='Telephone')
+
+argparser.add_argument(
+    '-c',
+    '--city',
+    default='st',
+    help='name of the city: [hh / st]'
+)
+location = argparser.parse_args().city
+
 
 class Telephone:
-    def __init__(self, cfg, location):
+    def __init__(self, _location):
+        cfg = self.__get_cfg()
         self.__init_pygame()
         try:
             self.contacts = cfg["contacts"]
             self.sound_path = cfg["PATH"]["sounds"]
             self.language = "deu/"
-            # self.location = location
-            self.phone_pin = cfg["PIN"][location]["PHONE_switch_pin"]
+            self.location = _location
+            self.phone_pin = cfg["PIN"][_location]["PHONE_switch_pin"]
             GPIO.setup(self.phone_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+            self.last_keypress = dt.now()
+            self.loop = Thread(target=self.main_loop())
+            self.loop.start()
 
         except KeyError as er:
             exit(er)
         self.number_dialed = ""
         self.max_digits = 12
+
+    @staticmethod
+    def __get_cfg():
+        try:
+            with open('src/config.json', 'r') as config_file:
+                return json.load(config_file)
+        except (FileNotFoundError, ValueError) as err:
+            logging.error(f"failed to fetch config file {err}")
+            exit(f"failed to fetch config file {err}")
 
     @staticmethod
     def __init_pygame():
@@ -118,103 +143,35 @@ class Telephone:
             return
         # @todo: maybe remove the checkNumber depending on the wanted use of the #/OK key but return has to stay
 
-        print("number dialed is " + Number)
+        print("number dialed is " + self.number_dialed)
 
         # @Todo: send number update on socket/website
         empty_channel.play(effect)
         pygame.time.delay(100)
 
+    def main_loop(self):
+        while True:
+            # phone put down, resetting
+            if GPIO.input(self.phone_pin) == GPIO.High:
+                self.number_dialed = ""
+                pygame.mixer.music.pause()  # pause beep sound
+                pygame.event.clear()  # clear any button pressed after 10 digits
+                continue
+
+            event = pygame.event.poll()
+            if event.type == pygame.KEYDOWN:
+                self.digit_dialed(event)
+
+            if not self.number_dialed:
+                pygame.mixer.music.unpause()
+            elif (self.last_keypress - dt.now()).total_seconds() > 0.5:
+                self.check_number()
 
 
-logging.info("This is a test log.")
-argparser = argparse.ArgumentParser(
-    description='Telephone')
-
-argparser.add_argument(
-    '-c',
-    '--city',
-    default='st',
-    help='name of the city: [hh / st]'
-)
-
-
-def get_cfg():
-    location = argparser.parse_args().city
-    with open('src/config.json', 'r') as config_file:
-        return Settings(json.load(config_file), location)
-
-
-def run_system():
-
-    global Number
-
-    logging.info("Telephone now is running")
-    lastKeypress = dt.now()
-    # a flag to check that the key is pressed once
-    # @TODO: replace this ... maybe simply a check if a number has been entered
-    keyPressedAtleastOnce = False
-
-    # @TODO: add the socketserver submodule
-
-    while True:
-
-          # if the player takes the call unpause the beep sound and check the dialed number
-          if GPIO.input(config["PIN"][city]["PHONE_switch_pin"]) == GPIO.LOW:
-               if not keyPressedAtleastOnce:
-                    pygame.mixer.music.unpause()
-
-               elif len(Number) < maxNumberOfDigits and lastKeypress == 500:
-                    lastKeypress = 0
-                    keyPressedAtleastOnce = False
-                    logging.info("Player didn't press a button for 5s nor completed 12 digits")
-                    pause_current_sound()
-                    play_sound(config['PATH']['sounds'] + "dialedWrongNumber.wav")
-                    pygame.event.clear()  # clear any button pressed after 12 digits
-
-               elif len(Number) >= maxNumberOfDigits:
-                    lastKeypress = 0
-                    keyPressedAtleastOnce = False
-                    logging.info("Player reached maximum digits")
-                    pause_current_sound()
-                    play_sound(config['PATH']['sounds'] + "dialedWrongNumber.wav")
-                    pygame.event.clear()
-
-               # keep on returning button state
-
-               event = pygame.event.poll()
-               # checking if a player didn't press
-               # a button after 5s from pressing any button
-               if keyPressedAtleastOnce:
-                    if   event.type == pygame.KEYDOWN:
-                         keyPressedAtleastOnce = False
-                         lastKeypress = 0
-                    else :
-                         sleep(0.01)
-                         lastKeypress = lastKeypress + 1
-               if event.type == pygame.KEYDOWN:
-                    keyPressedAtleastOnce = True
-                    lastKeypress = 0
-                    checkCorrectDigit(event)
-               else:
-                    pass
-          else:
-               keyPressedAtleastOnce = False  # reset flag of pressing the button at least once
-               pygame.mixer.music.pause()  # pause beep sound
-               Number = ""  # reset dialed number
-               pygame.event.clear()  # clear any button pressed after 10 digits
-
-             
 def main():
-    try:
-        global config
-        config = get_cfg()
-        init_pygame()
-        run_system()
-    except Exception as exp:
-        logging.error(f"Pygame initialization error: {exp}")
-        print(f"Pygame initialization error: {exp}")
-        print(exp)
-    sleep(5)
+    phone = Telephone(location)
+    while True:
+        print("idk do website things")
 
 
 if __name__ == '__main__':  

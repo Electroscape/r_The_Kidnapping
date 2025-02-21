@@ -83,7 +83,7 @@ class FuseIo(IntEnum):
 
 
 class WaterIO(IntEnum):
-    pcfIn = 4   # 0x39 binary
+    pcfIn = 4   # 0x3C binary
     uvActive = 1 << 2
 
 

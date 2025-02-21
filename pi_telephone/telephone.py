@@ -4,7 +4,10 @@ import logging
 import os
 import pygame
 from pygame.locals import *
-import RPi.GPIO as GPIO
+try:
+    import RPi.GPIO as GPIO
+except ImportError:
+    import Mock.GPIO as GPIO
 from time import sleep
 import subprocess
 from threading import Thread
@@ -46,6 +49,9 @@ class Telephone:
     def __init__(self, _location):
         cfg = self.__get_cfg()
         self.__init_pygame()
+        self.number_dialed = ""
+        self.max_digits = 12
+
         try:
             self.contacts = cfg["contacts"]
             self.sound_path = cfg["PATH"]["sounds"]
@@ -59,13 +65,11 @@ class Telephone:
 
         except KeyError as er:
             exit(er)
-        self.number_dialed = ""
-        self.max_digits = 12
 
     @staticmethod
     def __get_cfg():
         try:
-            with open('src/config.json', 'r') as config_file:
+            with open('config.json', 'r') as config_file:
                 return json.load(config_file)
         except (FileNotFoundError, ValueError) as err:
             logging.error(f"failed to fetch config file {err}")
@@ -95,7 +99,7 @@ class Telephone:
         duration = self.set_sound()
         start_time = dt.now()
         while pygame.mixer.music.get_busy() and (start_time - dt.now()).seconds < duration:
-            if GPIO.input() == GPIO.HIGH:
+            if GPIO.input(self.phone_pin):
                 self.pause_current_sound()
                 return
             else:
@@ -129,6 +133,7 @@ class Telephone:
         empty_channel = pygame.mixer.Channel(1)
 
         # key 48 is 0, 49 and so on, so ....
+        # technically things like pygame.K_1 is available, just kept it similar
         digit = event.key - 48
         if digit > 9 or digit < 0:
             print(f"unkown eventkey received: {event.key}")
@@ -152,7 +157,7 @@ class Telephone:
     def main_loop(self):
         while True:
             # phone put down, resetting
-            if GPIO.input(self.phone_pin) == GPIO.High:
+            if GPIO.input(self.phone_pin):
                 self.number_dialed = ""
                 pygame.mixer.music.pause()  # pause beep sound
                 pygame.event.clear()  # clear any button pressed after 10 digits

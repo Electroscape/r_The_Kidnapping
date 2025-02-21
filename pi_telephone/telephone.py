@@ -19,7 +19,9 @@ root_path = Path(os.getcwd())
 print(f"root path of the script: {root_path}")
 sound_path = root_path.joinpath("sounds")
 
-os.environ["SDL_VIDEODRIVER"] = "dummy"
+# os.environ["SDL_VIDEODRIVER"] = "dummy"
+os.environ["SDL_VIDEODRIVER"] = "x11"
+
 GPIO.setmode(GPIO.BOARD)
 
 
@@ -50,6 +52,7 @@ class Telephone:
         cfg = self.__get_cfg()
         self.__init_pygame()
         self.number_dialed = ""
+        # currently not used, but hard to see
         self.max_digits = 12
 
         try:
@@ -57,10 +60,11 @@ class Telephone:
             self.sound_path = cfg["PATH"]["sounds"]
             self.language = "deu/"
             self.location = _location
+            # set to board, board 12 is GPIO 18
             self.phone_pin = cfg["PIN"][_location]["PHONE_switch_pin"]
             GPIO.setup(self.phone_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
             self.last_keypress = dt.now()
-            self.loop = Thread(target=self.main_loop())
+            self.loop = Thread(target=self.main_loop, daemon=True)
             self.loop.start()
 
         except KeyError as er:
@@ -155,17 +159,20 @@ class Telephone:
         pygame.time.delay(100)
 
     def main_loop(self):
+        logging.info("mainloop")
+
         while True:
             # phone put down, resetting
-            if GPIO.input(self.phone_pin):
+            if not GPIO.input(self.phone_pin):
                 self.number_dialed = ""
                 pygame.mixer.music.pause()  # pause beep sound
                 pygame.event.clear()  # clear any button pressed after 10 digits
                 continue
 
-            event = pygame.event.poll()
-            if event.type == pygame.KEYDOWN:
-                self.digit_dialed(event)
+            for event in pygame.event.get():  # Get all events instead of polling once
+                if event.type == pygame.KEYDOWN:
+                    logging.info(f"Key pressed: {event.key}")
+                    self.digit_dialed(event)
 
             if not self.number_dialed:
                 pygame.mixer.music.unpause()
@@ -175,6 +182,7 @@ class Telephone:
 
 def main():
     phone = Telephone(location)
+    logging.info("running")
     while True:
         print("idk do website things")
 

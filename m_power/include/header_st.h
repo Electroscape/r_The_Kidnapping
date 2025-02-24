@@ -1,7 +1,7 @@
 #pragma once
 
-#define open      0
-#define closed      1
+#define relayOn     0
+#define relayOff     1
 
 enum IOpins {
     IO_1,
@@ -55,10 +55,10 @@ enum relays {
 };
 
 enum relayInits {
-    empore_init = open,
-    living_init = open,
-    room2_init = open,
-    service_init = open,
+    empore_init = relayOff,
+    living_init = relayOff,
+    room2_init = relayOff,
+    service_init = relayOff,
 };
 
 int relayPinArray[relayAmount] = {

@@ -37,46 +37,49 @@ void handleInputs() {
 
     switch (result) {
         case inputValues::roomReset:
-            Mother.motherRelay.digitalWrite(relays::empore, closed);
-            Mother.motherRelay.digitalWrite(relays::living, closed);
-            Mother.motherRelay.digitalWrite(relays::room2, closed);
-            Mother.motherRelay.digitalWrite(relays::service, closed);
+            Mother.motherRelay.digitalWrite(relays::empore, relayOff);
+            Mother.motherRelay.digitalWrite(relays::living, relayOff);
+            Mother.motherRelay.digitalWrite(relays::room2, relayOff);
+            Mother.motherRelay.digitalWrite(relays::service, relayOff);
         break;
         case inputValues::livingOn:
-            Mother.motherRelay.digitalWrite(relays::living, open);
+            Mother.motherRelay.digitalWrite(relays::living, relayOn);
         break;
         case inputValues::livingOff:
-            Mother.motherRelay.digitalWrite(relays::living, closed);
+            Mother.motherRelay.digitalWrite(relays::living, relayOff);
         break;
         case inputValues::emporeOn:
-            Mother.motherRelay.digitalWrite(relays::empore, open);
+            Mother.motherRelay.digitalWrite(relays::empore, relayOn);
         break;
         case inputValues::empporeOff:
-            Mother.motherRelay.digitalWrite(relays::empore, closed);
+            Mother.motherRelay.digitalWrite(relays::empore, relayOff);
         break;
         case inputValues::room2On:
-            Mother.motherRelay.digitalWrite(relays::room2, open);
+            Mother.motherRelay.digitalWrite(relays::room2, relayOn);
         break;
         case inputValues::room2Off:
-            Mother.motherRelay.digitalWrite(relays::room2, closed);
+            Mother.motherRelay.digitalWrite(relays::room2, relayOff);
         break;
         case inputValues::chimneyOpening:
-            Mother.motherRelay.digitalWrite(relays::empore, closed);
-            Mother.motherRelay.digitalWrite(relays::living, closed);
+            Mother.motherRelay.digitalWrite(relays::empore, relayOff);
+            Mother.motherRelay.digitalWrite(relays::living, relayOff);
             wdt_disable();
             delay(10000);
             enableWdt();
-            Mother.motherRelay.digitalWrite(relays::empore, open);
-            Mother.motherRelay.digitalWrite(relays::living, open);
+            Mother.motherRelay.digitalWrite(relays::empore, relayOn);
+            Mother.motherRelay.digitalWrite(relays::living, relayOn);
         break;
         case inputValues::serviceOn:
-            Mother.motherRelay.digitalWrite(relays::service, open);
-            Mother.motherRelay.digitalWrite(relays::empore, open);
-            Mother.motherRelay.digitalWrite(relays::living, open);
-            Mother.motherRelay.digitalWrite(relays::room2, open);
+            Mother.motherRelay.digitalWrite(relays::service, relayOn);
+            Mother.motherRelay.digitalWrite(relays::empore, relayOn);
+            Mother.motherRelay.digitalWrite(relays::living, relayOn);
+            Mother.motherRelay.digitalWrite(relays::room2, relayOn);
         break;
         case inputValues::serviceOff:
-            Mother.motherRelay.digitalWrite(relays::service, closed);
+            Mother.motherRelay.digitalWrite(relays::service, relayOff);
+            Mother.motherRelay.digitalWrite(relays::empore, relayOff);
+            Mother.motherRelay.digitalWrite(relays::living, relayOff);
+            Mother.motherRelay.digitalWrite(relays::room2, relayOff);
         break;
     }
 

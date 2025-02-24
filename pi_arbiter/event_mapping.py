@@ -83,7 +83,7 @@ class FuseIo(IntEnum):
 
 
 class WaterIO(IntEnum):
-    pcfIn = 4   # 0x3C binary
+    pcfIn = 4   # 0x39 binary
     uvActive = 1 << 2
 
 
@@ -181,32 +181,31 @@ def mc_boot(_, nw_sock, *args):
 def zwinger_open(_, nw_sock, *args):
     nw_sock.transmit("zwinger")
 
+'''
+just as a template event
+
+"self_check": {
+    trigger_cmd: "self",
+    trigger_msg: "check",
+    pcf_out_add: [0],
+    pcf_out: [0],
+    fe_cb: {
+        fe_cb_tgt: "tr1",
+        fe_cb_cmd: "usbBoot",
+        fe_cb_msg: "boot"
+    },
+    event_script: call_video,
+    event_next_qeued: "self_check_q1",
+},
+'''
+
 
 event_map = {
-    '''
-    just as a template
-
-    "self_check": {
-        trigger_cmd: "self",
-        trigger_msg: "check",
-        pcf_out_add: [0],
-        pcf_out: [0],
-        fe_cb: {
-            fe_cb_tgt: "tr1",
-            fe_cb_cmd: "usbBoot",
-            fe_cb_msg: "boot"
-        },
-        event_script: call_video,
-        event_next_qeued: "self_check_q1",
-    },
-    '''
-
     "game_live": {
         pcf_out_add: [LightIO.pcfOut, BreakoutIO.pcfOut, PowerIO.pcfOut],
         pcf_out: [LightIO.gameReset, BreakoutIO.roomReset, PowerIO.roomReset],
         event_script: set_live
     },
-
 
     "service_enable": {
         pcf_out_add: [LightIO.pcfOut, PowerIO.pcfOut],

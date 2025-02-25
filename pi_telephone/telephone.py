@@ -13,8 +13,12 @@ import subprocess
 from threading import Thread
 from pathlib import Path
 from datetime import datetime as dt, timedelta
+from flask import Flask, render_template, request, jsonify
+from flask_socketio import SocketIO, emit
 
-print(f"Current working directory of the script: {os.path.realpath(os.path.dirname(__file__))}")
+app = Flask(__name__)
+socketio = SocketIO(app, cors_allowed_origins="*")
+
 root_path = Path(os.getcwd())
 print(f"root path of the script: {root_path}")
 sound_path = root_path.joinpath("sounds")
@@ -33,8 +37,8 @@ logging.basicConfig(
 )
 
 config = None
-
-logging.info("This is a test log.")
+argparser = argparse.ArgumentParser(description='Telephone')
+argparser.add_argument('-c', '--city', default='st', help='name of the city: [hh / st]')
 argparser = argparse.ArgumentParser(
     description='Telephone')
 
@@ -90,6 +94,7 @@ class Telephone:
         # number must be smaller than 1
         pygame.mixer.music.set_volume(1.0)
         pygame.mixer.music.pause()
+        logging.info("pygame init done")
 
     def set_sound(self):
         effect = pygame.mixer.Sound(self.sound_path)
@@ -108,6 +113,12 @@ class Telephone:
                 return
             else:
                 continue
+
+    def set_german(self, is_german):
+        if is_german:
+            self.language = "/deu"
+        else:
+            self.language = "/eng"
 
     @staticmethod
     def pause_current_sound():
@@ -144,6 +155,7 @@ class Telephone:
             return
 
         self.number_dialed += f"{digit}"
+        send_number(self.number_dialed)
 
         try:
             effect = pygame.mixer.Sound(sound_path.joinpath(f"{digit}.wav"))
@@ -179,13 +191,31 @@ class Telephone:
             elif (self.last_keypress - dt.now()).total_seconds() > 0.5:
                 self.check_number()
 
+@app.route("/set-language", methods=["POST"])
+def set_language():
+    global selected_language
+    data = request.get_json()
+    if "language" in data:
+        selected_language = data["language"]
+        phone.set_german(selected_language == "de")
+        print(f"Language changed to: {selected_language}")
+        return jsonify({"message": "Language updated", "language": selected_language}), 200
+    return jsonify({"error": "Invalid request"}), 400
+
+def send_number(number):
+    print(f"Emitting number: {number}")
+    socketio.emit("update_number", number)
+
+# Web route to render the frontend
+@app.route("/", methods=["GET", "POST"])
+def index():
+    return render_template("index.html")
 
 def main():
+    global phone
     phone = Telephone(location)
-    logging.info("running")
-    while True:
-        print("idk do website things")
+    logging.info("Telephone app is running")
+    socketio.run(app, debug=True, host='0.0.0.0', port=5500)
 
-
-if __name__ == '__main__':  
-     main()
+if __name__ == '__main__':
+    main()

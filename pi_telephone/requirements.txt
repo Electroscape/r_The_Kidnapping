@@ -1,2 +1,4 @@
 pygame
 RPi.GPIO
+python-socketio==5.8.0
+flask-socketio==5.3.3

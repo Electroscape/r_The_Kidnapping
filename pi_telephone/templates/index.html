@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telephone Interface</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        #dialed-number {
+            font-size: 24px;
+            margin-top: 20px;
+        }
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Telephone Interface</h1>
+    <div id="dialed-number">Dialed Number: <span id="number-display">---</span></div>
+
+    <h2>Select Language</h2>
+    <button onclick="changeLanguage('de')">🇩🇪 German</button>
+    <button onclick="changeLanguage('en')">🇺🇸 English</button>
+
+    <script>
+        // Connect to Socket.IO server
+        const socket = io.connect('http://' + document.domain + ':' + location.port);
+        // const socket = io("http://localhost:5000");
+
+        socket.on("update_number", (data) => {
+            console.log("Received number:", data);
+            document.getElementById("number-display").textContent = data;
+        });
+
+        function changeLanguage(lang) {
+            fetch("/set-language", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ language: lang })
+            })
+            .then(response => response.json())
+            .then(data => console.log("Language changed to:", data.language))
+            .catch(error => console.error("Error:", error));
+        }
+    </script>
+</body>
+</html>

@@ -39,16 +39,10 @@ logging.basicConfig(
 config = None
 argparser = argparse.ArgumentParser(description='Telephone')
 argparser.add_argument('-c', '--city', default='st', help='name of the city: [hh / st]')
-argparser = argparse.ArgumentParser(
-    description='Telephone')
 
-argparser.add_argument(
-    '-c',
-    '--city',
-    default='st',
-    help='name of the city: [hh / st]'
-)
 location = argparser.parse_args().city
+
+dialed_numbers = []
 
 
 class Telephone:
@@ -58,21 +52,22 @@ class Telephone:
         self.number_dialed = ""
         # currently not used, but hard to see
         self.max_digits = 12
-
+        self.sound_end_time = False
         try:
             self.contacts = cfg["contacts"]
-            self.sound_path = cfg["PATH"]["sounds"]
             self.language = "deu/"
+            self.dial_delay = 1.5
             self.location = _location
             # set to board, board 12 is GPIO 18
             self.phone_pin = cfg["PIN"][_location]["PHONE_switch_pin"]
             GPIO.setup(self.phone_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
             self.last_keypress = dt.now()
+            self.checking_number = False
             self.loop = Thread(target=self.main_loop, daemon=True)
             self.loop.start()
 
         except KeyError as er:
-            exit(er)
+            logging.error(er)
 
     @staticmethod
     def __get_cfg():
@@ -96,23 +91,25 @@ class Telephone:
         pygame.mixer.music.pause()
         logging.info("pygame init done")
 
-    def set_sound(self):
-        effect = pygame.mixer.Sound(self.sound_path)
-        empty_channel = pygame.mixer.Channel(1)
-        empty_channel.play(effect)
+    @staticmethod
+    def set_sound(sound_file):
+        effect = pygame.mixer.Sound(sound_file)
+        channel = pygame.mixer.Channel(1)
+        channel.play(effect)
+        sleep(0.1)
         return effect.get_length()
 
-    def play_sound(self, do_exit=False):
+    def play_sound(self, sound_file, dialing=False):
+        print(sound_file)
+
         self.pause_current_sound()
-        logging.info(f"Playing voice record {self.sound_path}")
-        duration = self.set_sound()
-        start_time = dt.now()
-        while pygame.mixer.music.get_busy() and (start_time - dt.now()).seconds < duration:
-            if GPIO.input(self.phone_pin):
-                self.pause_current_sound()
-                return
-            else:
-                continue
+        duration = self.set_sound(sound_file)
+
+        if dialing:
+            return
+        print(f"Sound duration is: {duration:.2f} seconds")
+        print(dt.now())
+        self.sound_end_time = dt.now() + timedelta(seconds=duration)
 
     def set_german(self, is_german):
         if is_german:
@@ -122,30 +119,33 @@ class Telephone:
 
     @staticmethod
     def pause_current_sound():
-        logging.info("Pausing current sound")
-        pygame.mixer.music.pause()
-        empty_channel = pygame.mixer.Channel(1)
-        empty_channel.stop()
+        logging.info("Pausing all sounds")
+        pygame.mixer.stop()  # Stops all channels
+        pygame.mixer.music.stop()
 
     def check_number(self):
         print("checkNumber")
-        sleep(0.5)
+        global dialed_numbers
 
         sound_file = self.contacts.get(self.number_dialed, False)
         if sound_file:
-
-            self.play_sound(self.sound_path.joinpath(self.language + sound_file))
-
+            self.play_sound(sound_path.joinpath("014_wahl&rufzeichen.wav"))
+            self.play_sound(sound_path.joinpath(self.language + sound_file))
+            dialed_numbers.append(sound_file)
         else:
-            self.play_sound(self.sound_path.joinpath("dialedWrongNumber.wav"), do_exit=True)
+            self.play_sound(sound_path.joinpath("dialedWrongNumber.wav"))
+            dialed_numbers.append(self.number_dialed)
+        self.play_sound(sound_path.joinpath("beepSound.wav"))
+        self.reset_dialing()
+        dialed_numbers = dialed_numbers[-5:]
 
     def reset_dialing(self):
         self.number_dialed = ""
+        send_number("")
 
     def digit_dialed(self, event):
         print(f"keyevent: {event} with eventkey {event.key}")
         self.pause_current_sound()
-        empty_channel = pygame.mixer.Channel(1)
 
         # key 48 is 0, 49 and so on, so ....
         # technically things like pygame.K_1 is available, just kept it similar
@@ -156,44 +156,49 @@ class Telephone:
 
         self.number_dialed += f"{digit}"
         send_number(self.number_dialed)
-
-        try:
-            effect = pygame.mixer.Sound(sound_path.joinpath(f"{digit}.wav"))
-        except Exception as exp:
-            print(exp)
-            return
-        # @todo: maybe remove the checkNumber depending on the wanted use of the #/OK key but return has to stay
-
         print("number dialed is " + self.number_dialed)
 
-        # @Todo: send number update on socket/website
-        empty_channel.play(effect)
-        pygame.time.delay(100)
+        self.play_sound(sound_path.joinpath(f"{digit}.wav"), dialing=True)
+        return
 
     def main_loop(self):
         logging.info("mainloop")
 
         while True:
-            # phone put down, resetting
-            if not GPIO.input(self.phone_pin):
-                self.number_dialed = ""
-                pygame.mixer.music.pause()  # pause beep sound
-                pygame.event.clear()  # clear any button pressed after 10 digits
-                continue
+            try:
+                if not GPIO.input(self.phone_pin):
+                    self.number_dialed = ""
+                    pygame.mixer.music.pause()
+                    pygame.event.clear()
+                    self.checking_number = False  # Reset flag when phone is put down
+                    continue
 
-            for event in pygame.event.get():  # Get all events instead of polling once
-                if event.type == pygame.KEYDOWN:
-                    logging.info(f"Key pressed: {event.key}")
-                    self.digit_dialed(event)
+                print(f"{self.sound_end_time} vs {dt.now()}")
+                if self.sound_end_time and self.sound_end_time > dt.now():
+                    self.pause_current_sound()
+                    self.sound_end_time = False
+                    print("ended sound")
 
-            if not self.number_dialed:
-                pygame.mixer.music.unpause()
-            elif (self.last_keypress - dt.now()).total_seconds() > 0.5:
-                self.check_number()
+                for event in pygame.event.get():
+                    if event.type == pygame.KEYDOWN:
+                        logging.info(f"Key pressed: {event.key}")
+                        self.last_keypress = dt.now()
+                        self.digit_dialed(event)
+                        self.checking_number = False  # Reset flag when a new key is pressed
+
+                if not self.number_dialed:
+                    pygame.mixer.music.unpause()
+                elif (dt.now() - self.last_keypress).total_seconds() > self.dial_delay and not self.checking_number:
+                    self.checking_number = True  # Set flag to prevent multiple calls
+                    self.check_number()
+            except Exception as exp:
+                logging.error(exp)
+
+            sleep(0.1)
+
 
 @app.route("/set-language", methods=["POST"])
 def set_language():
-    global selected_language
     data = request.get_json()
     if "language" in data:
         selected_language = data["language"]
@@ -202,20 +207,33 @@ def set_language():
         return jsonify({"message": "Language updated", "language": selected_language}), 200
     return jsonify({"error": "Invalid request"}), 400
 
+
 def send_number(number):
     print(f"Emitting number: {number}")
-    socketio.emit("update_number", number)
+    try:
+        socketio.emit("update_number", number)
+    except Exception as exp:
+        logging.error(exp)
+
+
+@app.route("/get-history")
+def get_history():
+    return jsonify({"history": dialed_numbers})
+
 
 # Web route to render the frontend
 @app.route("/", methods=["GET", "POST"])
 def index():
     return render_template("index.html")
 
+
 def main():
     global phone
     phone = Telephone(location)
     logging.info("Telephone app is running")
+    phone.play_sound(sound_path.joinpath("014_wahl&rufzeichen.wav"))
     socketio.run(app, debug=True, host='0.0.0.0', port=5500)
+
 
 if __name__ == '__main__':
     main()

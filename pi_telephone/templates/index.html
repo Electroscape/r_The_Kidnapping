@@ -20,38 +20,59 @@
             padding: 10px 20px;
             font-size: 16px;
         }
+        #history {
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
     <h1>Telephone Interface</h1>
     <div id="dialed-number">Dialed Number: <span id="number-display">---</span></div>
 
+    <h2>Last 5 Dialed Numbers</h2>
+    <ul id="history"></ul>
+
     <h2>Select Language</h2>
     <button onclick="changeLanguage('de')">🇩🇪 German</button>
     <button onclick="changeLanguage('en')">🇺🇸 English</button>
 
     <script>
-        // Connect to Socket.IO server
         const socket = io.connect('http://' + document.domain + ':' + location.port);
-        // const socket = io("http://localhost:5000");
 
         socket.on("update_number", (data) => {
             console.log("Received number:", data);
             document.getElementById("number-display").textContent = data;
+            fetchHistory();
         });
+
+        function fetchHistory() {
+            fetch("/get-history")
+                .then(response => response.json())
+                .then(data => {
+                    const historyList = document.getElementById("history");
+                    historyList.innerHTML = "";
+                    data.history.forEach(num => {
+                        let li = document.createElement("li");
+                        li.textContent = num;
+                        historyList.appendChild(li);
+                    });
+                })
+                .catch(error => console.error("Error fetching history:", error));
+        }
 
         function changeLanguage(lang) {
             fetch("/set-language", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ language: lang })
             })
             .then(response => response.json())
             .then(data => console.log("Language changed to:", data.language))
             .catch(error => console.error("Error:", error));
         }
+
+        // Fetch history on page load
+        fetchHistory();
     </script>
 </body>
 </html>

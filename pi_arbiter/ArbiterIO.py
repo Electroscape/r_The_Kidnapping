@@ -72,7 +72,8 @@ class ArbiterIO:
         inputs = []
         for input_pcf in range(3, 6):
             pin_value = self.read_pcf(input_pcf)
-            if pin_value > 0:
+            sleep(0.01)
+            if pin_value > 0 and pin_value == self.read_pcf(input_pcf):
                 inputs.append((input_pcf, pin_value))
         return inputs
 

@@ -3,6 +3,8 @@ import json
 
 from communication.Simple_Socket import SocketClient
 
+## cd to the script path to find the config.json next to it
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 os.system('pkill vlc')
 
 def get_cfg():
@@ -28,7 +30,8 @@ def main():
 
     while True:
         if arbiter_socket.read_buffer():
-            os.system("DISPLAY=:0.0 cvlc --fullscreen --loop --no-video-title --no-audio KDN-Videos/viewR_long.mp4 &")
+            os.system('pkill vlc')
+            os.system("DISPLAY=:0.0 cvlc --fullscreen --loop --no-video-title --no-audio ~/KDN-Videos/viewR_long.mp4 &")
 
     # Deprecated use VLC > mplayer
     #  os.system("DISPLAY=:0.0 mplayer -fs -loop 0 -xineramascreen 0 KDN-Videos/viewL_long.mp4 &")

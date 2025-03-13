@@ -3,7 +3,7 @@ import json
 import logging
 import os
 
-# import simpleaudio as sa
+import simpleaudio as sa
 from pynput import keyboard
 
 try:
@@ -11,7 +11,6 @@ try:
 except ImportError:
     import Mock.GPIO as GPIO
 from time import sleep, perf_counter
-
 
 from threading import Thread, Lock
 from pathlib import Path
@@ -79,8 +78,7 @@ class Telephone:
                 self.key_events.append(key.char)
                 self.last_keypress = dt.now()
             except AttributeError:
-                pass # in case of special keys
-
+                pass  # in case of special keys
 
     @staticmethod
     def __get_cfg():
@@ -91,16 +89,20 @@ class Telephone:
             logging.error(f"failed to fetch config file {err}")
             exit(f"failed to fetch config file {err}")
 
-    '''
-        def play_sound(self, sound_file, dialing=False):
+
+    def play_sound(self, sound_file, dialing=False):
+        try:
             print(sound_file)
-            wave_obj = sa.WaveObject.from_wave_file("sound_file")
+            wave_obj = sa.WaveObject.from_wave_file(str(sound_file))
             play_obj = wave_obj.play()
-            if not dialing:
-                self.current_sound = play_obj
-    
-    
-    '''
+        except FileNotFoundError:
+
+            pass
+        if not dialing:
+            pass
+
+
+
     def set_german(self, is_german):
         if is_german:
             self.language = "/deu"
@@ -120,7 +122,7 @@ class Telephone:
 
     def check_number(self):
         if self.call_active:
-            return 
+            return
         try:
             print("checkNumber")
 
@@ -158,6 +160,25 @@ class Telephone:
             send_number(self.number_dialed)
             print("number dialed is " + self.number_dialed)
 
+    def phone_down(self):
+        print("phone down")
+        self.sound_queue = []
+        self.reset_dialing()
+        self.pause_current_sound()
+        with self.lock:
+            self.key_events.clear()
+        self.call_active = False
+
+    def phone_up(self):
+        print("phoneup")
+
+        self.handle_keys()
+
+        if self.number_dialed:
+            # pygame.mixer.music.pause()
+            if (dt.now() - self.last_keypress).total_seconds() > self.dial_delay:
+                self.check_number()
+
     def main_loop(self):
         logging.info("mainloop")
         last_check_time = perf_counter()  # Track time instead of sleeping
@@ -165,25 +186,14 @@ class Telephone:
         while True:
 
             if not GPIO.input(self.phone_pin):
-                print("phone down")
-                self.sound_queue = []
-                self.reset_dialing()
-                self.pause_current_sound()
-                with self.lock:
-                    self.key_events.clear()
-                self.call_active = False
-                continue
-
-            self.handle_keys()
-
-            if self.number_dialed:
-                # pygame.mixer.music.pause()
-                if (dt.now() - self.last_keypress).total_seconds() > self.dial_delay:
-                    self.check_number()
+                self.phone_down()
+            else:
+                self.phone_up()
 
             while perf_counter() - last_check_time < 0.02:
                 pass  # Busy wait for 20ms
             last_check_time = perf_counter()  # Reset timer
+
 
 @app.route("/set-language", methods=["POST"])
 def set_language():

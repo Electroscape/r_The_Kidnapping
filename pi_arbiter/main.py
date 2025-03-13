@@ -116,7 +116,7 @@ def handle_event(event_key, event_value=None, frontend_override=False):
         if not event_value.get(event_condition, lambda: True)() and not frontend_override:
             # print(f"conditions not fullfilled {event_key}")
             return
-        event_value.get(event_script, lambda *args: 'Invalid')(event_key, nw_sock)
+        event_value.get(event_script, lambda *args: 'Invalid')(event_key, nw_sock, tv_sock_server)
     except TypeError as err:
         print(f"Error with event fnc/condition {err}")
 
@@ -292,6 +292,15 @@ def main():
 
 
 def init_socket(settings):
+    print("Initialising Sockets")
+    global tv_sock_server
+    try:
+        tv_port = settings["tv_server"]["port"]
+        tv_sock_server = TESocketServer(tv_port)
+        print(f"TV socket server is active on port {tv_port}")
+    except KeyError:
+        print("KeyError: tv_sock_server")
+
     global nw_sock
     try:
         client_cfg = settings["socket_client"]
@@ -299,24 +308,18 @@ def init_socket(settings):
         port = client_cfg["port"]
         nw_sock = SocketClient(server_add, port)
         print(f"starting socketclient with {server_add} as server")
-        return
+        return  ## do we really return here?
     except KeyError:
         pass
     try:
         client_cfg = settings["socket_server"]
         port = client_cfg["port"]
-        nw_sock = TESocketServer(port)
+        nw_sock = TESocketServer(port)  ## do we override the same variable?
         print(f"starting socketServer on port {port}")
         return
     except KeyError:
         pass
 
-    global tv_sock_server
-    try:
-        tv_port = settings["tv_server"]["port"]
-        tv_sock_server = TESocketServer(tv_port)
-    except KeyError:
-        pass
 
 
 if __name__ == '__main__':

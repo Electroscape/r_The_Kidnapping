@@ -8,16 +8,10 @@ sudo apt-get install libsdl2-mixer-2.0-0
 
 ## **Libraries Used**
 
-### Pygame
+### pynput
 
-Pygame a cross platform set of python modules which is used for video games.
-Its a library which retruns the interactions with a player when pressing on a keyboard.
-
-**Resources**: I learned how to manage the library from this link <https://www.pygame.org/docs/> .
-
-- A **CONFIG FILE** is created to store the directories and pins used with the raspberry pi 3B.
-
-- Placing a **CURRENT WORKING DIRECTORY** command to print the running file directory, if you run the script from any point in the folder.
+pynput==1.7.8 needs to be used as the current 1.8 has an issues that needs to be fixed within the lib, hence a downgrade
+https://github.com/moses-palmer/pynput/issues/633
 
 ## **Functoinality**
 

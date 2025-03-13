@@ -2,15 +2,18 @@ import argparse
 import json
 import logging
 import os
-import pygame
-from pygame.locals import *
+
+# import simpleaudio as sa
+from pynput import keyboard
+
 try:
     import RPi.GPIO as GPIO
 except ImportError:
     import Mock.GPIO as GPIO
 from time import sleep, perf_counter
-import subprocess
-from threading import Thread
+
+
+from threading import Thread, Lock
 from pathlib import Path
 from datetime import datetime as dt, timedelta
 from flask import Flask, render_template, request, jsonify
@@ -23,12 +26,7 @@ root_path = Path(os.getcwd())
 print(f"root path of the script: {root_path}")
 sound_path = root_path.joinpath("sounds")
 
-# os.environ["SDL_VIDEODRIVER"] = "dummy"
-os.environ["SDL_VIDEODRIVER"] = "x11"
-
 GPIO.setmode(GPIO.BOARD)
-
-
 logging.basicConfig(
     filename='log.log',
     level=logging.DEBUG,
@@ -36,7 +34,6 @@ logging.basicConfig(
     style='{'
 )
 
-config = None
 argparser = argparse.ArgumentParser(description='Telephone')
 argparser.add_argument('-c', '--city', default='st', help='name of the city: [hh / st]')
 
@@ -48,13 +45,14 @@ dialed_numbers = []
 class Telephone:
     def __init__(self, _location):
         cfg = self.__get_cfg()
-        self.__init_pygame()
         self.number_dialed = ""
         # currently not used, but hard to see
         self.max_digits = 12
-        self.sound_end_time = False
+        self.current_sound = None
         self.sound_queue = []
+        self.key_events = []
         self.call_active = False
+        self.lock = Lock()
         try:
             self.contacts = cfg["contacts"]
             self.language = "deu/"
@@ -65,11 +63,24 @@ class Telephone:
             GPIO.setup(self.phone_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
             self.last_keypress = dt.now()
             self.running_call = False
+
+            self.listener = keyboard.Listener(on_press=self.on_press)  # Keep reference
+            self.listener.start()
+
             self.loop = Thread(target=self.main_loop, daemon=True)
             self.loop.start()
 
         except KeyError as er:
             logging.error(er)
+
+    def on_press(self, key):
+        with self.lock:
+            try:
+                self.key_events.append(key.char)
+                self.last_keypress = dt.now()
+            except AttributeError:
+                pass # in case of special keys
+
 
     @staticmethod
     def __get_cfg():
@@ -80,39 +91,16 @@ class Telephone:
             logging.error(f"failed to fetch config file {err}")
             exit(f"failed to fetch config file {err}")
 
-    @staticmethod
-    def __init_pygame():
-        pygame.init()
-        screen = pygame.display.set_mode((800, 600))  # Virtual screen
-        pygame.mixer.set_num_channels(8)
-
-        pygame.mixer.music.load(sound_path.joinpath("013_freizeichen_30min.wav"))
-        pygame.mixer.music.play(-1, 0.0)
-        # number must be smaller than 1
-        pygame.mixer.music.set_volume(1.0)
-        pygame.mixer.music.pause()
-        logging.info("pygame init done")
-
-    @staticmethod
-    def set_sound(sound_file):
-        effect = pygame.mixer.Sound(sound_file)
-        channel = pygame.mixer.Channel(1)
-        channel.play(effect)
-        return effect.get_length()
-
-    def play_sound(self, sound_file, dialing=False):
-        print(sound_file)
-
-        self.pause_current_sound()
-        duration = self.set_sound(sound_file)
-
-        if dialing:
-            return
-        print(f"Sound duration is: {duration:.2f} seconds")
-        self.sound_end_time = dt.now() + timedelta(seconds=duration)
-        print(self.sound_end_time)
-        sleep(5)
-
+    '''
+        def play_sound(self, sound_file, dialing=False):
+            print(sound_file)
+            wave_obj = sa.WaveObject.from_wave_file("sound_file")
+            play_obj = wave_obj.play()
+            if not dialing:
+                self.current_sound = play_obj
+    
+    
+    '''
     def set_german(self, is_german):
         if is_german:
             self.language = "/deu"
@@ -122,8 +110,6 @@ class Telephone:
     @staticmethod
     def pause_current_sound():
         logging.info("Pausing all sounds")
-        pygame.mixer.stop()  # Stops all channels
-        pygame.mixer.music.pause()
 
     @staticmethod
     def add_to_history(number):
@@ -158,82 +144,45 @@ class Telephone:
         self.number_dialed = ""
         send_number(self.number_dialed)
 
-    def digit_dialed(self, event):
-        print(f"keyevent: {event} with eventkey {event.key}")
-        self.pause_current_sound()
+    def handle_keys(self):
 
-        # key 48 is 0, 49 and so on, so ....
-        # technically things like pygame.K_1 is available, just kept it similar
-        digit = event.key - 48
-        if digit > 9 or digit < 0:
-            print(f"unkown eventkey received: {event.key}")
-            return
+        update = False
+        with self.lock:
+            while self.key_events:
+                key = self.key_events.pop(0)
+                update = True
+                self.number_dialed += f"{key}"
+                self.play_sound(sound_path.joinpath(f"{key}.wav"), dialing=True)
 
-        self.number_dialed += f"{digit}"
-        send_number(self.number_dialed)
-        print("number dialed is " + self.number_dialed)
-
-        self.play_sound(sound_path.joinpath(f"{digit}.wav"), dialing=True)
-        return
+        if update:
+            send_number(self.number_dialed)
+            print("number dialed is " + self.number_dialed)
 
     def main_loop(self):
         logging.info("mainloop")
         last_check_time = perf_counter()  # Track time instead of sleeping
 
         while True:
-            try:
 
-                if not GPIO.input(self.phone_pin):
-                    print("phone down")
-                    self.sound_queue = []
-                    self.reset_dialing()
-                    self.pause_current_sound()
-                    pygame.event.clear()
-                    self.call_active = False
-                    self.sound_end_time = False
-                    continue
+            if not GPIO.input(self.phone_pin):
+                print("phone down")
+                self.sound_queue = []
+                self.reset_dialing()
+                self.pause_current_sound()
+                with self.lock:
+                    self.key_events.clear()
+                self.call_active = False
+                continue
 
-                if self.sound_end_time and self.sound_end_time < dt.now():
-                    if self.sound_queue:
-                        next_sound = self.sound_queue.pop(0)
-                        print(f"going to next sound: {next_sound}")
-                        self.play_sound(next_sound)
-                    else:
-                        print("ended sound")
-                        self.pause_current_sound()
-                        self.sound_end_time = False
-                        if self.call_active:
-                            # resets the sound bec number dialed is reset, waiting to be put down
-                            send_number(self.number_dialed)
-                        # self.call_active = False
+            self.handle_keys()
 
-                if self.call_active:
-                    continue
+            if self.number_dialed:
+                # pygame.mixer.music.pause()
+                if (dt.now() - self.last_keypress).total_seconds() > self.dial_delay:
+                    self.check_number()
 
-                for event in pygame.event.get():
-                    if event.type == pygame.KEYDOWN:
-                        print(f"Key pressed: {event.key}")
-                        self.last_keypress = dt.now()
-                        self.digit_dialed(event)
-
-                print(f"number is {self.number_dialed}")
-
-                if self.number_dialed:
-                    pygame.mixer.music.pause()
-                    if (dt.now() - self.last_keypress).total_seconds() > self.dial_delay:
-                        self.check_number()
-                elif not self.sound_end_time:
-                    # print(f"unpause condition {(not self.number_dialed and not self.sound_end_time)}")
-                    # print(bool(self.number_dialed))
-                    # print(self.sound_end_time)
-                    pygame.mixer.music.unpause()
-                    # print("unpausing")
-
-            except Exception as exp:
-                logging.error(exp)
-
-            while perf_counter() - last_check_time < 0.1:
-                pass  # Busy wait for 100ms
+            while perf_counter() - last_check_time < 0.02:
+                pass  # Busy wait for 20ms
             last_check_time = perf_counter()  # Reset timer
 
 @app.route("/set-language", methods=["POST"])
@@ -270,9 +219,9 @@ def main():
     global phone
     phone = Telephone(location)
     logging.info("Telephone app is running")
-    sleep(0.1)
+    sleep(20)
     # phone.play_sound(sound_path.joinpath("014_wahl&rufzeichen.wav"))
-    socketio.run(app, debug=True, host='0.0.0.0', port=5500)
+    # socketio.run(app, debug=True, host='0.0.0.0', port=5500)
 
 
 if __name__ == '__main__':

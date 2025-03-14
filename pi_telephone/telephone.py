@@ -51,6 +51,7 @@ class Telephone:
         self.sound_queue = []
         self.key_events = []
         self.call_active = False
+        self.play_obj = None
         self.lock = Lock()
         try:
             self.contacts = cfg["contacts"]
@@ -94,14 +95,9 @@ class Telephone:
         try:
             print(sound_file)
             wave_obj = sa.WaveObject.from_wave_file(str(sound_file))
-            play_obj = wave_obj.play()
+            self.play_obj = wave_obj.play()
         except FileNotFoundError:
-
             pass
-        if not dialing:
-            pass
-
-
 
     def set_german(self, is_german):
         if is_german:
@@ -111,6 +107,7 @@ class Telephone:
 
     @staticmethod
     def pause_current_sound():
+        self.sound_queue = []
         logging.info("Pausing all sounds")
 
     @staticmethod
@@ -163,7 +160,6 @@ class Telephone:
             logging.info(txt)
 
     def phone_down(self):
-        self.sound_queue = []
         self.reset_dialing()
         self.pause_current_sound()
         with self.lock:
@@ -178,8 +174,11 @@ class Telephone:
             if (dt.now() - self.last_keypress).total_seconds() > self.dial_delay:
                 self.check_number()
 
+        if self.sound_queue and self.play_obj is not None and not self.play_obj.is_playing():
+            self.play_sound(self.sound_queue.pop())
+
     def main_loop(self):
-        logging.info("mainloop")
+        logging.info("phone mainloop")
         last_check_time = perf_counter()  # Track time instead of sleeping
 
         while True:

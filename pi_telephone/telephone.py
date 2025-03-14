@@ -120,9 +120,9 @@ class Telephone:
 
     def set_german(self, is_german):
         if is_german:
-            self.language = "/deu"
+            self.language = "deu/"
         else:
-            self.language = "/eng"
+            self.language = "eng/"
 
     @staticmethod
     def pause_current_sound():

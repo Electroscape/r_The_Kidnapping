@@ -226,9 +226,11 @@ def index():
 def main():
     global phone
     phone = Telephone(location)
+
     logging.info("Telephone app is running")
     # phone.play_sound(sound_path.joinpath("014_wahl&rufzeichen.wav"))
-    socketio.run(app, debug=True, host='0.0.0.0', port=5500, allow_unsafe_werkzeug=True)
+    # Debug True will cause a double instance of the telephone making a mulitple executions of sounds
+    socketio.run(app, debug=False, host='0.0.0.0', port=5500, allow_unsafe_werkzeug=True)
 
 
 if __name__ == '__main__':

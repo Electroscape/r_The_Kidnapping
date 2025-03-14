@@ -30,6 +30,7 @@ IO = ArbiterIO()
 sio = socketio.Client()
 cooldowns = CooldownHandler()
 nw_sock = None
+tv_sock_server = None
 
 gpio_thread = None
 # used to prevent multiple boots
@@ -46,7 +47,6 @@ now = dt.now()
 log_name = now.strftime("eventlogs/Arbiter events %m_%d_%Y  %H_%M_%S.log")
 logging.basicConfig(filename=log_name, level=logging.INFO,
                     format=f'%(asctime)s %(levelname)s : %(message)s')
-
 
 
 def get_cfg():
@@ -78,21 +78,6 @@ def trigger_event(event_key, event_value=None):
     if event_value is None:
         return
 
-    '''
-    if event_key == "airlock_begin_atmo":
-        global time_start
-        time_start = dt.now()
-    
-    elapsed_time_str = ""
-    if time_start is not None:
-        event_dt = dt.now() - time_start
-        elapsed_time_str = str(event_dt)
-    log_msg = f"{elapsed_time_str} {event_key}"
-    logging.info(log_msg)
-    
-    '''
-
-
     print(f"triggered event {event_key}")
 
     # IO pins
@@ -101,9 +86,15 @@ def trigger_event(event_key, event_value=None):
         pcf_no = event_value[pcf_out_add]
         values = event_value[pcf_out]
         print(f"setting outputs: PCF={pcf_no} Value={values}")
+
+        pcf_value_dict = {}
+        # edit here
         for index in range(min(len(values), len(pcf_no))):
-            IO.write_pcf(pcf_no[index], values[index])
+            pcf = pcf_no[index]
+            pcf_value_dict[pcf] = pcf_value_dict.get(pcf, 0) + values[index]
             reset_gpios_dicts.update({pcf_no[index]: dt.now() + reset_delta})
+        for pcf, value in pcf_value_dict.items():
+            IO.write_pcf(pcf, value)
     except KeyError as err:
         print(err)
         pass
@@ -125,7 +116,7 @@ def handle_event(event_key, event_value=None, frontend_override=False):
         if not event_value.get(event_condition, lambda: True)() and not frontend_override:
             # print(f"conditions not fullfilled {event_key}")
             return
-        event_value.get(event_script, lambda *args: 'Invalid')(event_key, nw_sock)
+        event_value.get(event_script, lambda *args: 'Invalid')(event_key, nw_sock, tv_sock_server)
     except TypeError as err:
         print(f"Error with event fnc/condition {err}")
 
@@ -301,6 +292,15 @@ def main():
 
 
 def init_socket(settings):
+    print("Initialising Sockets")
+    global tv_sock_server
+    try:
+        tv_port = settings["tv_server"]["port"]
+        tv_sock_server = TESocketServer(tv_port)
+        print(f"TV socket server is active on port {tv_port}")
+    except KeyError:
+        print("KeyError: tv_sock_server")
+
     global nw_sock
     try:
         client_cfg = settings["socket_client"]
@@ -308,17 +308,19 @@ def init_socket(settings):
         port = client_cfg["port"]
         nw_sock = SocketClient(server_add, port)
         print(f"starting socketclient with {server_add} as server")
-        return
+        return  ## do we really return here?
     except KeyError:
         pass
     try:
         client_cfg = settings["socket_server"]
         port = client_cfg["port"]
-        nw_sock = TESocketServer(port)
+        nw_sock = TESocketServer(port)  ## do we override the same variable?
         print(f"starting socketServer on port {port}")
         return
     except KeyError:
         pass
+
+
 
 if __name__ == '__main__':
     cfg = get_cfg()

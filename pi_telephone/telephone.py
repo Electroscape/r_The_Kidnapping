@@ -214,7 +214,7 @@ class Telephone:
 
         while True:
 
-            if not GPIO.input(self.phone_pin):
+            if GPIO.input(self.phone_pin):
                 self.phone_down()
             else:
                 self.phone_up()

@@ -64,7 +64,11 @@ class Telephone:
             self.last_keypress = dt.now()
             self.running_call = False
 
-            self.listener = keyboard.Listener(on_press=self.on_press)  # Keep reference
+            self.pressed_keys = set()
+            self.listener = keyboard.Listener(
+                on_press=self.on_press,
+                on_release=self.on_release
+            )
             self.listener.start()
 
             self.loop = Thread(target=self.main_loop, daemon=True)
@@ -76,10 +80,25 @@ class Telephone:
     def on_press(self, key):
         with self.lock:
             try:
-                self.key_events.append(key.char)
+                key_char = key.char
+                if key_char in self.pressed_keys:
+                    return  # Ignore repeated presses while key is held
+
+                self.pressed_keys.add(key_char)  # Mark key as pressed
+                self.key_events.append(key_char)
                 self.last_keypress = dt.now()
+
             except AttributeError:
-                pass  # in case of special keys
+                pass  # Ignore special keys
+
+    def on_release(self, key):
+        with self.lock:
+            try:
+                key_char = key.char
+                if key_char in self.pressed_keys:
+                    self.pressed_keys.remove(key_char)  # Remove key when released
+            except AttributeError:
+                pass  # Ignore special keys
 
     @staticmethod
     def __get_cfg():

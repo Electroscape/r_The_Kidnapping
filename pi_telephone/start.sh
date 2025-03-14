@@ -7,5 +7,11 @@ pkill flask
 pkill chromium
 
 cd "${0%/*}" || exit
-export DISPLAY=:0.0
+export XDG_RUNTIME_DIR=/run/user/1000
+export PULSE_SERVER=unix:/run/user/1000/pulse/native
+export DISPLAY=:0
+
+# Delay to ensure services are ready
+sleep 5
+
 python3 telephone.py -c st

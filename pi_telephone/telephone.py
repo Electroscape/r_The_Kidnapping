@@ -158,10 +158,11 @@ class Telephone:
 
         if update:
             send_number(self.number_dialed)
-            print("number dialed is " + self.number_dialed)
+            txt = "number dialed is " + self.number_dialed
+            print(txt)
+            logging.info(txt)
 
     def phone_down(self):
-        print("phone down")
         self.sound_queue = []
         self.reset_dialing()
         self.pause_current_sound()
@@ -170,8 +171,6 @@ class Telephone:
         self.call_active = False
 
     def phone_up(self):
-        print("phoneup")
-
         self.handle_keys()
 
         if self.number_dialed:
@@ -229,9 +228,8 @@ def main():
     global phone
     phone = Telephone(location)
     logging.info("Telephone app is running")
-    sleep(20)
     # phone.play_sound(sound_path.joinpath("014_wahl&rufzeichen.wav"))
-    # socketio.run(app, debug=True, host='0.0.0.0', port=5500)
+    socketio.run(app, debug=True, host='0.0.0.0', port=5500, allow_unsafe_werkzeug=True)
 
 
 if __name__ == '__main__':

@@ -144,7 +144,7 @@ class Telephone:
         self.call_active = True
         try:
             print("checkNumber")
-
+            sa.stop_all()
             sound_file = self.contacts.get(self.number_dialed, False)
             if sound_file:
                 self.play_sound(sound_path.joinpath("014_wahl&rufzeichen.wav"))
@@ -154,6 +154,7 @@ class Telephone:
             else:
                 self.play_sound(sound_path.joinpath("dialedWrongNumber.wav"))
                 self.add_to_history(self.number_dialed)
+
             self.reset_dialing()
         except Exception as exp:
             print(exp)
@@ -204,7 +205,7 @@ class Telephone:
         else:
             if self.sound_queue:
                 if self.play_obj is None or not self.play_obj.is_playing():
-                    self.play_sound(self.sound_queue.pop())
+                    self.play_sound(self.sound_queue.pop(0))
 
 
     def main_loop(self):

@@ -12,6 +12,6 @@ export PULSE_SERVER=unix:/run/user/1000/pulse/native
 export DISPLAY=:0
 
 # Delay to ensure services are ready
-sleep 5
+sleep 2
 
 python3 telephone.py -c st

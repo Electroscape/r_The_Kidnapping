@@ -115,7 +115,11 @@ class Telephone:
             print(sound_file)
             wave_obj = sa.WaveObject.from_wave_file(str(sound_file))
             self.play_obj = wave_obj.play()
+            if not dialing:
+                self.play_obj.wait_done()
         except FileNotFoundError:
+            logging.error(f"failed to find sound {sound_file}")
+            print(f"failed to find sound {sound_file}")
             pass
 
     def set_german(self, is_german):
@@ -124,9 +128,9 @@ class Telephone:
         else:
             self.language = "eng/"
 
-    @staticmethod
-    def pause_current_sound():
+    def pause_current_sound(self):
         self.sound_queue = []
+        sa.stop_all()
         logging.info("Pausing all sounds")
 
     @staticmethod
@@ -137,8 +141,7 @@ class Telephone:
         dialed_numbers = dialed_numbers[-5:]
 
     def check_number(self):
-        if self.call_active:
-            return
+        self.call_active = True
         try:
             print("checkNumber")
 
@@ -151,26 +154,29 @@ class Telephone:
             else:
                 self.play_sound(sound_path.joinpath("dialedWrongNumber.wav"))
                 self.add_to_history(self.number_dialed)
-            # self.sound_queue.append(sound_path.joinpath("beepSound.wav"))
             self.reset_dialing()
-            self.call_active = True
         except Exception as exp:
             print(exp)
 
     def reset_dialing(self):
         print("resetting dialing")
         self.number_dialed = ""
+        self.play_obj = None
         send_number(self.number_dialed)
 
     def handle_keys(self):
 
+        if self.call_active:
+            return
+
         update = False
+
         with self.lock:
             while self.key_events:
                 key = self.key_events.pop(0)
                 update = True
                 self.number_dialed += f"{key}"
-                self.play_sound(sound_path.joinpath(f"{key}.wav"), dialing=True)
+                self.play_sound(sound_path.joinpath(f"{key}.wav"), True)
 
         if update:
             send_number(self.number_dialed)
@@ -188,13 +194,18 @@ class Telephone:
     def phone_up(self):
         self.handle_keys()
 
-        if self.number_dialed:
-            # pygame.mixer.music.pause()
-            if (dt.now() - self.last_keypress).total_seconds() > self.dial_delay:
-                self.check_number()
+        if not self.call_active:
+            if self.number_dialed:
+                if (dt.now() - self.last_keypress).total_seconds() > self.dial_delay:
+                    self.check_number()
+            elif self.play_obj is None or not self.play_obj.is_playing():
+                fz = sound_path.joinpath("output.wav")
+                self.play_sound(fz, True)
+        else:
+            if self.sound_queue:
+                if self.play_obj is None or not self.play_obj.is_playing():
+                    self.play_sound(self.sound_queue.pop())
 
-        if self.sound_queue and self.play_obj is not None and not self.play_obj.is_playing():
-            self.play_sound(self.sound_queue.pop())
 
     def main_loop(self):
         logging.info("phone mainloop")

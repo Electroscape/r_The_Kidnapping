@@ -160,10 +160,12 @@ class Telephone:
             print(exp)
 
     def reset_dialing(self):
+        do_update = bool(self.number_dialed)
         print("resetting dialing")
         self.number_dialed = ""
         self.play_obj = None
-        send_number(self.number_dialed)
+        if do_update:
+            send_number(self.number_dialed)
 
     def handle_keys(self):
 

@@ -30,9 +30,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 
-    <!-- sweet alert -->
-    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-
     <!-- import local files -->
     <link rel="stylesheet" href="{{ url_for('static',filename='css/home.css') }}" media="screen">
     <link rel="stylesheet" href="{{ url_for('static',filename='css/floatChat.css') }}" media="screen">
@@ -114,102 +111,6 @@
                     $('#chatAudio')[0].play();
                 }
                 handleMessageReception(msg);
-            })
-
-            socket.on('usr_auth', function (msg) {
-                let prev_usr = $(".login-info").find("strong").text();
-                if (msg.silent) {
-                    loadControlPanel(msg.data)
-                    return;
-                }
-                if (msg.usr.toLowerCase() === "empty") {
-                    toastr.warning(`${prev_usr} logged out`);
-                    swal("logged out", `${prev_usr} has been logged out`, "warning").then(
-                        () => {
-                            {% if not request.path in ["/"] %}
-                                document.location.href = "/"
-                            {% endif %}
-                        });
-                } else {
-                    toastr.success(`${getFullName(msg.usr)} logged in`);
-                    $('#chatAudio')[0].play();
-                }
-                updateLoginInfo(msg.usr.toLowerCase());
-
-                {% if request.path == "/lab_control" %}
-                    clearInterval(countDownInterval);
-                    $.post("{{ url_for('lab_control') }}", {
-                        auth: "success"
-                    });
-                    stopBootLoop = true;
-                    swal("Login", `Hello ${msg.usr}! Welcome to the lab`, "success").then(
-                        () => {
-                            setTimeout(() => {
-                                document.location.href = "/"
-                            }, 1500);
-                        });
-                    toastr.success('Successful authentication');
-
-                {% else %}
-                    loadControlPanel(msg.data)
-                {% endif %}
-            })
-
-            socket.on("elancell_fe", function (msg) {
-                $('#chatAudio')[0].play();
-                toastr.info(`Data upload ${msg.data}`);
-            })
-
-            socket.on('breach_fe', function (msg) {
-                if (msg === "breach") {
-                    $('#chatAudio')[0].play();
-                    toastr.error(`USB media is detected`);
-                    swal("warning", "Your system is being hacked", "error").then(() => {
-                            document.location.href = "/";
-                        }
-                    );
-                } else {
-                    {% if request.path in ["/", "/elancell_breach", "/elancell_upload"] %}
-                        swal("Data Upload Reset", "USB media has been removed", "warning").then(() => {
-                                document.location.href = "/";
-                            }
-                        );
-                    {% endif %}
-                }
-            })
-
-            socket.on("laserlock_fe", function (msg) {
-                console.log(`laserlock ${msg}`)
-                loadControlPanel(msg.data, laserlockStatus = msg.status);
-                $('#chatAudio')[0].play();
-                toastr.warning(`laserlock is ${msg.status}
-                                <button type="button" class="btn btn-outline-dark float-end">open laserlock</button>`,
-                    "New Update",
-                    {
-                        timeOut: false,
-                        onclick: function () {
-                            document.location.href = "/lab_control";
-                        }
-                    }
-                );
-            })
-
-            socket.on("boot_fe", function (msg) {
-                console.log(`usb boot: ${msg}`)
-                if (msg.status === "disconnect") {
-                    toastr.error(`Shutdown in 5 Seconds`);
-                    setTimeout(function () {
-                        window.location.href = "/";
-                    }, 5000);
-                }
-            })
-
-            socket.on('samples_updates_fe', function (msg) {
-                setTimeout(() => {
-                    $('#chatAudio')[0].play();
-                    toastr.success(msg);
-                }, {% if request.path == "/gas_analysis" %}5000{% else %}1000{% endif %});
-
             })
 
             function handleMessageReception(msg, playNotification = true) {

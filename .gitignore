@@ -3,5 +3,6 @@
 **/.pio/
 **/.idea/
 **/.gitignore
-**.DS_*
+**DS**
+**/venv
 **.log

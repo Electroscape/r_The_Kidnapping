@@ -161,7 +161,7 @@ class Telephone:
 
     def reset_dialing(self):
         do_update = bool(self.number_dialed)
-        print("resetting dialing")
+        # print("resetting dialing")
         self.number_dialed = ""
         self.play_obj = None
         if do_update:
@@ -179,6 +179,7 @@ class Telephone:
                 key = self.key_events.pop(0)
                 update = True
                 self.number_dialed += f"{key}"
+                self.pause_current_sound()
                 self.play_sound(sound_path.joinpath(f"{key}.wav"), True)
 
         if update:

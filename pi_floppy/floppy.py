@@ -5,6 +5,7 @@ import socket
 import eventlet
 import threading
 import subprocess
+import pygame
 
 from rfid import RFID
 
@@ -41,6 +42,11 @@ cards = {
 valid_cards = list(cards.keys())
 for c in valid_cards:
     cards[c] = f"static/blueprints/plan_{cards[c]}"
+
+# Initialize pygame mixer for sound playback
+pygame.mixer.init()
+pygame.mixer.music.load("bootup.mp3")
+pygame.mixer.music.set_volume(1.0)  # Set volume to 100%
 
 # Start with mc not booted
 mc_boot = False
@@ -162,6 +168,9 @@ def process_command(data: str) -> None:
         print(f"frontend on scan tab")
     elif data == 'idle':
         mc_boot = True
+        # Play bootup sound
+        pygame.mixer.music.play()
+        # Send command to all displays to play idle
         for display in DISPLAY_IPS:
             send_command(display, "play_idle")
 

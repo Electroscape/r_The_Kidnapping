@@ -14,6 +14,11 @@ HOST = '0.0.0.0'   # Listen on all interfaces
 
 prev_command = ""
 
+# Initialize pygame mixer for sound playback
+pygame.mixer.init()
+pygame.mixer.music.load("notification.mp3")
+pygame.mixer.music.set_volume(1.0)  # Set volume to 100%
+
 # Function to execute the received command
 def execute_command(command: str) -> None:
     global prev_command
@@ -37,12 +42,7 @@ def execute_command(command: str) -> None:
             subprocess.Popen(["bash", f"{command}.sh"])
             if command == "play_solution":
                 # Play notification sound
-                pygame.mixer.init()
-                pygame.mixer.music.load("notification.wav")
                 pygame.mixer.music.play()
-                # Wait for sound to finish
-                while pygame.mixer.music.get_busy():
-                    pygame.time.Clock().tick(10)
 
     except Exception as e:
         print(f"Error executing command: {e}")

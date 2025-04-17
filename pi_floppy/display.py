@@ -1,6 +1,7 @@
 import socket
 import subprocess
 import json
+import pygame
 
 # Open and read the JSON file
 with open('config.json', 'r') as json_file:
@@ -34,6 +35,14 @@ def execute_command(command: str) -> None:
         if command.startswith("play_"):
             # Run script
             subprocess.Popen(["bash", f"{command}.sh"])
+            if command == "play_solution":
+                # Play notification sound
+                pygame.mixer.init()
+                pygame.mixer.music.load("notification.wav")
+                pygame.mixer.music.play()
+                # Wait for sound to finish
+                while pygame.mixer.music.get_busy():
+                    pygame.time.Clock().tick(10)
 
     except Exception as e:
         print(f"Error executing command: {e}")

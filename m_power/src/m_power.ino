@@ -34,7 +34,7 @@ void handleInputs() {
     if (lastState == result) {
         return;
     }
-    Serial.print("Input: ");
+    Serial.print("Inputs: ");
     Serial.println(result);
     
     switch (result) {
@@ -90,7 +90,7 @@ void handleInputs() {
     }
 
     lastState = result;
-    Serial.println(result);
+    // Serial.println(result);
 }
 
 
@@ -105,6 +105,11 @@ void setup() {
     enableWdt();
     Mother.rs485SetSlaveCount(0);
     wdt_reset();
+
+    // turn on fast-service on start
+    Mother.motherRelay.digitalWrite(relays::service, relayOn);
+    Mother.motherRelay.digitalWrite(relays::empore, relayOn);
+    Mother.motherRelay.digitalWrite(relays::living, relayOn);
 }
 
 

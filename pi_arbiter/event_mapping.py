@@ -58,7 +58,7 @@ class LightIO(IntEnum):
     hallwayStart = 4
     hallwayOff = 5
     hallwayOn = 6
-    hallwayDimmed = 7
+    hallwayGreen = 7
     apartmentEnter = 8
     chimneyOverride = 9
     mcBoot = 10
@@ -104,11 +104,13 @@ class PowerIO(IntEnum):
     emporeOff = 3
     livingOn = 4
     livingOff = 5
-    raum2On = 6
-    raum2Off = 7
-    serviceOn = 8
-    serviceOff = 9
-    chimneyOpening = 10
+    emporeLivingOn = 6 # is 2 + 4
+    raum2On = 7 # chemney light
+    emporeLivingOff = 8 # is 3 + 5
+    raum2Off = 9
+    serviceOn = 10
+    serviceOff = 11
+    mcBoot = 15 # is 3 + 5 + 7
 
 
 # binary_pcfs = [FuseIo.pcfIn, ArbiterIO.pcfIn]
@@ -231,7 +233,8 @@ event_map = {
         pcf_in: ArbiterIO.entrance,
         pcf_out_add: [LightIO.pcfOut],
         pcf_out: [LightIO.hallwayOn],
-        event_condition: can_start_hallway
+        event_condition: can_start_hallway,
+        event_delay: 5
     },
     "hallway_on": {
         pcf_in_add: FuseIo.pcfIn,
@@ -266,7 +269,9 @@ event_map = {
 
     "fusebox_doorOpened": {
         pcf_in_add: FuseIo.pcfIn,
-        pcf_in: FuseIo.doorOpen
+        pcf_in: FuseIo.doorOpen,
+        pcf_out_add: [LightIO.pcfOut],
+        pcf_out: [LightIO.hallwayGreen],
     },
 
     # boots up PCs from the floppy riddle, lights up the MC

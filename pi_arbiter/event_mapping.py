@@ -280,8 +280,7 @@ event_map = {
         pcf_in: FuseIo.mcBoot,
         pcf_out_add: [BreakoutIO.pcfOut, LightIO.pcfOut, PowerIO.pcfOut, PowerIO.pcfOut, PowerIO.pcfOut],
         pcf_out: [BreakoutIO.mcBoot, LightIO.mcBoot, PowerIO.livingOff, PowerIO.raum2On, PowerIO.emporeOff],
-        event_script: mc_boot,
-        event_next_qeued: "livingPower_onMCBoot",
+        event_script: mc_boot
     },
 
     "breakout_solved": {
@@ -305,11 +304,6 @@ event_map = {
         pcf_out_add: [PowerIO.pcfOut, PowerIO.pcfOut],
         pcf_out: [PowerIO.livingOn, PowerIO.emporeOn],
         event_delay: 20
-    },
-    "livingPower_onMCBoot": {
-        pcf_out_add: [PowerIO.pcfOut, PowerIO.pcfOut],
-        pcf_out: [PowerIO.livingOn, PowerIO.emporeOn],
-        event_delay: 15
     },
     "livingPower_off": {
         pcf_out_add: [PowerIO.pcfOut],

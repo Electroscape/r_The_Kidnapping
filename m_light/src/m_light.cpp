@@ -145,6 +145,7 @@ void stageActions() {
             LED_CMDS::fade2color(Mother, brains::ledStrip, LED_CMDS::clrwarmerWhite, 50, LED_CMDS::clrBlack, 0, 2000, strips::stripLiving);
             LED_CMDS::fade2color(Mother, brains::ledDot, LED_CMDS::clrwarmWhite, 50, LED_CMDS::clrBlack, 0, 2000, ledsIndex::empore);
             LED_CMDS::fade2color(Mother, brains::ledDot, LED_CMDS::clrwarmWhite, 50, LED_CMDS::clrBlack, 0, 2000, ledsIndex::living);
+            //LED_CMDS::fade2color(Mother, brains::ledDot, LED_CMDS::clrwarmerWhite, 50, LED_CMDS::clrBlack, 0, 2000, ledsIndex::hallway);
             delay(2000);
             LED_CMDS::setAllStripsToClr(Mother, brains::ledStrip, LED_CMDS::clrBlack, 0);
             LED_CMDS::setStripToClr(Mother, brains::ledDot, LED_CMDS::clrBlack, 0, ledsIndex::empore);
@@ -159,6 +160,7 @@ void stageActions() {
             LED_CMDS::fade2color(Mother, brains::ledDot, LED_CMDS::clrBlack, 0, LED_CMDS::clrwarmWhite, 50, 6000, ledsIndex::empore);
             delay(100);
             LED_CMDS::fade2color(Mother, brains::ledDot, LED_CMDS::clrBlack, 0, LED_CMDS::clrwarmWhite,50, 6000, ledsIndex::living);
+            //LED_CMDS::fade2color(Mother, brains::ledDot, LED_CMDS::clrBlack, 0, LED_CMDS::clrwarmerWhite,50, 6000, ledsIndex::hallway);
             wdt_enable(WDTO_8S);
         break;
         case stages::idle: 
@@ -241,7 +243,7 @@ void handleInputs() {
             wdt_disable();
             //LED_CMDS::setStripToClr(Mother, brains::ledStrip, LED_CMDS::clrBlue, 0, strips::stripLiving);
             LED_CMDS::fade2color(Mother, brains::ledStrip, LED_CMDS::clrBlack, 0, LED_CMDS::clrwarmerWhite, 50, 8000, strips::stripLiving);
-            delay(8000);
+            //delay(8000);
             //LED_CMDS::setStripToClr(Mother, brains::ledStrip, LED_CMDS::clrBlack, 0, strips::stripLiving);
             //delay(1000);
             //LED_CMDS::setStripToClr(Mother, brains::ledStrip, LED_CMDS::clrWhite, 0, strips::stripLiving);
@@ -252,11 +254,13 @@ void handleInputs() {
             delay(5000);
             LED_CMDS::fade2color(Mother, brains::ledDot, LED_CMDS::clrBlack, 0, LED_CMDS::clrwarmWhite, 30, 10000, ledsIndex::empore);
             //LED_CMDS::setStripToClr(Mother, brains::ledDot, LED_CMDS::clrWhite, 50, ledsIndex::empore);
+            LED_CMDS::setStripToClr(Mother, brains::ledDot, LED_CMDS::clrwarmerWhite, 50, ledsIndex::hallway); 
             //delay(10);
             wdt_enable(WDTO_8S);
         break;
         case IOValues::chimneyOverride: stage=stages::chimneyOpening; break;
         case IOValues::mcBoot: 
+            wdt_disable();
             LED_CMDS::setStripToClr(Mother, brains::ledStrip, LED_CMDS::clrBlack, 0, strips::stripLiving); 
             LED_CMDS::blinking(Mother,brains::ledDot, LED_CMDS::clrBlack, LED_CMDS::clrBlue, 500, 500, 5, 70, ledsIndex::hallway);
             LED_CMDS::blinking(Mother,brains::ledDot, LED_CMDS::clrBlack, LED_CMDS::clrBlue, 500, 500, 5, 70, ledsIndex::empore);
@@ -265,25 +269,31 @@ void handleInputs() {
             LED_CMDS::setStripToClr(Mother, brains::ledDot, LED_CMDS::clrBlack, 0, ledsIndex::hallway); 
             LED_CMDS::setStripToClr(Mother, brains::ledDot, LED_CMDS::clrBlack, 0, ledsIndex::empore); 
             LED_CMDS::setStripToClr(Mother, brains::ledDot, LED_CMDS::clrBlack, 0, ledsIndex::living); 
-            LED_CMDS::fade2color(Mother, brains::ledStrip, LED_CMDS::clrBlack, 0, LED_CMDS::clrBlue, 80, 30000, strips::missionControl);
+            LED_CMDS::fade2color(Mother, brains::ledStrip, LED_CMDS::clrBlack, 0, LED_CMDS::clrBlue, 50, 6000, strips::missionControl);
+            LED_CMDS::fade2color(Mother, brains::ledDot, LED_CMDS::clrBlack, 0, LED_CMDS::clrBlue, 30, 6000, ledsIndex::empore);
             delay(8000);
-            LED_CMDS::fade2color(Mother, brains::ledDot, LED_CMDS::clrBlack, 0, LED_CMDS::clrwarmerWhite, 50, 8000, ledsIndex::hallway);
-            LED_CMDS::fade2color(Mother, brains::ledDot, LED_CMDS::clrBlack, 0, LED_CMDS::clrwarmWhite, 30, 8000, ledsIndex::living);
-            LED_CMDS::fade2color(Mother, brains::ledDot, LED_CMDS::clrBlack, 0, LED_CMDS::clrwarmWhite, 30, 8000, ledsIndex::empore);
-            LED_CMDS::fade2color(Mother, brains::ledStrip, LED_CMDS::clrBlack, 0, LED_CMDS::clrwarmerWhite, 50, 8000, strips::stripLiving);
+            LED_CMDS::setStripToClr(Mother, brains::ledStrip, LED_CMDS::clrBlue, 50, strips::missionControl);
+            LED_CMDS::setStripToClr(Mother, brains::ledDot, LED_CMDS::clrBlue, 50, ledsIndex::empore);
+            wdt_enable(WDTO_8S);
+            //LED_CMDS::fade2color(Mother, brains::ledDot, LED_CMDS::clrBlack, 0, LED_CMDS::clrbrightWhite, 50, 8000, ledsIndex::hallway);
+            //LED_CMDS::fade2color(Mother, brains::ledDot, LED_CMDS::clrBlack, 0, LED_CMDS::clrwarmWhite, 30, 8000, ledsIndex::living);
+            //LED_CMDS::fade2color(Mother, brains::ledStrip, LED_CMDS::clrBlack, 0, LED_CMDS::clrwarmerWhite, 50, 8000, strips::stripLiving);
         break;
         case IOValues::waterUV:
             Mother.motherRelay.digitalWrite(relays::mcAlarm, open);
-            LED_CMDS::fade2color(Mother, brains::ledStrip, LED_CMDS::clrwarmerWhite, 50, LED_CMDS::clrwarmerWhite, 10, 5000, strips::stripLiving);
+            LED_CMDS::fade2color(Mother, brains::ledStrip, LED_CMDS::clrwarmerWhite, 50, LED_CMDS::clrwarmerWhite, 10, 1000, strips::stripLiving);
             delay(100);
-            LED_CMDS::fade2color(Mother, brains::ledDot, LED_CMDS::clrwarmWhite, 50, LED_CMDS::clrBlack, 0, 5000, ledsIndex::empore);
+            LED_CMDS::fade2color(Mother, brains::ledDot, LED_CMDS::clrBlue, 50, LED_CMDS::clrBlack, 0, 1000, ledsIndex::empore);
             delay(100);
-            LED_CMDS::fade2color(Mother, brains::ledDot, LED_CMDS::clrwarmWhite, 30, LED_CMDS::clrwarmWhite, 10, 5000, ledsIndex::living);
+            LED_CMDS::fade2color(Mother, brains::ledDot, LED_CMDS::clrwarmWhite, 30, LED_CMDS::clrwarmWhite, 10, 1000, ledsIndex::living);
             delay(100);
             LED_CMDS::setStripToClr(Mother, brains::ledDot, LED_CMDS::clrGreen, 70, ledsIndex::zwinger);
         break;
         case IOValues::gameResetIn: 
             gameReset();
+        break;
+        case IOValues::hallwayGreen: 
+            LED_CMDS::setStripToClr(Mother, brains::ledDot, LED_CMDS::clrGreen, 50, ledsIndex::hallway);
         break;
         case IOValues::gameOver:
             LED_CMDS::setAllStripsToClr(Mother, brains::ledDot, LED_CMDS::clrRed, 50);

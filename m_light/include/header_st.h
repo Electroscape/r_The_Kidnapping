@@ -76,7 +76,7 @@ enum IOValues {
     hallwayStart,
     hallwayOff,
     hallwayOn,
-    hallwayDimmed,      // actually not used, left in here to not shift the order -> just using hallwayStart
+    hallwayGreen,      // make hallway green when doorFuses solved
     apartmentEnter,
     chimneyOverride,    // manual override trigger
     mcBoot,          // fusebox powering up MC via fuses
@@ -120,7 +120,7 @@ int flagMapping[StageCount]{
 
 
 char passwords[PasswordAmount][MaxPassLen] = {
-    "1234",
+    "3043",
     "20162023",     // service code
 };
 

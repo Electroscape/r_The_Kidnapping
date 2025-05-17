@@ -8,12 +8,10 @@
     <title>floppy</title>
 
     <!-- socketio -->
-    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"
-        integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+"
-        crossorigin="anonymous"></script>
-    <!-- JQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.1.js"
-        integrity="sha256-3zlB5s2uwoUzrXK3BT7AX3FyvojsraNFxCc2vC/7pNI=" crossorigin="anonymous"></script>
+     <!-- load from local_lib -->
+    <script type="javascript" src="{{ url_for('static', filename='local_lib/jquery-3.6.1.js') }}"></script>
+
+    <script type="javascript" src="{{ url_for('static', filename='local_lib/socket.io.min.js') }}"></script>
 
     <style>
         body {

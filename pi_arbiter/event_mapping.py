@@ -137,7 +137,8 @@ def set_live(_, floppy_sock_server, tv_sock_server):
     floppy_sock_server.transmit("reset")
     tv_sock_server.transmit("start")
 
-def exit_solved(_, tv_sock_server, *args):
+def exit_solved(_, floppy_sock_server, tv_sock_server):
+    floppy_sock_server.transmit("exit")
     tv_sock_server.transmit("exit")
 
 

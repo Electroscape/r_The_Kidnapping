@@ -1,3 +1,6 @@
+# fixes activate venv from crontab 
+cd "${0%/*}"
+
 # set environment variable to enable sound
 XDG_RUNTIME_DIR=/run/user/$(id -u)
 export XDG_RUNTIME_DIR

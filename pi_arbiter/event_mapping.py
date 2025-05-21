@@ -137,6 +137,9 @@ def set_live(_, floppy_sock_server, tv_sock_server):
     floppy_sock_server.transmit("reset")
     tv_sock_server.transmit("start")
 
+def exit_solved(_, tv_sock_server, *args):
+    tv_sock_server.transmit("exit")
+
 
 def is_game_started(*args):
     return game_states.hasStarted
@@ -288,6 +291,7 @@ event_map = {
         pcf_in: BreakoutIO.solved,
         pcf_out_add: [BreakoutIO.pcfOut, LightIO.pcfOut, PowerIO.pcfOut],
         pcf_out: [BreakoutIO.setSolved, LightIO.gameSolved, PowerIO.livingOff],
+        event_script: exit_solved,
     },
 
     "livingPower_onChimneyOpened": {

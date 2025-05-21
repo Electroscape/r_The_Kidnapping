@@ -100,7 +100,8 @@ def audio_handler(command):
         print(f"Playing: {file}")
         start_audio_in_thread(file)
 
-    elif command == "stop":
+    elif command == "exit":
+        print("stop audio")
         stop_audio()
     else:
         print(f"Unknown command: {command}")

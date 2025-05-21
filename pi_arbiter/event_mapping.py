@@ -129,12 +129,12 @@ class GameStatus:
 game_states = GameStatus()
 
 
-def set_live(_, nw_sock, tv_sock_server):
+def set_live(_, floppy_sock_server, tv_sock_server):
     game_states.gameLive = True
     game_states.hasStarted = False
     game_states.apartmentEntered = False
     game_states.hallway_started = False
-    nw_sock.transmit("reset")
+    floppy_sock_server.transmit("reset")
     tv_sock_server.transmit("start")
 
 
@@ -172,16 +172,16 @@ def  start_game_condition(*args):
     return False
 
 
-def call_video(event_key, nw_sock, *_):
-    nw_sock.transmit(event_key)
+def call_video(event_key, floppy_sock_server, *_):
+    floppy_sock_server.transmit(event_key)
 
     
-def mc_boot(_, nw_sock, *args):
-    nw_sock.transmit("idle")
+def mc_boot(_, floppy_sock_server, *args):
+    floppy_sock_server.transmit("idle")
 
 
-def zwinger_open(_, nw_sock, *args):
-    nw_sock.transmit("zwinger")
+def zwinger_open(_, floppy_sock_server, *args):
+    floppy_sock_server.transmit("zwinger")
 
 '''
 just as a template event

@@ -6,7 +6,7 @@ sudo pkill python
 
 # Hide cursor
 #unclutter -idle  &
-
+source venv/bin/activate
 python music_trigger.py &
 
 # modify the IP address you want to display

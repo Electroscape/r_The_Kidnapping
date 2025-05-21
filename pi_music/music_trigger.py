@@ -5,6 +5,8 @@ import threading
 import time
 from communication.Simple_Socket import SocketClient
 
+AUDIO_VOLUME_PERCENT = 70  # Volume level for audio playback
+
 # Initialize VLC instance
 instance = vlc.Instance()
 player = instance.media_player_new()
@@ -31,6 +33,11 @@ def play_audio(file_path):
         media = instance.media_new(file_path)
         player.set_media(media)
         player.play()
+        time.sleep(0.1)  # Let VLC start
+        player.audio_set_volume(AUDIO_VOLUME_PERCENT)
+        time.sleep(0.1)  # Let VLC start
+        current_volume = player.audio_get_volume()
+        print(f"Current volume: {current_volume}")
 
     # Wait until audio ends or is stopped externally
     while True:
@@ -79,6 +86,10 @@ def init_socket():
 
 # Handle messages
 def audio_handler(command):
+    # if command is list, get the first element
+    if isinstance(command, list):
+        command = command[0]
+
     if command == "start":
         file = sounds["start"]
         print(f"Playing: {file}")
@@ -109,4 +120,3 @@ def main():
 # Main loop
 if __name__ == "__main__":
     main()
-

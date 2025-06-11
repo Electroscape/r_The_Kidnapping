@@ -1,7 +1,15 @@
 import os
 import json
+import argparse
+from time import sleep
 
-from communication.Simple_Socket import SocketClient
+from communication.Simple_Socket import SocketClient, TESocketServer
+
+
+argparser = argparse.ArgumentParser(description='Telephone')
+argparser.add_argument('-s', '--socket', default='client', help='socketmode: [host / client (default)]')
+host_mode = argparser.parse_args().socket == "host"
+
 
 VIDEO_FILE = "~/KDN-Videos/viewR_long.mp4"
 
@@ -18,6 +26,7 @@ def get_cfg():
         print(e)
         exit()
 
+
 def init_socket():
     cfg = get_cfg()
     try:
@@ -25,6 +34,8 @@ def init_socket():
         port = cfg["port"]
     except KeyError:
         exit("missing server configuration")
+    if host_mode:
+        return TESocketServer(port)
     return SocketClient(server_add, port)
 
 # Handle messages
@@ -43,13 +54,16 @@ def video_handler(command):
 
 
 def main():
-    arbiter_socket = init_socket()
+    socket = init_socket()
 
-    while True:
-        message = arbiter_socket.read_buffer()
+    while not host_mode:
+        message = socket.read_buffer()
         if message:
             print(f"Received message: {message}")
             video_handler(message)
+
+    sleep(10)
+    socket.transmit("start")
 
     # Deprecated use VLC > mplayer
     #  os.system("DISPLAY=:0.0 mplayer -fs -loop 0 -xineramascreen 0 KDN-Videos/viewL_long.mp4 &")

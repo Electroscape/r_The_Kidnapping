@@ -58,7 +58,7 @@ class LightIO(IntEnum):
     hallwayStart = 4
     hallwayOff = 5
     hallwayOn = 6
-    hallwayDimmed = 7
+    hallwayGreen = 7
     apartmentEnter = 8
     chimneyOverride = 9
     mcBoot = 10
@@ -104,11 +104,13 @@ class PowerIO(IntEnum):
     emporeOff = 3
     livingOn = 4
     livingOff = 5
-    raum2On = 6
-    raum2Off = 7
-    serviceOn = 8
-    serviceOff = 9
-    chimneyOpening = 10
+    emporeLivingOn = 6 # is 2 + 4
+    raum2On = 7 # chemney light
+    emporeLivingOff = 8 # is 3 + 5
+    raum2Off = 9
+    serviceOn = 10
+    serviceOff = 11
+    mcBoot = 15 # is 3 + 5 + 7
 
 
 # binary_pcfs = [FuseIo.pcfIn, ArbiterIO.pcfIn]
@@ -127,13 +129,17 @@ class GameStatus:
 game_states = GameStatus()
 
 
-def set_live(_, nw_sock, tv_sock_server):
+def set_live(_, floppy_sock_server, tv_sock_server):
     game_states.gameLive = True
     game_states.hasStarted = False
     game_states.apartmentEntered = False
     game_states.hallway_started = False
-    nw_sock.transmit("reset")
+    floppy_sock_server.transmit("reset")
     tv_sock_server.transmit("start")
+
+def exit_solved(_, floppy_sock_server, tv_sock_server):
+    floppy_sock_server.transmit("exit")
+    tv_sock_server.transmit("exit")
 
 
 def is_game_started(*args):
@@ -170,16 +176,16 @@ def  start_game_condition(*args):
     return False
 
 
-def call_video(event_key, nw_sock, *_):
-    nw_sock.transmit(event_key)
+def call_video(event_key, floppy_sock_server, *_):
+    floppy_sock_server.transmit(event_key)
 
     
-def mc_boot(_, nw_sock, *args):
-    nw_sock.transmit("idle")
+def mc_boot(_, floppy_sock_server, *args):
+    floppy_sock_server.transmit("idle")
 
 
-def zwinger_open(_, nw_sock, *args):
-    nw_sock.transmit("zwinger")
+def zwinger_open(_, floppy_sock_server, *args):
+    floppy_sock_server.transmit("zwinger")
 
 '''
 just as a template event
@@ -231,7 +237,8 @@ event_map = {
         pcf_in: ArbiterIO.entrance,
         pcf_out_add: [LightIO.pcfOut],
         pcf_out: [LightIO.hallwayOn],
-        event_condition: can_start_hallway
+        event_condition: can_start_hallway,
+        event_delay: 5
     },
     "hallway_on": {
         pcf_in_add: FuseIo.pcfIn,
@@ -266,7 +273,9 @@ event_map = {
 
     "fusebox_doorOpened": {
         pcf_in_add: FuseIo.pcfIn,
-        pcf_in: FuseIo.doorOpen
+        pcf_in: FuseIo.doorOpen,
+        pcf_out_add: [LightIO.pcfOut],
+        pcf_out: [LightIO.hallwayGreen],
     },
 
     # boots up PCs from the floppy riddle, lights up the MC
@@ -275,8 +284,7 @@ event_map = {
         pcf_in: FuseIo.mcBoot,
         pcf_out_add: [BreakoutIO.pcfOut, LightIO.pcfOut, PowerIO.pcfOut, PowerIO.pcfOut, PowerIO.pcfOut],
         pcf_out: [BreakoutIO.mcBoot, LightIO.mcBoot, PowerIO.livingOff, PowerIO.raum2On, PowerIO.emporeOff],
-        event_script: mc_boot,
-        event_next_qeued: "livingPower_onMCBoot",
+        event_script: mc_boot
     },
 
     "breakout_solved": {
@@ -284,6 +292,7 @@ event_map = {
         pcf_in: BreakoutIO.solved,
         pcf_out_add: [BreakoutIO.pcfOut, LightIO.pcfOut, PowerIO.pcfOut],
         pcf_out: [BreakoutIO.setSolved, LightIO.gameSolved, PowerIO.livingOff],
+        event_script: exit_solved,
     },
 
     "livingPower_onChimneyOpened": {
@@ -300,11 +309,6 @@ event_map = {
         pcf_out_add: [PowerIO.pcfOut, PowerIO.pcfOut],
         pcf_out: [PowerIO.livingOn, PowerIO.emporeOn],
         event_delay: 20
-    },
-    "livingPower_onMCBoot": {
-        pcf_out_add: [PowerIO.pcfOut, PowerIO.pcfOut],
-        pcf_out: [PowerIO.livingOn, PowerIO.emporeOn],
-        event_delay: 15
     },
     "livingPower_off": {
         pcf_out_add: [PowerIO.pcfOut],

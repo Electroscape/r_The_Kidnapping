@@ -4,3 +4,6 @@
 [submodule "pi_windows/communication"]
 	path = pi_windows/communication
 	url = https://github.com/MartinPek/Simple-Socket
+[submodule "Pi_Telephone"]
+	path = Pi_Telephone
+	url = https://github.com/Electroscape/Pi_Telephone

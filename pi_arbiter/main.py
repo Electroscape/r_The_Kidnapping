@@ -29,7 +29,7 @@ IO = ArbiterIO()
 
 sio = socketio.Client()
 cooldowns = CooldownHandler()
-nw_sock = None
+floppy_sock_server = None
 tv_sock_server = None
 
 gpio_thread = None
@@ -116,7 +116,7 @@ def handle_event(event_key, event_value=None, frontend_override=False):
         if not event_value.get(event_condition, lambda: True)() and not frontend_override:
             # print(f"conditions not fullfilled {event_key}")
             return
-        event_value.get(event_script, lambda *args: 'Invalid')(event_key, nw_sock, tv_sock_server)
+        event_value.get(event_script, lambda *args: 'Invalid')(event_key, floppy_sock_server, tv_sock_server)
     except TypeError as err:
         print(f"Error with event fnc/condition {err}")
 
@@ -301,12 +301,12 @@ def init_socket(settings):
     except KeyError:
         print("KeyError: tv_sock_server")
 
-    global nw_sock
+    global floppy_sock_server
     try:
         client_cfg = settings["socket_client"]
         server_add = client_cfg["server_add"]
         port = client_cfg["port"]
-        nw_sock = SocketClient(server_add, port)
+        floppy_sock_server = SocketClient(server_add, port)
         print(f"starting socketclient with {server_add} as server")
         return  ## do we really return here?
     except KeyError:
@@ -314,7 +314,7 @@ def init_socket(settings):
     try:
         client_cfg = settings["socket_server"]
         port = client_cfg["port"]
-        nw_sock = TESocketServer(port)  ## do we override the same variable?
+        floppy_sock_server = TESocketServer(port)  ## do we override the same variable?
         print(f"starting socketServer on port {port}")
         return
     except KeyError:

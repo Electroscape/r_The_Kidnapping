@@ -1,6 +1,6 @@
 #pragma once
 
-#define relayAmount 4
+#define relayAmount 5
 #define open        0
 #define closed      1
 
@@ -9,6 +9,7 @@ enum relays {
     pump_2,
     table_light,
     magnets,    // Zwinger and drawer
+    magnets_interrupt
 };
 
 enum relayInits {
@@ -16,6 +17,7 @@ enum relayInits {
     pump_2_init = closed,
     table_light_init = closed,
     magnets_init = closed, // Wiring will be NC for both
+    magnets_interrupt_init = closed
 };
 
 int relayPinArray[relayAmount] = {
@@ -23,6 +25,7 @@ int relayPinArray[relayAmount] = {
     pump_2,
     table_light,
     magnets,
+    magnets_interrupt
 };
 
 int relayInitArray[relayAmount] = {
@@ -30,6 +33,7 @@ int relayInitArray[relayAmount] = {
     pump_2_init,
     table_light_init,
     magnets_init,
+    magnets_interrupt_init
 };
 
 enum brains {

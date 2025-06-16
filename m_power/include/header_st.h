@@ -1,7 +1,7 @@
 #pragma once
 
 #define relayOn     0
-#define relayOff     1
+#define relayOff    1
 
 enum IOpins {
     IO_1,
@@ -20,11 +20,13 @@ enum inputValues {
     empporeOff,
     livingOn,
     livingOff,
-    room2On,
-    room2Off,           
+    emporeLivingOn,
+    raum2On, // chimney light
+    emporeLivingOff,  
+    raum2Off,          
     serviceOn,           
-    serviceOff,  
-    chimneyOpening,                 
+    serviceOff,
+    mcBoot = 15, // is 3 + 5 + 7          
 };
 
 enum outputValues {};
@@ -49,7 +51,7 @@ int outputArray[outputCnt] = {};
 enum relays {
     empore,
     living,
-    room2,
+    raum2,
     service,
     relayAmount
 };
@@ -57,20 +59,20 @@ enum relays {
 enum relayInits {
     empore_init = relayOff,
     living_init = relayOff,
-    room2_init = relayOff,
+    raum2_init = relayOff,
     service_init = relayOff,
 };
 
 int relayPinArray[relayAmount] = {
     empore,
     living,
-    room2,
+    raum2,
     service,
 };
 
 int relayInitArray[relayAmount] = {
     empore_init,
     living_init,
-    room2_init,
+    raum2_init, // chemney light
     service_init,
 };

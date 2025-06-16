@@ -106,7 +106,7 @@ void handleInputs() {
     lastState = result;
     Serial.println(result);
 
-    if (ledTable & result) {
+    if (ledTable & result && level3_complete) {
         Mother.motherRelay.digitalWrite(table_light, open);
         Mother.motherRelay.digitalWrite(magnets, open);
         MotherIO.setOuput(solved);
@@ -124,6 +124,7 @@ void handleInputs() {
             level3_complete = false;
             Mother.motherRelay.digitalWrite(table_light, table_light_init);
             Mother.motherRelay.digitalWrite(magnets, magnets_init);
+            Mother.motherRelay.digitalWrite(magnets_interrupt, magnets_interrupt_init);
         }
     } else if (level1_active) {
         pumpIntensity = 1;
@@ -155,6 +156,7 @@ void handleInputs() {
         Mother.motherRelay.digitalWrite(pump_1, closed);
         Mother.motherRelay.digitalWrite(pump_2, closed);
         pumpIntensity = 4;
+        Mother.motherRelay.digitalWrite(magnets_interrupt, !magnets_interrupt_init);
     }
 }
 

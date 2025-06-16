@@ -34,12 +34,14 @@ void handleInputs() {
     if (lastState == result) {
         return;
     }
-
+    Serial.print("Inputs: ");
+    Serial.println(result);
+    
     switch (result) {
         case inputValues::roomReset:
             Mother.motherRelay.digitalWrite(relays::empore, relayOff);
             Mother.motherRelay.digitalWrite(relays::living, relayOff);
-            Mother.motherRelay.digitalWrite(relays::room2, relayOff);
+            Mother.motherRelay.digitalWrite(relays::raum2, relayOff);
             Mother.motherRelay.digitalWrite(relays::service, relayOff);
         break;
         case inputValues::livingOn:
@@ -54,37 +56,41 @@ void handleInputs() {
         case inputValues::empporeOff:
             Mother.motherRelay.digitalWrite(relays::empore, relayOff);
         break;
-        case inputValues::room2On:
-            Mother.motherRelay.digitalWrite(relays::room2, relayOn);
+        case inputValues::raum2On:
+            Mother.motherRelay.digitalWrite(relays::raum2, relayOn);
         break;
-        case inputValues::room2Off:
-            Mother.motherRelay.digitalWrite(relays::room2, relayOff);
+        case inputValues::raum2Off:
+            Mother.motherRelay.digitalWrite(relays::raum2, relayOff);
         break;
-        case inputValues::chimneyOpening:
-            Mother.motherRelay.digitalWrite(relays::empore, relayOff);
-            Mother.motherRelay.digitalWrite(relays::living, relayOff);
-            wdt_disable();
-            delay(10000);
-            enableWdt();
+        case inputValues::emporeLivingOn:
             Mother.motherRelay.digitalWrite(relays::empore, relayOn);
             Mother.motherRelay.digitalWrite(relays::living, relayOn);
+        break;
+        case inputValues::emporeLivingOff:
+            Mother.motherRelay.digitalWrite(relays::empore, relayOff);
+            Mother.motherRelay.digitalWrite(relays::living, relayOff);
+        break;
+        case inputValues::mcBoot:
+            Mother.motherRelay.digitalWrite(relays::empore, relayOff);
+            Mother.motherRelay.digitalWrite(relays::living, relayOff);
+            Mother.motherRelay.digitalWrite(relays::raum2, relayOn);
         break;
         case inputValues::serviceOn:
             Mother.motherRelay.digitalWrite(relays::service, relayOn);
             Mother.motherRelay.digitalWrite(relays::empore, relayOn);
             Mother.motherRelay.digitalWrite(relays::living, relayOn);
-            Mother.motherRelay.digitalWrite(relays::room2, relayOn);
+            Mother.motherRelay.digitalWrite(relays::raum2, relayOn);
         break;
         case inputValues::serviceOff:
             Mother.motherRelay.digitalWrite(relays::service, relayOff);
             Mother.motherRelay.digitalWrite(relays::empore, relayOff);
             Mother.motherRelay.digitalWrite(relays::living, relayOff);
-            Mother.motherRelay.digitalWrite(relays::room2, relayOff);
+            Mother.motherRelay.digitalWrite(relays::raum2, relayOff);
         break;
     }
 
     lastState = result;
-    Serial.println(result);
+    // Serial.println(result);
 }
 
 
@@ -99,6 +105,11 @@ void setup() {
     enableWdt();
     Mother.rs485SetSlaveCount(0);
     wdt_reset();
+
+    // turn on fast-service on start
+    Mother.motherRelay.digitalWrite(relays::service, relayOn);
+    Mother.motherRelay.digitalWrite(relays::empore, relayOn);
+    Mother.motherRelay.digitalWrite(relays::living, relayOn);
 }
 
 

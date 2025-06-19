@@ -3,6 +3,7 @@ import json
 import vlc
 import threading
 import time
+import math
 from communication.Simple_Socket import SocketClient
 
 AUDIO_VOLUME_PERCENT = 70  # Volume level for audio playback
@@ -66,6 +67,36 @@ def stop_audio():
         player.stop()
 
 
+def ease_in_out(t):
+    # Ease-in-out cubic
+    return 3 * t**2 - 2 * t**3
+
+def fade_volume(start, end, duration):
+    steps = 6  # Less frequent updates = smoother with VLC
+    step_duration = duration / steps
+    volume_diff = end - start
+
+    for i in range(steps + 1):
+        progress = i / steps
+        eased_progress = ease_in_out(progress)
+        new_volume = int(start + volume_diff * eased_progress)
+        with player_lock:
+            player.audio_set_volume(new_volume)
+            print(f"Setting volume to: {new_volume}")
+        time.sleep(step_duration)
+
+def chimney_effect():
+    with player_lock:
+        original_volume = player.audio_get_volume()
+    print(f"Original volume: {original_volume}")
+
+    # player.audio_set_volume(0)
+    fade_volume(original_volume, 0, 2)  # Fade down over 2 seconds
+    time.sleep(7)                      # Stay muted
+    fade_volume(0, original_volume, 4)  # Fade up over 6 seconds
+
+
+
 def get_cfg():
     try:
         with open('config.json') as json_file:
@@ -99,6 +130,10 @@ def audio_handler(command):
         file = sounds["mc_boot"]
         print(f"Playing: {file}")
         start_audio_in_thread(file)
+
+    elif command == "chimney":
+        print("Chimney effect triggered")
+        chimney_effect()
 
     elif command == "exit":
         print("stop audio")

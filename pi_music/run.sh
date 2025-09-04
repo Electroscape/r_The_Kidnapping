@@ -11,6 +11,7 @@ XDG_RUNTIME_DIR=/run/user/$(id -u)
 export XDG_RUNTIME_DIR
 
 sudo pkill python
+sudo pkill vlc
 
 # Hide cursor
 #unclutter -idle  &

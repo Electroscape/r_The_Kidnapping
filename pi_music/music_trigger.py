@@ -4,9 +4,10 @@ import vlc
 import threading
 import time
 import math
+import sys
 from communication.Simple_Socket import SocketClient
 
-AUDIO_VOLUME_PERCENT = 70  # Volume level for audio playback
+AUDIO_VOLUME_PERCENT = 40  # Volume level for audio playback
 
 # Initialize VLC instance
 instance = vlc.Instance()
@@ -21,7 +22,7 @@ player_lock = threading.Lock()
 sounds = {
     "start": ("sound/start.mp3", True),       #     looping
     "mc_boot": ("sound/mc_boot.mp3", False),  # Not looping
-    "finish": ("sound/finish.mp3", False),    # Not looping
+    "finish": ("sound/alert2.mp3", False),    # Not looping
 }
 
 ## cd to the script path to find the config.json next to it
@@ -30,7 +31,7 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 # Audio playback thread target
-def play_audio(file_path, loop=False):
+def play_audio(file_path, loop=False, volume=AUDIO_VOLUME_PERCENT):
     media = instance.media_new(file_path)
     media_list = instance.media_list_new()
     media_list.add_media(media)
@@ -44,7 +45,7 @@ def play_audio(file_path, loop=False):
 
     media_list_player.play()
     time.sleep(0.1)  # Let VLC start
-    media_player.audio_set_volume(AUDIO_VOLUME_PERCENT)
+    media_player.audio_set_volume(volume)
     current_volume = media_player.audio_get_volume()
     print(f"Current volume: {current_volume}")
 
@@ -57,7 +58,7 @@ def play_audio(file_path, loop=False):
             time.sleep(0.1)
 
 # Manage new audio playback safely
-def start_audio_in_thread(file_path, loop=False):
+def start_audio_in_thread(file_path, loop=False, volume2=AUDIO_VOLUME_PERCENT):
     global current_audio_thread
 
     # Stop previous thread if running
@@ -66,7 +67,7 @@ def start_audio_in_thread(file_path, loop=False):
         current_audio_thread.join()
 
     # Start new audio thread
-    current_audio_thread = threading.Thread(target=play_audio, args=(file_path, loop))
+    current_audio_thread = threading.Thread(target=play_audio, args=(file_path, loop, volume2))
     current_audio_thread.start()
 
 
@@ -131,9 +132,34 @@ def audio_handler(command):
         command = command[0]
 
     if command in sounds:
+        os.system('bash restart.sh')
         file, loop = sounds[command]
         print(f"Playing: {file}")
         start_audio_in_thread(file, loop)
+
+    elif command == "end_deu":
+        print("End effect deu triggered")
+        #stop_audio()
+        end_file, end_loop = sounds["finish"]
+        #play_audio(end_file, loop=end_loop, volume=40) # Play end sound with custom volume
+        start_audio_in_thread(end_file, loop=end_loop, volume2=40)
+        time.sleep(20) #audio length minus 1
+        #fade_volume(40, 100, 3)
+        media_player.audio_set_volume(100)
+        print("Volume changed to 100")
+
+    elif command == "end_eng":
+        print("End effect eng triggered")
+        #stop_audio()
+        end_file, end_loop = sounds["finish"]
+        #play_audio(end_file, loop=end_loop, volume=40) # Play end sound with custom volume
+        start_audio_in_thread(end_file, loop=end_loop, volume2=40)
+        time.sleep(17) #audio length minus 1
+        #fade_volume(40, 100, 3)
+        media_player.audio_set_volume(100)
+        print("Volume changed to 100")
+
+
 
     elif command == "chimney":
         print("Chimney effect triggered")
@@ -141,6 +167,7 @@ def audio_handler(command):
 
     elif command == "exit":
         print("stop audio")
+        os.system('bash end_video.sh')
         stop_audio()
     else:
         print(f"Unknown command: {command}")
@@ -159,4 +186,10 @@ def main():
 
 # Main loop
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) > 1:
+        # If an argument is passed, use it as a test message
+        test_command = sys.argv[1]
+        audio_handler(test_command)
+        print(f"Command executed: {test_command}")
+    else:
+        main()

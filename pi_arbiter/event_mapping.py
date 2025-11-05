@@ -141,6 +141,9 @@ def exit_solved(_, floppy_sock_server, tv_sock_server):
     floppy_sock_server.transmit("exit")
     tv_sock_server.transmit("exit")
 
+def chimney_effect(_, floppy_sock_server, tv_sock_server):
+    floppy_sock_server.transmit("chimney")
+    tv_sock_server.transmit("chimney")
 
 def is_game_started(*args):
     return game_states.hasStarted
@@ -260,6 +263,7 @@ event_map = {
         pcf_in: LightIO.chinmeySolved,
         pcf_out_add: [LightIO.pcfOut, FuseIo.pcfOut, PowerIO.pcfOut, PowerIO.pcfOut],
         pcf_out: [LightIO.chimneyOverride, FuseIo.mcOpened, PowerIO.emporeOff, PowerIO.livingOff],
+        event_script: chimney_effect,
         event_next_qeued: "livingPower_onChimneyOpened"
     },
 

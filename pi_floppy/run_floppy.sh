@@ -19,4 +19,20 @@ unclutter -idle 0 &
 
 # modify the IP address you want to display
 # comment or uncomment to run the browser on the webpage you choose
-DISPLAY=:0.0 /usr/bin/chromium-browser --start-fullscreen --noerrdialogs --disable-infobars --disable-session-crashed-bubble --disable-component-update --disable-background-networking --disable-default-apps --kiosk --no-first-run --autoplay-policy=no-user-gesture-required 0.0.0.0:5666 &
+# Added multiple flags to allow autoplay:
+# --autoplay-policy=no-user-gesture-required - Allow autoplay without user gesture
+# --disable-features=PreloadMediaEngagementData - Disable media engagement checks
+# --disable-features=MediaEngagementBypassAutoplayPolicies - Bypass autoplay policies
+DISPLAY=:0.0 /usr/bin/chromium \
+  --start-fullscreen \
+  --noerrdialogs \
+  --disable-infobars \
+  --disable-session-crashed-bubble \
+  --disable-component-update \
+  --disable-background-networking \
+  --disable-default-apps \
+  --kiosk \
+  --no-first-run \
+  --autoplay-policy=no-user-gesture-required \
+  --disable-features=PreloadMediaEngagementData,MediaEngagementBypassAutoplayPolicies \
+  0.0.0.0:5666 &

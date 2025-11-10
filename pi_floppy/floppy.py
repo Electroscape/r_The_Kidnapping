@@ -10,6 +10,7 @@ from rfid import RFID
 
 import logging
 import json
+import os
 
 # Open and read the JSON file
 with open('config.json', 'r') as json_file:
@@ -116,9 +117,10 @@ def on_msg(data):
 # Function to execute the received command
 def execute_command(command: str) -> None:
     try:
-        if command == "zwinger":
+        if command == "zwinger" or command == "exit":
             # Run script
             subprocess.Popen(["bash", f"play_{command}.sh"])
+            print(f"Executing command on Floppy PC: {command}")
 
     except Exception as e:
         print(f"Error executing command: {e}")
@@ -170,8 +172,15 @@ def process_command(data: str) -> None:
         for display in DISPLAY_IPS:
             send_command(display, "play_blackscreen")
         mc_boot = False
+        os.system("sudo pkill vlc")
 
     elif data == 'zwinger':
+        execute_command(data)
+    
+    elif data == 'exit':
+        logging.info("Ending: sending exit command to all displays and Floppy PC (local)")
+        for display in DISPLAY_IPS:
+            send_command(display, "play_exit")
         execute_command(data)
 
     elif data in valid_cards:

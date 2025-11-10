@@ -50,7 +50,7 @@ def get_start_time() -> bool:
             saved_time = dt.strptime(saved_time, date_format)
             global startTime
             startTime = saved_time
-        except valueError as err:
+        except ValueError as err:
             print(err)
             return False
     except OSError:
@@ -97,10 +97,7 @@ loading_percent = 0
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'EscapeTerminal#'
 
-ip_conf = read_json(f"ip_config.json", from_static=False)
-
-ip_conf = [f"http://{ip}" for ip in ip_conf.values() if isinstance(ip, str)]
-all_cors = ip_conf + ['*']
+all_cors = ['*']
 
 #  engineio_logger=True, for really detailed logs
 sio = SocketIO(app, ping_timeout=120, ping_interval=20)

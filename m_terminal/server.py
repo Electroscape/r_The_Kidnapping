@@ -50,7 +50,7 @@ def get_start_time() -> bool:
             saved_time = dt.strptime(saved_time, date_format)
             global startTime
             startTime = saved_time
-        except valueError as err:
+        except ValueError as err:
             print(err)
             return False
     except OSError:

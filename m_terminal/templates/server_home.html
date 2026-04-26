@@ -21,9 +21,9 @@
 
         var countDownDate = Date.now() + 60 * 1000 * 60;
 
-        if ({{g_config.startTime}}) {
-            console.log({{g_config.startTime}})
-            countDownDate = {{g_config.startTime}} * 1000 + 60 * 1000 * 60;
+        if ('{{ g_config.startTime }}') {
+            console.log('{{ g_config.startTime }}')
+            countDownDate = '{{ g_config.startTime }}' * 1000 + 60 * 1000 * 60;
         }
 
         socket.on('connect', function () {
@@ -70,10 +70,10 @@
 {% endblock %}
 
 {% block head %}
-    <link href="https://cdn.jsdelivr.net/css-toggle-switch/latest/toggle-switch.css" rel="stylesheet"/>
-    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
-    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <link href="{{ url_for('static', filename='local_libs/toggle-switch.css') }}" rel="stylesheet"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='local_libs/jquery-ui.css') }}">
+    <script src="{{ url_for('static', filename='local_libs/jquery-1.12.4.js') }}"></script>
+    <script src="{{ url_for('static', filename='local_libs/jquery-ui.js') }}"></script>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/chatroom.css') }}">
 
